@@ -1,0 +1,49 @@
+{
+  "name": "utaku",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Utaku image downloader",
+  "keywords": [
+    "chrome-extension",
+    "web-extension",
+    "typescript",
+    "react",
+    "rollup",
+    "boilerplate"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "release": "cross-env NODE_ENV=production rollup -c",
+    "start": "rollup -c -w"
+  },
+  "author": "keisokoo",
+  "license": "MIT",
+  "dependencies": {
+    "@types/chrome": "^0.0.243",
+    "@types/firefox-webext-browser": "^111.0.1",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
+    "@types/webextension-polyfill": "^0.10.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "webextension-polyfill": "^0.10.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^25.0.4",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "@rollup/plugin-replace": "^5.0.2",
+    "@rollup/plugin-typescript": "^11.1.2",
+    "@typescript-eslint/eslint-plugin": "^6.4.0",
+    "@typescript-eslint/parser": "^6.4.0",
+    "cross-env": "^7.0.3",
+    "eslint": "^8.47.0",
+    "eslint-plugin-react": "^7.33.1",
+    "prettier": "^3.0.1",
+    "rollup": "^3.28.0",
+    "rollup-plugin-chrome-extension": "^3.6.12",
+    "rollup-plugin-empty-dir": "^1.0.5",
+    "rollup-plugin-zip": "^1.0.3",
+    "tslib": "^2.6.1",
+    "typescript": "^5.1.6"
+  }
+}
