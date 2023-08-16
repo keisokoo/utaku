@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "release": "cross-env NODE_ENV=production rollup -c",
+    "prod": "cross-env NODE_ENV=production rollup -c",
     "start": "rollup -c -w"
   },
   "author": "keisokoo",
@@ -29,6 +29,8 @@
     "webextension-polyfill": "^0.10.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.22.10",
+    "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.4",
     "@rollup/plugin-node-resolve": "^15.1.0",
     "@rollup/plugin-replace": "^5.0.2",
@@ -38,11 +40,17 @@
     "cross-env": "^7.0.3",
     "eslint": "^8.47.0",
     "eslint-plugin-react": "^7.33.1",
+    "glob": "^10.3.3",
+    "postcss": "^8.4.28",
     "prettier": "^3.0.1",
     "rollup": "^3.28.0",
     "rollup-plugin-chrome-extension": "^3.6.12",
+    "rollup-plugin-copy": "^3.4.0",
+    "rollup-plugin-delete": "^2.0.0",
     "rollup-plugin-empty-dir": "^1.0.5",
+    "rollup-plugin-postcss": "^4.0.2",
     "rollup-plugin-zip": "^1.0.3",
+    "sass": "^1.65.1",
     "tslib": "^2.6.1",
     "typescript": "^5.1.6"
   }

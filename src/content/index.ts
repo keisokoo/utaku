@@ -1,3 +1,4 @@
+import './index.scss'
 // element의 transform의 x값 y값을 가져오는 함수
 function getTransformXY(el: HTMLElement) {
   const transform = window.getComputedStyle(el).transform
@@ -62,16 +63,17 @@ function adjustPositionOnResize(el: HTMLButtonElement) {
 function createFloatingButton() {
   // 화면에 둥둥 떠다니는 버튼을 만들어주는 함수
   const floatingButton = document.createElement('button')
+  floatingButton.classList.add('floating-button')
   floatingButton.innerText = '버튼'
   floatingButton.style.position = 'fixed'
   floatingButton.style.top = '0px'
   floatingButton.style.left = '0px'
-  floatingButton.style.width = '100px'
-  floatingButton.style.height = '100px'
+  floatingButton.style.width = '54px'
+  floatingButton.style.height = '54px'
   floatingButton.style.borderRadius = '50%'
-  floatingButton.style.backgroundColor = 'red'
-  floatingButton.style.color = 'white'
-  floatingButton.style.fontSize = '20px'
+  floatingButton.style.backgroundColor = 'white'
+  floatingButton.style.color = 'black'
+  floatingButton.style.fontSize = '16px'
   floatingButton.style.zIndex = '9999'
   floatingButton.style.border = 'none'
   floatingButton.style.outline = 'none'
@@ -101,7 +103,7 @@ function createFloatingButton() {
     requestAnimationFrame(animateFadeOut)
   }
 
-  let hideTimeout: number | null = null
+  let hideTimeout: NodeJS.Timeout | null = null
 
   window.addEventListener('mousemove', () => {
     if (hideTimeout) {
