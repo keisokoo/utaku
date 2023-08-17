@@ -25,6 +25,16 @@
     "34": "icon34.png",
     "128": "icon128.png"
   },
+  "permissions": [
+    "tabs",
+    "activeTab",
+    "unlimitedStorage",
+    "scripting",
+    "storage",
+    "downloads",
+    "webRequest"
+  ],
+  "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {
       "resources": ["chunks/*-*.js", "content/index.js"],

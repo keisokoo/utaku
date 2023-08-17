@@ -1,4 +1,11 @@
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import { v4 as uuid } from 'uuid'
+import App from './App'
 import './index.scss'
+if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
+let root: ReactDOM.Root | null = null
+const rootId = uuid()
 // element의 transform의 x값 y값을 가져오는 함수
 function getTransformXY(el: HTMLElement) {
   const transform = window.getComputedStyle(el).transform
@@ -17,12 +24,14 @@ function getTransformXY(el: HTMLElement) {
 
 // 드래그 가능한 버튼으로 만들어주는 함수, 화면밖은 못나가게
 function attachDragEvent(el: HTMLButtonElement) {
+  let startX = 0
+  let startY = 0
   el.addEventListener('mousedown', (e: MouseEvent) => {
     const clientX = e.clientX
     const clientY = e.clientY
     const startPosition = getTransformXY(el)
-    const startX = startPosition.x
-    const startY = startPosition.y
+    startX = startPosition.x
+    startY = startPosition.y
     const moveHandler = (e: MouseEvent) => {
       const scrollBarWidth =
         document.documentElement.scrollWidth - window.innerWidth
@@ -37,7 +46,24 @@ function attachDragEvent(el: HTMLButtonElement) {
       nextY = Math.min(maxY, Math.max(0, nextY))
       el.style.transform = `translate(${nextX}px, ${nextY}px)`
     }
-    const upHandler = () => {
+    const upHandler = (e: MouseEvent) => {
+      const lastPosition = getTransformXY(el)
+      const lastX = lastPosition.x
+      const lastY = lastPosition.y
+      if (lastX === startX && lastY === startY) {
+        // 클릭한 것으로 판단
+        console.log('clicked!')
+        if (!root) {
+          const container = document.getElementById(
+            'root-' + rootId
+          ) as HTMLElement
+          root = ReactDOM.createRoot(container)
+          root.render(<App />)
+        } else {
+          root.unmount()
+          root = null
+        }
+      }
       document.removeEventListener('mousemove', moveHandler)
       document.removeEventListener('mouseup', upHandler)
     }
@@ -115,7 +141,10 @@ function createFloatingButton() {
 }
 
 function main() {
-  console.log('content script1!!')
+  const reactRoot = document.createElement('div')
+  reactRoot.id = 'root-' + rootId
+  reactRoot.classList.add('utaku-root')
+  document.body.appendChild(reactRoot)
   createFloatingButton()
 }
 main()

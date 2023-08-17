@@ -4,3 +4,65 @@
     opacity: 1;
   }
 }
+.utaku-root {
+  position: fixed;
+  z-index: 9998;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  color: #000;
+  * {
+    box-sizing: border-box;
+  }
+  .utaku-wrapper{
+    width: 100%;
+  }
+  .utaku-dispose-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    & > img {
+      width: 1px;
+      height: 1px;
+    }
+  }
+  .utaku-container {
+    overflow: auto hidden;
+    overscroll-behavior: contain;
+    width: 100%;
+    height: calc(100% - 100px);
+    padding: 16px;
+    backdrop-filter: blur(6px);
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  .utaku-grid {
+    column-count: initial;
+    display: flex;
+    gap: 8px;
+  }
+  .grid-item {
+    break-inside: avoid;
+    box-sizing: border-box;
+    opacity: 0.8;
+    cursor: pointer;
+    transition: all 0.15s ease-out 0s;
+    position: relative;
+    padding: 6px;
+    color: rgba(255, 255, 255, 0.698);
+    &.active {
+      opacity: 1;
+      box-shadow: inset 0px 0px 0px 5px #02ff28;
+    }
+  }
+  .image-box {
+    font-size: 0;
+    img {
+    width: auto;
+    height: 280px;
+    break-inside: avoid;
+    box-sizing: border-box;
+}}
+}

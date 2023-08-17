@@ -12,13 +12,11 @@ import postcss from 'rollup-plugin-postcss'
 import zip from 'rollup-plugin-zip'
 
 const isProduction = process.env.NODE_ENV === 'production'
-
-export default {
+const defaultConfig = {
   input: {
     background: 'src/background/index.ts',
     popup: 'src/pages/popup/index.tsx',
     options: 'src/pages/options/index.tsx',
-    content: 'src/content/index.ts',
   },
   output: {
     dir: 'dist',
@@ -32,7 +30,7 @@ export default {
     }),
     postcss({
       extract: path.resolve('dist/content/index.css'),
-      modules: true,
+      modules: false,
       use: ['sass'],
     }),
     replace({
@@ -42,12 +40,14 @@ export default {
       },
     }),
     resolve({
+      extensions: ['.mjs', '.js', '.jsx', '.json', '.node', '.ts', '.tsx'],
       moduleDirectories: ['node_modules'],
     }),
     babel({
       extensions: [...DEFAULT_EXTENSIONS, '.ts', 'tsx'],
       exclude: /node_modules/,
       babelHelpers: 'bundled',
+      presets: [['@babel/preset-env', { modules: false }]],
     }),
     commonjs({
       include: /node_modules/,
@@ -57,7 +57,21 @@ export default {
         { src: 'public/*', dest: 'dist' }, // public 폴더의 모든 파일을 dist 폴더로 복사
       ],
     }),
-    del({ targets: 'dist/*' }),
     isProduction && zip({ dir: 'releases' }),
   ],
 }
+export default [
+  {
+    ...defaultConfig,
+    plugins: [...defaultConfig.plugins, del({ targets: 'dist/content/*' })],
+  },
+  {
+    ...defaultConfig,
+    input: 'src/content/index.tsx',
+    output: {
+      dir: 'dist',
+      format: 'iife',
+      entryFileNames: 'content/index.js',
+    },
+  },
+]

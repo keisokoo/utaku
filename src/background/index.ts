@@ -10,36 +10,29 @@
 //   }
 // })
 import browser from 'webextension-polyfill'
-function createWindow(tab: chrome.tabs.Tab) {
-  if (tab) {
-    browser.tabs.get(tab.id ?? 0).then((tab) => {
-      console.log('b tab', tab)
+async function createWindow(tab: browser.Tabs.Tab) {
+  console.log('tab', tab)
+  const currentTabs = await browser.tabs.query({
+    url: browser.runtime.getURL('popup/index.html'),
+  })
+  console.log('currentTabs1', currentTabs)
+
+  const firstTab =
+    currentTabs.length > 0 && currentTabs[0].id ? currentTabs[0] : null
+  if (firstTab && firstTab.windowId) {
+    console.log('firstTab', firstTab)
+
+    await browser.windows.update(firstTab.windowId, { focused: true })
+    await browser.tabs.update(firstTab.id, { active: true })
+  } else {
+    await browser.windows.create({
+      type: 'popup',
+      url: browser.runtime.getURL('popup/index.html'),
+      focused: true,
+      width: 1024,
+      height: 768,
     })
   }
-  chrome.tabs.query(
-    { url: chrome.runtime.getURL('popup/index.html') },
-    (tabs) => {
-      if (tabs.length > 0 && tabs[0].id) {
-        const tabId = tabs[0].id
-        console.log('tabId', tabId)
-        console.log('tab', tab)
-
-        chrome.tabs.get(tabId, (tab) => {
-          chrome.windows.update(tab.windowId, { focused: true }, (win) => {
-            chrome.tabs.update(tabId, { active: true })
-          })
-        })
-      } else {
-        chrome.windows.create({
-          type: 'popup',
-          url: chrome.runtime.getURL('popup/index.html'),
-          focused: true,
-          width: 1024,
-          height: 768,
-        })
-      }
-    }
-  )
 }
 
-chrome.action.onClicked.addListener(createWindow)
+browser.action.onClicked.addListener(async (tab) => createWindow(tab))

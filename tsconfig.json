@@ -10,5 +10,6 @@
     "noUnusedLocals": true,
     "strict": true,
     "target": "es2018"
-  }
+  },
+  "include": ["global.d.ts", "src/**/*"]
 }
