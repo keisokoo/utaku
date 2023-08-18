@@ -6,13 +6,13 @@ import replace from '@rollup/plugin-replace'
 import typescript from '@rollup/plugin-typescript'
 import path from 'path'
 import copy from 'rollup-plugin-copy'
-import del from 'rollup-plugin-delete'
 import postcss from 'rollup-plugin-postcss'
 
 import zip from 'rollup-plugin-zip'
 
 const isProduction = process.env.NODE_ENV === 'production'
 const defaultConfig = {
+  context: 'window',
   input: {
     background: 'src/background/index.ts',
     popup: 'src/pages/popup/index.tsx',
@@ -22,7 +22,7 @@ const defaultConfig = {
     dir: 'dist',
     format: 'esm',
     entryFileNames: '[name]/index.js',
-    chunkFileNames: path.join('chunks', '[name]-[hash].js'),
+    chunkFileNames: path.join('chunks', '[name].js'),
   },
   plugins: [
     typescript({
@@ -61,10 +61,11 @@ const defaultConfig = {
   ],
 }
 export default [
-  {
-    ...defaultConfig,
-    plugins: [...defaultConfig.plugins, del({ targets: 'dist/content/*' })],
-  },
+  // {
+  //   ...defaultConfig,
+  //   plugins: [...defaultConfig.plugins, del({ targets: 'dist/content/*' })],
+  // },
+  defaultConfig,
   {
     ...defaultConfig,
     input: 'src/content/index.tsx',

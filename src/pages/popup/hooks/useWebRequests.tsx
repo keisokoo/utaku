@@ -1,5 +1,5 @@
+import { groupBy, isEqual, uniqBy } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { equals, groupBy, uniqBy } from 'remeda'
 
 interface TAB_LIST_TYPE extends chrome.tabs.Tab {
   tooltip?: string
@@ -91,7 +91,7 @@ const useWebRequests = (active = true) => {
 
   useEffect(() => {
     const TabIdList = Object.keys(sourceGroup).map((keyName) => Number(keyName))
-    set_tabIdList((prev) => (equals(prev, TabIdList) ? prev : TabIdList))
+    set_tabIdList((prev) => (isEqual(prev, TabIdList) ? prev : TabIdList))
   }, [sourceGroup])
 
   const clearList = useCallback(() => {

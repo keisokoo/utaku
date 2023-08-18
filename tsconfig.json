@@ -11,5 +11,7 @@
     "strict": true,
     "target": "es2018"
   },
-  "include": ["global.d.ts", "src/**/*"]
+  "include": ["global.d.ts", 
+  "src/**/*.ts",
+  "src/**/*.tsx"]
 }

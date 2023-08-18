@@ -1,33 +1,50 @@
-// let popupIsOn = false
-// chrome.runtime.onConnect.addListener(function (port) {
-//   if (port.name === 'popup') {
-//     popupIsOn = true
-//     console.log('popup has been opened!')
-//     port.onDisconnect.addListener(function () {
-//       console.log('popup has been closed')
-//       popupIsOn = false
-//     })
-//   }
-// })
-import browser from 'webextension-polyfill'
-async function createWindow(tab: browser.Tabs.Tab) {
-  console.log('tab', tab)
+
+import browser from 'webextension-polyfill';
+let activeTabInfo: {
+  "tabId": number,
+  "windowId": number
+} | null = null
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  const tabs = await chrome.tabs.query({
+    url: chrome.runtime.getURL('popup/index.html'),
+  });
+  const currentTabInfo = await chrome.tabs.get(activeInfo.tabId);
+  if (!currentTabInfo.url?.includes('http')) return
+  if (tabs?.[0]?.id && tabs[0].id === activeInfo.tabId) {
+    return
+  } else {
+    console.log('activeTabInfo', activeInfo);
+    activeTabInfo = activeInfo
+  }
+
+});
+chrome.runtime.onConnect.addListener(function (port) {
+  if (port.name === 'popup') {
+    chrome.action.setIcon({ path: '/icon34-active.png' })
+    port.onDisconnect.addListener(function () {
+      chrome.action.setIcon({ path: '/icon34.png' })
+    })
+  }
+})
+async function getPopupTab() {
   const currentTabs = await browser.tabs.query({
     url: browser.runtime.getURL('popup/index.html'),
   })
-  console.log('currentTabs1', currentTabs)
-
-  const firstTab =
-    currentTabs.length > 0 && currentTabs[0].id ? currentTabs[0] : null
+  return currentTabs.length > 0 && currentTabs[0].id ? currentTabs[0] : null
+}
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function createWindow(_tab: chrome.tabs.Tab) {
+  const firstTab = await getPopupTab()
   if (firstTab && firstTab.windowId) {
-    console.log('firstTab', firstTab)
 
-    await browser.windows.update(firstTab.windowId, { focused: true })
-    await browser.tabs.update(firstTab.id, { active: true })
+    chrome.windows.update(firstTab.windowId, { focused: true }, () => {
+      if (firstTab.id) chrome.tabs.update(firstTab.id, { active: true })
+    })
+
   } else {
-    await browser.windows.create({
+    chrome.windows.create({
       type: 'popup',
-      url: browser.runtime.getURL('popup/index.html'),
+      url: chrome.runtime.getURL('popup/index.html'),
       focused: true,
       width: 1024,
       height: 768,
@@ -35,4 +52,25 @@ async function createWindow(tab: browser.Tabs.Tab) {
   }
 }
 
-browser.action.onClicked.addListener(async (tab) => createWindow(tab))
+function onMessage(
+  request: {
+    message: string
+    data: unknown
+  },
+  _sender: chrome.runtime.MessageSender,
+  sendResponse: (response?: { data: number | object | null; }) => void
+) {
+  if (request.message === 'available') {
+    getPopupTab().then((popupTab) => {
+      sendResponse({ data: popupTab })
+    })
+  }
+  if (request.message === 'activeTabInfo') {
+    sendResponse({ data: activeTabInfo })
+  }
+  return true;
+}
+if (!chrome.runtime.onMessage.hasListener(onMessage)) {
+  chrome.runtime.onMessage.addListener(onMessage)
+}
+chrome.action.onClicked.addListener((tab) => createWindow(tab))

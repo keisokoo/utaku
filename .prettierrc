@@ -15,6 +15,5 @@
   "singleAttributePerLine": false,
   "useTabs": false,
   "trailingComma": "es5",
-  "printWidth": 80,
-  "parser": "typescript"
+  "printWidth": 80
 }

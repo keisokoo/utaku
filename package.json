@@ -19,6 +19,8 @@
   "author": "keisokoo",
   "license": "MIT",
   "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
     "@types/chrome": "^0.0.243",
     "@types/firefox-webext-browser": "^111.0.1",
     "@types/lodash-es": "^4.17.8",
@@ -29,6 +31,7 @@
     "lodash-es": "^4.17.21",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-icons": "^4.10.1",
     "remeda": "^1.24.1",
     "styled-components": "^6.0.7",
     "uuid": "^9.0.0",
@@ -37,6 +40,7 @@
   "devDependencies": {
     "@babel/core": "^7.22.10",
     "@babel/preset-env": "^7.22.10",
+    "@emotion/babel-plugin": "^11.11.0",
     "@rollup/plugin-babel": "^6.0.3",
     "@rollup/plugin-commonjs": "^25.0.4",
     "@rollup/plugin-node-resolve": "^15.1.0",

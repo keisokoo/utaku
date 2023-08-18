@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
+import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
 
 const objectKeys = <T extends object>(item: T) => {
@@ -10,23 +11,106 @@ const objectEntries = <T extends object>(item: T) => {
 
 const App = (): JSX.Element => {
   const results = useWebRequests(true)
+  const { folderName, downloadedItem, handleFolderName } = useFileDownload()
   const { sourceGroup } = results
+  const [folderNameList, set_folderNameList] = useState<string[]>([])
+  useEffect(() => {
+    chrome.storage.sync.get(['folderName', 'folderNameList'], (items) => {
+      if (items.folderName) handleFolderName(items.folderName)
+      if (items.folderNameList) set_folderNameList(items.folderNameList)
+    })
+    chrome.runtime.connect({ name: 'popup' })
+    const contentInit = () => {
+      document.querySelector('.floating-button')?.classList.remove('hide')
+    }
+    const removeContentInit = () => {
+      document.querySelector('.floating-button')?.classList.add('hide')
+    }
+
+    chrome.runtime.sendMessage(
+      {
+        message: 'activeTabInfo',
+        data: chrome.runtime.id,
+      },
+      ({
+        data,
+      }: {
+        data: {
+          tabId: number
+          windowId: number
+        } | null
+      }) => {
+        if (chrome.runtime.lastError) {
+          return
+        }
+        if (data) {
+          chrome.scripting.executeScript({
+            target: { tabId: data.tabId },
+            func: contentInit,
+            args: [],
+          })
+        }
+        return true
+      }
+    )
+    return () => {
+      chrome.runtime.sendMessage(
+        {
+          message: 'activeTabInfo',
+          data: chrome.runtime.id,
+        },
+        ({
+          data,
+        }: {
+          data: {
+            tabId: number
+            windowId: number
+          } | null
+        }) => {
+          if (chrome.runtime.lastError) {
+            return
+          }
+          if (data) {
+            chrome.scripting.executeScript({
+              target: { tabId: data.tabId },
+              func: removeContentInit,
+              args: [],
+            })
+          }
+          return true
+        }
+      )
+    }
+  }, [])
   useEffect(() => {
     const onMessage = (
-      request: string,
+      request: {
+        message: string
+        data: unknown
+      },
       sender: chrome.runtime.MessageSender,
-      sendResponse: (response?: {
-        data: {
-          [x: string]: chrome.webRequest.WebResponseHeadersDetails
-        }
-        downloaded: string[]
-      }) => void
+      sendResponse: (response?: { data: object; downloaded?: string[] }) => void
     ) => {
       const senderTabId = sender?.tab?.id
       if (!senderTabId) return
-      if (request === 'get-items') {
+      if (request.message === 'get-items') {
         const data = sourceGroup[senderTabId]
-        sendResponse({ data, downloaded: [] })
+        sendResponse({ data, downloaded: downloadedItem })
+      }
+      if (request.message === 'download') {
+        const downloadList = request.data as string[]
+        for (let i = 0; i < downloadList.length; i++) {
+          results.handleRemove(downloadList[i])
+          chrome.downloads.download({ url: downloadList[i] })
+        }
+      }
+      if (request.message === 'getFolderName') {
+        sendResponse({
+          data: {
+            folderName,
+            folderNameList,
+          },
+        })
       }
     }
     if (!chrome.runtime.onMessage.hasListener(onMessage)) {
@@ -37,7 +121,13 @@ const App = (): JSX.Element => {
         chrome.runtime.onMessage.removeListener(onMessage)
       }
     }
-  }, [sourceGroup])
+  }, [
+    sourceGroup,
+    results.handleRemove,
+    downloadedItem,
+    folderName,
+    folderNameList,
+  ])
   useEffect(() => {
     console.log('results', results.sourceGroup)
   }, [results])

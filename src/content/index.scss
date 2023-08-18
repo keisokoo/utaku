@@ -1,7 +1,27 @@
 .floating-button {
-  opacity: 0.5;
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  border-radius: 8px 8px 0 0;
+  font-size: 12px;
+  letter-spacing: 1px;
+  padding: 6px 8px 3px;
+  color: rgb(198, 198, 198);
+  backdrop-filter: blur(6px);
+  background-color: rgb(0 0 0 / 50%);
+  text-align: center;
+  z-index: 9999;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  opacity: 1;
   &:hover {
-    opacity: 1;
+    color: rgb(23 255 86);
+  }
+  &.hide {
+    display: none !important;
+    visibility: hidden !important;
   }
 }
 .utaku-root {
@@ -14,7 +34,7 @@
   * {
     box-sizing: border-box;
   }
-  .utaku-wrapper{
+  .utaku-wrapper {
     width: 100%;
   }
   .utaku-dispose-image {
@@ -27,6 +47,15 @@
     & > img {
       width: 1px;
       height: 1px;
+    }
+  }
+  .utaku-filter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    .utaku-filter-size {
+      display: flex;
+      align-items: center;
     }
   }
   .utaku-container {
@@ -60,9 +89,10 @@
   .image-box {
     font-size: 0;
     img {
-    width: auto;
-    height: 280px;
-    break-inside: avoid;
-    box-sizing: border-box;
-}}
+      width: auto;
+      height: 280px;
+      break-inside: avoid;
+      box-sizing: border-box;
+    }
+  }
 }

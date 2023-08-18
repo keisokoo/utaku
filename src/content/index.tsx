@@ -5,6 +5,30 @@ import App from './App'
 import './index.scss'
 if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
+const getAvailable = () => {
+  try {
+    chrome.runtime.sendMessage(
+      {
+        message: 'available',
+      },
+      ({ data }: { data: chrome.tabs.Tab | null }) => {
+        if (chrome.runtime.lastError) {
+          return
+        }
+        if (data) {
+          document.querySelector('.floating-button')?.classList.remove('hide')
+        } else {
+          document.querySelector('.floating-button')?.classList.add('hide')
+        }
+        return true
+      }
+    )
+  } catch (error) {
+    console.log('error', error)
+  }
+}
+document.addEventListener('visibilitychange', getAvailable)
+window.addEventListener('focus', getAvailable, false)
 const rootId = uuid()
 // element의 transform의 x값 y값을 가져오는 함수
 function getTransformXY(el: HTMLElement) {
@@ -16,60 +40,21 @@ function getTransformXY(el: HTMLElement) {
   if (!matrix) {
     return { x: 0, y: 0 }
   }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_a, _b, _c, _d, e, f] = matrix[1]
     .split(',')
     .map((item) => parseFloat(item))
   return { x: e, y: f }
 }
-
-// 드래그 가능한 버튼으로 만들어주는 함수, 화면밖은 못나가게
-function attachDragEvent(el: HTMLButtonElement) {
-  let startX = 0
-  let startY = 0
-  el.addEventListener('mousedown', (e: MouseEvent) => {
-    const clientX = e.clientX
-    const clientY = e.clientY
-    const startPosition = getTransformXY(el)
-    startX = startPosition.x
-    startY = startPosition.y
-    const moveHandler = (e: MouseEvent) => {
-      const scrollBarWidth =
-        document.documentElement.scrollWidth - window.innerWidth
-      const diffX = e.clientX - clientX
-      const diffY = e.clientY - clientY
-      let nextX = startX + diffX
-      let nextY = startY + diffY
-
-      const maxX = window.innerWidth - el.offsetWidth + scrollBarWidth
-      const maxY = window.innerHeight - el.offsetHeight
-      nextX = Math.min(maxX, Math.max(0, nextX))
-      nextY = Math.min(maxY, Math.max(0, nextY))
-      el.style.transform = `translate(${nextX}px, ${nextY}px)`
-    }
-    const upHandler = (e: MouseEvent) => {
-      const lastPosition = getTransformXY(el)
-      const lastX = lastPosition.x
-      const lastY = lastPosition.y
-      if (lastX === startX && lastY === startY) {
-        // 클릭한 것으로 판단
-        console.log('clicked!')
-        if (!root) {
-          const container = document.getElementById(
-            'root-' + rootId
-          ) as HTMLElement
-          root = ReactDOM.createRoot(container)
-          root.render(<App />)
-        } else {
-          root.unmount()
-          root = null
-        }
-      }
-      document.removeEventListener('mousemove', moveHandler)
-      document.removeEventListener('mouseup', upHandler)
-    }
-    document.addEventListener('mousemove', moveHandler)
-    document.addEventListener('mouseup', upHandler)
-  })
+function toggleMount() {
+  if (!root) {
+    const container = document.getElementById('root-' + rootId) as HTMLElement
+    root = ReactDOM.createRoot(container)
+    root.render(<App />)
+  } else {
+    root.unmount()
+    root = null
+  }
 }
 function adjustPositionOnResize(el: HTMLButtonElement) {
   const position = getTransformXY(el)
@@ -87,28 +72,26 @@ function adjustPositionOnResize(el: HTMLButtonElement) {
   el.style.transform = `translate(${nextX}px, ${nextY}px)`
 }
 function createFloatingButton() {
-  // 화면에 둥둥 떠다니는 버튼을 만들어주는 함수
   const floatingButton = document.createElement('button')
+  floatingButton.classList.add('hide')
   floatingButton.classList.add('floating-button')
-  floatingButton.innerText = '버튼'
-  floatingButton.style.position = 'fixed'
-  floatingButton.style.top = '0px'
-  floatingButton.style.left = '0px'
-  floatingButton.style.width = '54px'
-  floatingButton.style.height = '54px'
-  floatingButton.style.borderRadius = '50%'
-  floatingButton.style.backgroundColor = 'white'
-  floatingButton.style.color = 'black'
-  floatingButton.style.fontSize = '16px'
-  floatingButton.style.zIndex = '9999'
-  floatingButton.style.border = 'none'
-  floatingButton.style.outline = 'none'
-  floatingButton.style.cursor = 'pointer'
-  attachDragEvent(floatingButton)
+  floatingButton.innerText = 'UTAKU'
   window.addEventListener('resize', () =>
     adjustPositionOnResize(floatingButton)
   )
-  document.body.appendChild(floatingButton)
+  return floatingButton
+}
+
+function main() {
+  const utakuRoot = document.createElement('div')
+  utakuRoot.classList.add('utaku-root')
+  const reactRoot = document.createElement('div')
+  reactRoot.id = 'root-' + rootId
+  const button = createFloatingButton()
+  utakuRoot.appendChild(button)
+  utakuRoot.appendChild(reactRoot)
+  document.body.appendChild(utakuRoot)
+  button.addEventListener('click', toggleMount)
   function fadeOutElement(el: HTMLElement) {
     let opacity = 1
     const fadeDuration = 150
@@ -123,6 +106,7 @@ function createFloatingButton() {
         requestAnimationFrame(animateFadeOut)
       } else {
         el.style.opacity = '0'
+        el.style.display = 'none'
       }
     }
 
@@ -131,20 +115,18 @@ function createFloatingButton() {
 
   let hideTimeout: NodeJS.Timeout | null = null
 
-  window.addEventListener('mousemove', () => {
+  window.addEventListener('mousemove', (e) => {
     if (hideTimeout) {
       clearTimeout(hideTimeout)
     }
-    floatingButton.style.opacity = '1' // 요소를 보이게 함
-    hideTimeout = setTimeout(() => fadeOutElement(floatingButton), 3000) // 3초 후에 fadeout 효과를 시작함
+    button.style.opacity = '1'
+    reactRoot.style.opacity = '1'
+    button.style.display = ''
+    reactRoot.style.display = ''
+    hideTimeout = setTimeout(() => {
+      fadeOutElement(button)
+      if (!reactRoot.contains(e.target as Node)) fadeOutElement(reactRoot)
+    }, 3000) // 3초 후에 fadeout 효과를 시작함
   })
-}
-
-function main() {
-  const reactRoot = document.createElement('div')
-  reactRoot.id = 'root-' + rootId
-  reactRoot.classList.add('utaku-root')
-  document.body.appendChild(reactRoot)
-  createFloatingButton()
 }
 main()
