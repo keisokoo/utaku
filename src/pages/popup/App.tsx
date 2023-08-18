@@ -1,19 +1,40 @@
+import classNames from 'classnames'
 import React, { useEffect, useState } from 'react'
+import { PrimaryButton, WhiteFill } from '../../components/Buttons'
+import Tooltip from '../../components/Tooltip'
+import PopupStyle from './Popup.styled'
 import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
-
-const objectKeys = <T extends object>(item: T) => {
-  return Object.keys(item) as Array<keyof T>
-}
-const objectEntries = <T extends object>(item: T) => {
-  return Object.entries(item) as Array<[keyof T, T[keyof T]]>
-}
+import './index.scss'
 
 const App = (): JSX.Element => {
   const results = useWebRequests(true)
   const { folderName, downloadedItem, handleFolderName } = useFileDownload()
-  const { sourceGroup } = results
+  const { sourceGroup, tabList } = results
   const [folderNameList, set_folderNameList] = useState<string[]>([])
+
+  const handleClickTab = (tabId?: number) => {
+    if (!tabId) return
+    chrome.tabs.get(tabId, (tab) => {
+      if (chrome.runtime.lastError) {
+        console.log(chrome.runtime.lastError.message)
+      } else {
+        chrome.windows.update(tab.windowId, { focused: true }, () => {
+          chrome.tabs.update(tabId, { active: true })
+        })
+      }
+    })
+  }
+
+  const handleReloadTab = (tabId?: number) => {
+    if (!tabId) return
+    if (chrome.runtime.lastError) {
+      console.log(chrome.runtime.lastError.message)
+    } else {
+      chrome.tabs.reload(tabId)
+    }
+  }
+
   useEffect(() => {
     chrome.storage.sync.get(['folderName', 'folderNameList'], (items) => {
       if (items.folderName) handleFolderName(items.folderName)
@@ -128,32 +149,58 @@ const App = (): JSX.Element => {
     folderName,
     folderNameList,
   ])
-  useEffect(() => {
-    console.log('results', results.sourceGroup)
-  }, [results])
   return (
-    <div>
-      <h1>Popup Page!</h1>
-      <p>허 참 어이가 없네?!</p>
-      <div>
-        {objectKeys(sourceGroup).map((result) => {
-          const item = sourceGroup[result]
-          return (
-            <div key={String(result)}>
-              <div>
-                {String(result)}
-                <span>{Object.keys(item).length}</span>
-              </div>
-              <div>
-                {objectEntries(item).map(([key, value]) => {
-                  return <div key={key}>{value.url}</div>
-                })}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
+    <PopupStyle.Wrap>
+      {tabList.map((tabItem) => {
+        const tabId = tabItem.id as keyof typeof sourceGroup | undefined
+        const groupList = tabId && sourceGroup ? sourceGroup[tabId] ?? {} : {}
+        const sourceList = Object.values(groupList)
+        return (
+          <PopupStyle.Item
+            key={tabItem.id}
+            className={classNames({ active: tabItem.active })}
+          >
+            {tabItem.tooltip && <Tooltip>{tabItem.tooltip}</Tooltip>}
+            <PopupStyle.Row
+              className="description"
+              onMouseEnter={(e) => {
+                const targetText = e.currentTarget
+                results.handleTooltip(
+                  tabItem,
+                  targetText ? targetText.innerText.replace(/\n/g, '') : ''
+                )
+              }}
+              onMouseLeave={() => {
+                results.handleTooltip(tabItem, '')
+              }}
+            >
+              <span className="title">{tabItem.title}</span>::
+              <span className="url">{tabItem.url}</span>
+              <span className="id">[{tabItem.id}]</span>
+              <span className="length">({sourceList?.length ?? 0})</span>
+            </PopupStyle.Row>
+            <PopupStyle.Row>
+              <PrimaryButton
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleClickTab(tabItem.id)
+                }}
+              >
+                선택
+              </PrimaryButton>
+              <WhiteFill
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleReloadTab(tabItem.id)
+                }}
+              >
+                새로고침
+              </WhiteFill>
+            </PopupStyle.Row>
+          </PopupStyle.Item>
+        )
+      })}
+    </PopupStyle.Wrap>
   )
 }
 

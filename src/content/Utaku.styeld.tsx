@@ -19,6 +19,7 @@ export const Controller = styled.div`
   button:disabled {
     background-color: ${colors['White/White 10%']};
     color: ${colors['Grayscale/Gray Default']};
+    opacity: 0.5;
     box-shadow: none;
     cursor: default;
   }

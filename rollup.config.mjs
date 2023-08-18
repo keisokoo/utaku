@@ -28,11 +28,6 @@ const defaultConfig = {
     typescript({
       target: 'es2016',
     }),
-    postcss({
-      extract: path.resolve('dist/content/index.css'),
-      modules: false,
-      use: ['sass'],
-    }),
     replace({
       preventAssignment: true,
       values: {
@@ -61,11 +56,17 @@ const defaultConfig = {
   ],
 }
 export default [
-  // {
-  //   ...defaultConfig,
-  //   plugins: [...defaultConfig.plugins, del({ targets: 'dist/content/*' })],
-  // },
-  defaultConfig,
+  {
+    ...defaultConfig,
+    plugins: [
+      ...defaultConfig.plugins,
+      postcss({
+        extract: path.resolve('dist/index.css'),
+        modules: false,
+        use: ['sass'],
+      }),
+    ],
+  },
   {
     ...defaultConfig,
     input: 'src/content/index.tsx',
@@ -74,5 +75,13 @@ export default [
       format: 'iife',
       entryFileNames: 'content/index.js',
     },
+    plugins: [
+      ...defaultConfig.plugins,
+      postcss({
+        extract: path.resolve('dist/content/index.css'),
+        modules: false,
+        use: ['sass'],
+      }),
+    ],
   },
 ]

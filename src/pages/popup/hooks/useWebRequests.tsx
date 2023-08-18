@@ -22,6 +22,9 @@ const useWebRequests = (active = true) => {
       changeInfo: chrome.tabs.TabChangeInfo,
       tab: TAB_LIST_TYPE
     ) => {
+      console.log('tab', tab)
+      if (!tabId) return
+      if (!tab) return
       set_tabList((prev) =>
         prev.some((tabItem) => tabItem.id === tab.id)
           ? prev.map((tabItem) => (tabItem.id === tab.id ? tab : tabItem))
@@ -29,9 +32,11 @@ const useWebRequests = (active = true) => {
       )
     }
     const closeTab = (tabId: number) => {
+      if (!tabId) return
       set_tabList((prev) => prev.filter((tabItem) => tabItem.id !== tabId))
     }
-    const activeTab = (activeInfo: chrome.tabs.TabActiveInfo) => {
+    const activeTab = async (activeInfo: chrome.tabs.TabActiveInfo) => {
+      if (!activeInfo) return
       set_tabList((prev) =>
         prev.map((tabItem) =>
           tabItem.id === activeInfo.tabId
@@ -114,6 +119,10 @@ const useWebRequests = (active = true) => {
     ) {
       if (req.type === 'image') {
         set_sourceList((prev) => uniqBy([...prev, req], (curr) => curr.url))
+        if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
+          chrome.tabs.get(req.tabId).then((tab) => {
+            set_tabList((prev) => uniqBy([...prev, tab], (curr) => curr.id))
+          })
       }
     }
     const hasListener = chrome.webRequest.onHeadersReceived.hasListeners()

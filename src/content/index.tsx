@@ -5,7 +5,7 @@ import App from './App'
 import './index.scss'
 if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
-const getAvailable = () => {
+const getAvailable = (el?: HTMLElement) => {
   try {
     chrome.runtime.sendMessage(
       {
@@ -15,10 +15,11 @@ const getAvailable = () => {
         if (chrome.runtime.lastError) {
           return
         }
+        const elementTarget = el ?? document.querySelector('.floating-button')
         if (data) {
-          document.querySelector('.floating-button')?.classList.remove('hide')
+          elementTarget?.classList.remove('hide')
         } else {
-          document.querySelector('.floating-button')?.classList.add('hide')
+          elementTarget?.classList.add('hide')
         }
         return true
       }
@@ -27,8 +28,8 @@ const getAvailable = () => {
     console.log('error', error)
   }
 }
-document.addEventListener('visibilitychange', getAvailable)
-window.addEventListener('focus', getAvailable, false)
+document.addEventListener('visibilitychange', () => getAvailable())
+window.addEventListener('focus', () => getAvailable(), false)
 const rootId = uuid()
 // element의 transform의 x값 y값을 가져오는 함수
 function getTransformXY(el: HTMLElement) {
@@ -73,7 +74,7 @@ function adjustPositionOnResize(el: HTMLButtonElement) {
 }
 function createFloatingButton() {
   const floatingButton = document.createElement('button')
-  floatingButton.classList.add('hide')
+  getAvailable(floatingButton)
   floatingButton.classList.add('floating-button')
   floatingButton.innerText = 'UTAKU'
   window.addEventListener('resize', () =>
