@@ -44,9 +44,6 @@ const App = (): JSX.Element => {
     const contentInit = () => {
       document.querySelector('.floating-button')?.classList.remove('hide')
     }
-    const removeContentInit = () => {
-      document.querySelector('.floating-button')?.classList.add('hide')
-    }
 
     chrome.runtime.sendMessage(
       {
@@ -74,34 +71,6 @@ const App = (): JSX.Element => {
         return true
       }
     )
-    return () => {
-      chrome.runtime.sendMessage(
-        {
-          message: 'activeTabInfo',
-          data: chrome.runtime.id,
-        },
-        ({
-          data,
-        }: {
-          data: {
-            tabId: number
-            windowId: number
-          } | null
-        }) => {
-          if (chrome.runtime.lastError) {
-            return
-          }
-          if (data) {
-            chrome.scripting.executeScript({
-              target: { tabId: data.tabId },
-              func: removeContentInit,
-              args: [],
-            })
-          }
-          return true
-        }
-      )
-    }
   }, [])
   useEffect(() => {
     const onMessage = (

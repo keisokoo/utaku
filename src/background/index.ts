@@ -13,16 +13,36 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   if (tabs?.[0]?.id && tabs[0].id === activeInfo.tabId) {
     return
   } else {
-    console.log('activeTabInfo', activeInfo);
     activeTabInfo = activeInfo
   }
 
 });
+
 chrome.runtime.onConnect.addListener(function (port) {
   if (port.name === 'popup') {
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach((tab) => {
+        if (tab.id && tab.id > 0)
+          chrome.tabs.sendMessage(tab.id, { message: 'utaku-active' }, () => {
+            if (chrome.runtime.lastError) {
+              console.log('Error:', chrome.runtime.lastError);
+            }
+          });
+      });
+    });
     chrome.action.setIcon({ path: '/icon34-active.png' })
     port.onDisconnect.addListener(function () {
       chrome.action.setIcon({ path: '/icon34.png' })
+      chrome.tabs.query({}, (tabs) => {
+        tabs.forEach((tab) => {
+          if (tab.id && tab.id > 0)
+            chrome.tabs.sendMessage(tab.id, { message: 'utaku-quit' }, () => {
+              if (chrome.runtime.lastError) {
+                console.log('Error:', chrome.runtime.lastError);
+              }
+            });
+        });
+      });
     })
   }
 })

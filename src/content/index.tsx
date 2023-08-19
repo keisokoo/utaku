@@ -5,6 +5,27 @@ import App from './App'
 import './index.scss'
 if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
+
+function onMessage(request: { message: string; data: object }) {
+  if (request?.message === 'utaku-active') {
+    const elementTarget = document.querySelector('.floating-button')
+    if (elementTarget) {
+      elementTarget?.classList.remove('hide')
+    }
+  }
+  if (request?.message === 'utaku-quit') {
+    const elementTarget = document.querySelector('.floating-button')
+    if (elementTarget) {
+      elementTarget?.classList.add('hide')
+    }
+    if (root) {
+      root.unmount()
+      root = null
+    }
+  }
+  return false
+}
+chrome.runtime.onMessage.addListener(onMessage)
 const getAvailable = (el?: HTMLElement) => {
   try {
     chrome.runtime.sendMessage(
