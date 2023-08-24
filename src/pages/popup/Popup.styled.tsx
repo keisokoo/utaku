@@ -28,6 +28,13 @@ const PopupStyle = {
       user-select: none;
     }
   `,
+  Column: styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-direction: column-reverse;
+  `,
   Row: styled.div`
     display: flex;
     align-items: center;
@@ -46,6 +53,24 @@ const PopupStyle = {
     .id {
       ${colors['Danger/Light']}
     }
+  `,
+  InnerRow: styled.div`
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: #ffffff0f;
+    padding: 8px;
+    border-radius: 8px;
+    .url-details {
+      flex: 1;
+      word-break: break-all;
+    }
+  `,
+  SpanRow: styled.span`
+    display: flex;
+    align-items: center;
+    gap: 4px;
   `,
 }
 export default PopupStyle

@@ -24,6 +24,15 @@ export const Controller = styled.div`
     cursor: default;
   }
   ${typography['Body/Small/Bold']}
+  .utaku-url-tooltip {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
 `
 export const Editor = styled(Controller)`
   background-color: rgb(7 121 255 / 50%);

@@ -1,0 +1,20 @@
+{
+  "close": {
+    "message": "Close"
+  },
+  "set_url_filter": {
+    "message": "Filtered URL"
+  },
+  "edit_url_filter": {
+    "message": "URL Filter Settings"
+  },
+  "edit_query": {
+    "message": "Edit Query"
+  },
+  "change_add_text": {
+    "message": "Change/Add Text"
+  },
+  "apply": {
+    "message": "Apply"
+  }
+}

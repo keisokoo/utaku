@@ -1,3 +1,4 @@
 {
-  "plugins": ["@emotion"]
+  "presets": ["@babel/preset-react"],
+  "plugins": ["@emotion", "babel-plugin-macros"]
 }

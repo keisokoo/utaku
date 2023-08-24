@@ -52,22 +52,6 @@ const getAvailable = (el?: HTMLElement) => {
 document.addEventListener('visibilitychange', () => getAvailable())
 window.addEventListener('focus', () => getAvailable(), false)
 const rootId = uuid()
-// element의 transform의 x값 y값을 가져오는 함수
-function getTransformXY(el: HTMLElement) {
-  const transform = window.getComputedStyle(el).transform
-  if (transform === 'none') {
-    return { x: 0, y: 0 }
-  }
-  const matrix = transform.match(/^matrix\((.+)\)$/)
-  if (!matrix) {
-    return { x: 0, y: 0 }
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_a, _b, _c, _d, e, f] = matrix[1]
-    .split(',')
-    .map((item) => parseFloat(item))
-  return { x: e, y: f }
-}
 function toggleMount() {
   if (!root) {
     const container = document.getElementById('root-' + rootId) as HTMLElement
@@ -78,40 +62,25 @@ function toggleMount() {
     root = null
   }
 }
-function adjustPositionOnResize(el: HTMLButtonElement) {
-  const position = getTransformXY(el)
-  let nextX = position.x
-  let nextY = position.y
-
-  const scrollBarWidth =
-    document.documentElement.scrollWidth - window.innerWidth
-  const maxX = window.innerWidth - el.offsetWidth + scrollBarWidth
-  const maxY = window.innerHeight - el.offsetHeight
-
-  nextX = Math.min(maxX, Math.max(0, nextX))
-  nextY = Math.min(maxY, Math.max(0, nextY))
-
-  el.style.transform = `translate(${nextX}px, ${nextY}px)`
-}
 function createFloatingButton() {
   const floatingButton = document.createElement('button')
   getAvailable(floatingButton)
   floatingButton.classList.add('floating-button')
   floatingButton.innerText = 'UTAKU'
-  window.addEventListener('resize', () =>
-    adjustPositionOnResize(floatingButton)
-  )
   return floatingButton
 }
 
 function main() {
   const utakuRoot = document.createElement('div')
+  const utakuModal = document.createElement('div')
+  utakuModal.classList.add('utaku-modal')
   utakuRoot.classList.add('utaku-root')
   const reactRoot = document.createElement('div')
   reactRoot.id = 'root-' + rootId
   const button = createFloatingButton()
   utakuRoot.appendChild(button)
   utakuRoot.appendChild(reactRoot)
+  utakuRoot.appendChild(utakuModal)
   document.body.appendChild(utakuRoot)
   button.addEventListener('click', toggleMount)
   function fadeOutElement(el: HTMLElement) {

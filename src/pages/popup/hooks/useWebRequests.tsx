@@ -4,11 +4,15 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 interface TAB_LIST_TYPE extends chrome.tabs.Tab {
   tooltip?: string
 }
-
+export interface ImageResponseDetails
+  extends chrome.webRequest.WebResponseHeadersDetails {
+  imageInfo?: {
+    width: number
+    height: number
+  }
+}
 const useWebRequests = (active = true) => {
-  const [sourceList, set_sourceList] = useState<
-    chrome.webRequest.WebResponseHeadersDetails[]
-  >([])
+  const [sourceList, set_sourceList] = useState<ImageResponseDetails[]>([])
   const [tabIdList, set_tabIdList] = useState<number[]>([])
   const [tabList, set_tabList] = useState<TAB_LIST_TYPE[]>([])
   const handleTooltip = (item: TAB_LIST_TYPE, tooltip: string) => {
@@ -16,6 +20,7 @@ const useWebRequests = (active = true) => {
       prev.map((curr) => (curr.id === item.id ? { ...curr, tooltip } : curr))
     )
   }
+
   useEffect(() => {
     const updateOrCreateTab = (
       tabId: number,
@@ -80,7 +85,7 @@ const useWebRequests = (active = true) => {
             return prev
           },
           {} as {
-            [key in string]: chrome.webRequest.WebResponseHeadersDetails
+            [key in string]: ImageResponseDetails
           }
         )
         return acc
@@ -88,7 +93,7 @@ const useWebRequests = (active = true) => {
       {} as Record<
         keyof typeof groupByTabId,
         {
-          [key in string]: chrome.webRequest.WebResponseHeadersDetails
+          [key in string]: ImageResponseDetails
         }
       >
     )
@@ -103,20 +108,15 @@ const useWebRequests = (active = true) => {
     set_sourceList([])
   }, [])
 
-  const handleSourceList = useCallback(
-    (item: chrome.webRequest.WebResponseHeadersDetails[]) => {
-      set_sourceList(item)
-    },
-    []
-  )
+  const handleSourceList = useCallback((item: ImageResponseDetails[]) => {
+    set_sourceList(item)
+  }, [])
   const handleRemove = useCallback((url: string) => {
     set_sourceList((prev) => prev.filter((curr) => curr.url !== url))
   }, [])
 
   useEffect(() => {
-    function getCurrentResponse(
-      req: chrome.webRequest.WebResponseHeadersDetails
-    ) {
+    function getCurrentResponse(req: ImageResponseDetails) {
       if (req.type === 'image') {
         set_sourceList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
@@ -141,6 +141,7 @@ const useWebRequests = (active = true) => {
 
   return {
     sourceList,
+    set_sourceList,
     tabList,
     tabIdList,
     sourceGroup,

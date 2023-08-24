@@ -1,6 +1,7 @@
 {
   "manifest_version": 3,
   "name": "utaku",
+  "default_locale": "en",
   "version": "1.0.0",
   "description": "Utaku image downloader",
   "background": {

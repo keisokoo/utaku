@@ -1,6 +1,12 @@
 import classNames from 'classnames'
 import React from 'react'
-import { FaCheck, FaClipboard, FaDownload, FaShare } from 'react-icons/fa'
+import {
+  FaCheck,
+  FaClipboard,
+  FaDownload,
+  FaFilter,
+  FaShare,
+} from 'react-icons/fa'
 import { ItemType } from '../../content/App'
 import S from './ItemBox.styles'
 
@@ -10,8 +16,10 @@ interface ItemBoxProps
     HTMLDivElement
   > {
   item: ItemType
+  setUrl?: (url: string) => void
+  setTooltip?: (tooltip: string) => void
 }
-const ItemBox = ({ item, ...props }: ItemBoxProps) => {
+const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
   const { ImageItem } = S
   const copyToClipboard = (text: string) => {
     if (navigator.clipboard) {
@@ -28,6 +36,16 @@ const ItemBox = ({ item, ...props }: ItemBoxProps) => {
   const handleNewWindow = (url: string | URL) => {
     window.open(url, '_blank')
   }
+  const tooltipEventAttributes = (value: string) => {
+    return {
+      onMouseEnter: () => {
+        setTooltip && setTooltip(value)
+      },
+      onMouseLeave: () => {
+        setTooltip && setTooltip('')
+      },
+    }
+  }
   return (
     <>
       <S.Wrap
@@ -40,37 +58,46 @@ const ItemBox = ({ item, ...props }: ItemBoxProps) => {
               <FaCheck />
             </i>
           )}
-          {/* {item.downloaded && (
-              <i className="downloaded">
-                <FaCheck />
-              </i>
-            )} */}
           <ImageItem key={item.requestId} src={item.url} alt={item.requestId} />
         </div>
         <S.ImageSize className="image-size">
-          <span>width: {item.imageInfo.width}px</span>
-          <span>height: {item.imageInfo.height}px</span>
+          <span>{item.imageInfo.width}px</span>
+          <span>×</span>
+          <span>{item.imageInfo.height}px</span>
+          {item.imageInfo.replaced && <span>(Replaced)</span>}
         </S.ImageSize>
         <S.Icons className="image-icons">
-          <div>
-            <S.IconWrap
-              onClick={(e) => {
-                e.stopPropagation()
-                copyToClipboard(item.url)
-              }}
-            >
-              <FaClipboard />
-            </S.IconWrap>
-            <S.IconWrap
-              onClick={(e) => {
-                e.stopPropagation()
-                handleDown(item.url)
-              }}
-            >
-              <FaDownload />
-            </S.IconWrap>
-          </div>
           <S.IconWrap
+            {...tooltipEventAttributes('Copy')}
+            onClick={(e) => {
+              e.stopPropagation()
+              copyToClipboard(item.url)
+            }}
+          >
+            <FaClipboard />
+          </S.IconWrap>
+          <S.IconWrap
+            {...tooltipEventAttributes('Download')}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleDown(item.url)
+            }}
+          >
+            <FaDownload />
+          </S.IconWrap>
+          {setUrl && (
+            <S.IconWrap
+              {...tooltipEventAttributes('Filter: ' + item.url)}
+              onClick={(e) => {
+                e.stopPropagation()
+                setUrl(item.url)
+              }}
+            >
+              <FaFilter />
+            </S.IconWrap>
+          )}
+          <S.IconWrap
+            {...tooltipEventAttributes('New Window')}
             onClick={(e) => {
               e.stopPropagation()
               handleNewWindow(item.url)

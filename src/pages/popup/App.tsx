@@ -1,8 +1,14 @@
 import classNames from 'classnames'
-import React, { useEffect, useState } from 'react'
-import { PrimaryButton, WhiteFill } from '../../components/Buttons'
+import React, { Fragment, useEffect, useState } from 'react'
+import {
+  GrayScaleFill,
+  PrimaryButton,
+  WhiteFill,
+} from '../../components/Buttons'
+import Modal from '../../components/Modal/Modal'
 import Tooltip from '../../components/Tooltip'
 import PopupStyle from './Popup.styled'
+import UrlEditor, { UrlFilter } from './components/UrlEditor'
 import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
 import './index.scss'
@@ -10,8 +16,11 @@ import './index.scss'
 const App = (): JSX.Element => {
   const results = useWebRequests(true)
   const { folderName, downloadedItem, handleFolderName } = useFileDownload()
-  const { sourceGroup, tabList } = results
+  const { sourceGroup, tabList, set_sourceList } = results
+  const [openTabList, set_openTabList] = useState<number[]>([])
   const [folderNameList, set_folderNameList] = useState<string[]>([])
+  const [currentUrl, setCurrentUrl] = useState('')
+  const [urlFilter, set_urlFilter] = useState<UrlFilter | null>()
 
   const handleClickTab = (tabId?: number) => {
     if (!tabId) return
@@ -34,7 +43,6 @@ const App = (): JSX.Element => {
       chrome.tabs.reload(tabId)
     }
   }
-
   useEffect(() => {
     chrome.storage.sync.get(['folderName', 'folderNameList'], (items) => {
       if (items.folderName) handleFolderName(items.folderName)
@@ -83,6 +91,25 @@ const App = (): JSX.Element => {
     ) => {
       const senderTabId = sender?.tab?.id
       if (!senderTabId) return
+      if (request.message === 'update-image-size') {
+        const { requestId, width, height } = request.data as {
+          requestId: string
+          width: number
+          height: number
+        }
+        set_sourceList((prev) => {
+          return prev.map((tabItem) => {
+            if (tabItem.requestId !== requestId) return tabItem
+            return {
+              ...tabItem,
+              imageInfo: {
+                width,
+                height,
+              },
+            }
+          })
+        })
+      }
       if (request.message === 'get-items') {
         const data = sourceGroup[senderTabId]
         sendResponse({ data, downloaded: downloadedItem })
@@ -102,6 +129,11 @@ const App = (): JSX.Element => {
           },
         })
       }
+      if (request.message === 'setFolderName') {
+        const folderName = request.data as string
+        handleFolderName(folderName)
+        chrome.storage.sync.set({ folderName })
+      }
     }
     if (!chrome.runtime.onMessage.hasListener(onMessage)) {
       chrome.runtime.onMessage.addListener(onMessage)
@@ -118,58 +150,149 @@ const App = (): JSX.Element => {
     folderName,
     folderNameList,
   ])
+  useEffect(() => {
+    console.log('sourceGroup', sourceGroup)
+  }, [sourceGroup])
+  useEffect(() => {
+    console.log('urlFilter', urlFilter)
+  }, [urlFilter])
   return (
-    <PopupStyle.Wrap>
-      {tabList.map((tabItem) => {
-        const tabId = tabItem.id as keyof typeof sourceGroup | undefined
-        const groupList = tabId && sourceGroup ? sourceGroup[tabId] ?? {} : {}
-        const sourceList = Object.values(groupList)
-        return (
-          <PopupStyle.Item
-            key={tabItem.id}
-            className={classNames({ active: tabItem.active })}
+    <>
+      <Modal
+        target="#popup-modal"
+        open={currentUrl !== ''}
+        onClose={() => {
+          setCurrentUrl('')
+        }}
+      >
+        <UrlEditor
+          currentUrl={currentUrl}
+          emitValue={(value) => {
+            set_urlFilter(value)
+            setCurrentUrl('')
+          }}
+        />
+      </Modal>
+      <PopupStyle.Wrap>
+        <WhiteFill
+          onClick={() => {
+            tabList.forEach((tabItem) => {
+              if (!tabItem?.id) return
+              chrome.tabs.reload(tabItem.id)
+            })
+            chrome.runtime.reload()
+          }}
+        >
+          Runtime Reload
+        </WhiteFill>
+        {urlFilter && (
+          <WhiteFill
+            onClick={() => {
+              set_urlFilter(null)
+            }}
           >
-            {tabItem.tooltip && <Tooltip>{tabItem.tooltip}</Tooltip>}
-            <PopupStyle.Row
-              className="description"
-              onMouseEnter={(e) => {
-                const targetText = e.currentTarget
-                results.handleTooltip(
-                  tabItem,
-                  targetText ? targetText.innerText.replace(/\n/g, '') : ''
-                )
-              }}
-              onMouseLeave={() => {
-                results.handleTooltip(tabItem, '')
-              }}
-            >
-              <span className="title">{tabItem.title}</span>::
-              <span className="url">{tabItem.url}</span>
-              <span className="id">[{tabItem.id}]</span>
-              <span className="length">({sourceList?.length ?? 0})</span>
-            </PopupStyle.Row>
-            <PopupStyle.Row>
-              <PrimaryButton
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleClickTab(tabItem.id)
-                }}
+            Reset Filter
+          </WhiteFill>
+        )}
+        {tabList.map((tabItem) => {
+          const tabId = tabItem.id as keyof typeof sourceGroup | undefined
+          const groupList = tabId && sourceGroup ? sourceGroup[tabId] ?? {} : {}
+          const sourceList = Object.values(groupList)
+          return (
+            <Fragment key={tabItem.id}>
+              <PopupStyle.Item
+                className={classNames({ active: tabItem.active })}
               >
-                선택
-              </PrimaryButton>
-              <WhiteFill
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleReloadTab(tabItem.id)
-                }}
-              >
-                새로고침
-              </WhiteFill>
-            </PopupStyle.Row>
-          </PopupStyle.Item>
-        )
-      })}
-    </PopupStyle.Wrap>
+                {tabItem.tooltip && <Tooltip>{tabItem.tooltip}</Tooltip>}
+                <PopupStyle.Row
+                  className="description"
+                  onMouseEnter={(e) => {
+                    const targetText = e.currentTarget
+                    results.handleTooltip(
+                      tabItem,
+                      targetText ? targetText.innerText.replace(/\n/g, '') : ''
+                    )
+                  }}
+                  onMouseLeave={() => {
+                    results.handleTooltip(tabItem, '')
+                  }}
+                >
+                  <span className="title">{tabItem.title}</span>::
+                  <span className="url">{tabItem.url}</span>
+                  <span className="id">[{tabItem.id}]</span>
+                  <span className="length">({sourceList?.length ?? 0})</span>
+                </PopupStyle.Row>
+                <PopupStyle.Row>
+                  <GrayScaleFill
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (!tabItem?.id) return
+                      set_openTabList((prev) => {
+                        if (typeof tabId !== 'number') return prev
+                        if (!prev.includes(tabId)) return [...prev, tabId]
+                        return prev.filter((curr) => curr !== tabId)
+                      })
+                    }}
+                  >
+                    목록
+                  </GrayScaleFill>
+                  <PrimaryButton
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleClickTab(tabItem.id)
+                    }}
+                  >
+                    선택
+                  </PrimaryButton>
+                  <WhiteFill
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleReloadTab(tabItem.id)
+                    }}
+                  >
+                    새로고침
+                  </WhiteFill>
+                </PopupStyle.Row>
+              </PopupStyle.Item>
+              {typeof tabId === 'number' && openTabList.includes(tabId) && (
+                <PopupStyle.Item className="list">
+                  <PopupStyle.Column>
+                    {sourceList.map((item) => {
+                      const { url, requestId, imageInfo } = item
+                      return (
+                        <PopupStyle.InnerRow
+                          key={requestId}
+                          className="description"
+                        >
+                          {imageInfo && (
+                            <PopupStyle.SpanRow>
+                              ({imageInfo.width}
+                              <span>×</span>
+                              {imageInfo.height})
+                            </PopupStyle.SpanRow>
+                          )}
+                          <div className="url-details">{url}</div>
+                          <PopupStyle.SpanRow>
+                            <GrayScaleFill
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setCurrentUrl(url)
+                              }}
+                            >
+                              편집
+                            </GrayScaleFill>
+                          </PopupStyle.SpanRow>
+                        </PopupStyle.InnerRow>
+                      )
+                    })}
+                  </PopupStyle.Column>
+                </PopupStyle.Item>
+              )}
+            </Fragment>
+          )
+        })}
+      </PopupStyle.Wrap>
+    </>
   )
 }
 

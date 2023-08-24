@@ -9,6 +9,7 @@ const TooltipStyle = {
     transform: translateY(calc(100% + 6px));
     padding: 6px 12px;
     position: absolute;
+    word-break: break-all;
   `,
 }
 

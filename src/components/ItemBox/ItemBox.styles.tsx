@@ -1,34 +1,38 @@
 import styled from '@emotion/styled'
 import { colors, typography } from '../../themes'
 const ImageItem = styled.img`
-  width: 100%;
+  width: auto;
+  height: 120px;
+  min-width: 100px;
+  object-fit: contain;
   break-inside: avoid;
   box-sizing: border-box;
-  &.downloaded {
-    opacity: 0.4;
-  }
 `
 const IconWrap = styled.i`
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background-color: #0000006e;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
+  font-size: 10px;
   &:hover {
     color: ${colors['White/White off']};
   }
-  svg: {
-    width: 14px;
-    height: 14px;
+  svg {
+    width: 8px;
+    height: 8px;
   }
 `
 const ImageSize = styled.div`
   ${typography['Body/Small/Regular']}
-  padding: 2px 0 4px;
+  font-size: 12px;
+  padding: 0px 0 2px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
+  gap: 4px;
 `
 const ItemBoxStyles = {
   Wrap: styled.div`
@@ -45,17 +49,9 @@ const ItemBoxStyles = {
     color: ${colors['White/White 70%']};
     .image-box {
       font-size: 0;
-    }
-    .downloaded {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 16px;
-      color: #e71300;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
+      background-color: #ffffff30;
+      border-radius: 8px;
+      overflow: hidden;
     }
     &.active {
       opacity: 1;
@@ -75,25 +71,14 @@ const ItemBoxStyles = {
       ${ImageSize} {
         color: ${colors['Accent/Dark']};
       }
-      ${IconWrap} {
-        color: ${colors['Accent/Dark']};
-        &:hover {
-          color: ${colors['White/White off']};
-        }
-      }
     }
   `,
   ImageSize,
   Icons: styled.div`
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    gap: 16px;
-    & > div {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
+    justify-content: center;
+    gap: 8px;
   `,
   IconWrap,
   ImageItem,

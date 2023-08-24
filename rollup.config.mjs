@@ -79,7 +79,10 @@ export default [
       ...defaultConfig.plugins,
       postcss({
         extract: path.resolve('dist/content/index.css'),
-        modules: false,
+        modules: {
+          generateScopedName: '[name]__[local]___[hash:base64:5]',
+          autoModules: (filename) => filename.endsWith('.module.scss'),
+        },
         use: ['sass'],
       }),
     ],

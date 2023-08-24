@@ -4,3 +4,7 @@ declare namespace chrome.webRequest {
     documentId: string
   }
 }
+declare module '*.scss' {
+  const content: { [className: string]: string };
+  export default content;
+}
