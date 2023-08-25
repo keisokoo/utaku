@@ -1,20 +1,27 @@
 import styled from '@emotion/styled'
 import React, { useMemo, useState } from 'react'
-import { PrimaryButton } from '../../../components/Buttons'
-import Checkbox from '../../../components/Checkbox/Checkbox'
-import ModalBody from '../../../components/Modal/ModalBody'
-import { colors } from '../../../themes'
-import { lang } from '../../../utils'
-import highlight from '../../../utils/highlight'
-
+import { colors } from '../../themes'
+import { lang } from '../../utils'
+import highlight from '../../utils/highlight'
+import { PrimaryButton, SecondaryButton } from '../Buttons'
+import Checkbox from '../Checkbox/Checkbox'
+import ModalBody from '../Modal/ModalBody'
+const ButtonWrap = styled.div`
+  margin-top: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  & > button {
+    flex: 1;
+  }
+`
 const EditorWrap = styled.div`
   display: flex;
-  flex-direction: row;
-  gap: 16px;
+  flex-direction: column;
+  gap: 8px;
   color: ${colors['Grayscale/Gray Dark']};
-  justify-content: space-between;
   & > div {
-    width: 320px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -36,6 +43,7 @@ const EditorWrap = styled.div`
     color: #494949;
     font-weight: 700;
     font-size: 14px;
+    text-align: left;
   }
   input {
     width: 100%;
@@ -84,7 +92,9 @@ const EditorWrap = styled.div`
 export type UrlFilter = {
   host: string
   selected: string[]
-  params: URLSearchParams
+  params: {
+    [k: string]: string
+  }
   from: string
   to: string
 }
@@ -105,7 +115,7 @@ export const filterList = (
         const searchParams = new URLSearchParams(url.search)
         selected.forEach((key) => {
           if (searchParams.has(key)) {
-            searchParams.set(key, params.get(key) ?? '')
+            searchParams.set(key, params[key] ?? '')
           }
         })
         url.search = searchParams.toString()
@@ -131,6 +141,7 @@ interface UrlEditorProps
   > {
   currentUrl: string
   emitValue?: (value: UrlFilter) => void
+  onClose?: () => void
 }
 const UrlEditor: React.FC<UrlEditorProps> = ({
   currentUrl,
@@ -171,7 +182,7 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
     const urlFilter: UrlFilter = {
       host: changedUrl.host,
       selected,
-      params: changedUrl.searchParams,
+      params: searchParams,
       from: replaceUrl.from,
       to: replaceUrl.to,
     }
@@ -192,6 +203,14 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
     <ModalBody title={lang('set_url_filter')} {...props}>
       <EditorWrap>
         <div className="utaku-left">
+          <div className="current-url">
+            <div>{highlight(currentUrl.toString(), filteredUrl)}</div>
+          </div>
+          {(selected.length > 0 || selectedReplaceUrl) && (
+            <div className="next-url">
+              <div>{highlight(changedUrl.toString(), replaceUrl.to)}</div>
+            </div>
+          )}
           <div className="filtered-url">
             <label>{lang('edit_url_filter')}</label>
             <input
@@ -202,14 +221,6 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
               }}
             />
           </div>
-          <div className="current-url">
-            <div>{highlight(currentUrl.toString(), filteredUrl)}</div>
-          </div>
-          {(selected.length > 0 || selectedReplaceUrl) && (
-            <div className="next-url">
-              <div>{highlight(changedUrl.toString(), replaceUrl.to)}</div>
-            </div>
-          )}
         </div>
         <div className="utaku-right">
           <div className="utaku-query-edit">
@@ -276,15 +287,32 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
           </div>
         </div>
       </EditorWrap>
-      <PrimaryButton
-        _css={`
-        margin-top: 16px;
-        width: 100%;
-      `}
-        onClick={EmitUrlFilter}
-      >
-        적용
-      </PrimaryButton>
+      <ButtonWrap>
+        <PrimaryButton onClick={EmitUrlFilter}>적용</PrimaryButton>
+        <SecondaryButton
+          onClick={() => {
+            const urlFilter: UrlFilter = {
+              host: changedUrl.host,
+              selected,
+              params: searchParams,
+              from: replaceUrl.from,
+              to: replaceUrl.to,
+            }
+            chrome.storage.sync.get('urlFilter', (result) => {
+              if (result.urlFilter) {
+                const nextUrlFilter = [...result.urlFilter, urlFilter]
+                chrome.storage.sync.set({ urlFilter: nextUrlFilter })
+              } else {
+                chrome.storage.sync.set({ urlFilter: [urlFilter] })
+              }
+            })
+            if (props.onClose) props.onClose()
+            return
+          }}
+        >
+          저장
+        </SecondaryButton>
+      </ButtonWrap>
     </ModalBody>
   )
 }

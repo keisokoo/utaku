@@ -16,5 +16,14 @@
   },
   "apply": {
     "message": "적용"
+  },
+  "add": {
+    "message": "추가"
+  },
+  "save": {
+    "message": "저장"
+  },
+  "delete": {
+    "message": "삭제"
   }
 }

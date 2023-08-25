@@ -5,9 +5,11 @@ import {
   FaClipboard,
   FaDownload,
   FaFilter,
+  FaImage,
   FaShare,
+  FaVideo,
 } from 'react-icons/fa'
-import { ItemType } from '../../content/App'
+import { ItemType } from '../../content/types'
 import S from './ItemBox.styles'
 
 interface ItemBoxProps
@@ -20,7 +22,7 @@ interface ItemBoxProps
   setTooltip?: (tooltip: string) => void
 }
 const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
-  const { ImageItem } = S
+  const { ImageItem, VideoItem } = S
   const copyToClipboard = (text: string) => {
     if (navigator.clipboard) {
       navigator.clipboard.writeText(text).then()
@@ -49,16 +51,35 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
   return (
     <>
       <S.Wrap
-        className={classNames({ active: item.imageInfo.active })}
+        className={classNames({ active: item.imageInfo.active }, item.type)}
         {...props}
       >
         <div className="image-box">
           {item.imageInfo.active && (
-            <i className="check">
+            <S.CheckIcon>
               <FaCheck />
-            </i>
+            </S.CheckIcon>
           )}
-          <ImageItem key={item.requestId} src={item.url} alt={item.requestId} />
+          {item.type === 'media' && (
+            <>
+              <S.MediaIcon>
+                <FaVideo />
+              </S.MediaIcon>
+              <VideoItem key={item.requestId} src={item.url} />
+            </>
+          )}
+          {item.type === 'image' && (
+            <>
+              <S.MediaIcon>
+                <FaImage />
+              </S.MediaIcon>
+              <ImageItem
+                key={item.requestId}
+                src={item.url}
+                alt={item.requestId}
+              />
+            </>
+          )}
         </div>
         <S.ImageSize className="image-size">
           <span>{item.imageInfo.width}px</span>

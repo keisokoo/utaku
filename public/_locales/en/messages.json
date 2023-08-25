@@ -16,5 +16,14 @@
   },
   "apply": {
     "message": "Apply"
+  },
+  "add": {
+    "message": "add"
+  },
+  "save": {
+    "message": "save"
+  },
+  "delete": {
+    "message": "delete"
   }
 }

@@ -1,12 +1,44 @@
+import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import { colors, typography } from '../../themes'
-const ImageItem = styled.img`
+const mediaCss = css`
   width: auto;
   height: 120px;
   min-width: 100px;
   object-fit: contain;
   break-inside: avoid;
   box-sizing: border-box;
+`
+const iconsCss = css`
+  position: absolute;
+  font-size: 16px;
+  color: #00bd1e;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+`
+const ImageItem = styled.img`
+  ${mediaCss}
+`
+const VideoItem = styled.video`
+  ${mediaCss}
+`
+const CheckIcon = styled.i`
+  ${iconsCss}
+  top: 8px;
+  left: 8px;
+`
+const MediaIcon = styled.i`
+  ${iconsCss}
+  top: 8px;
+  right: 8px;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
 `
 const IconWrap = styled.i`
   width: 16px;
@@ -17,6 +49,7 @@ const IconWrap = styled.i`
   align-items: center;
   justify-content: center;
   font-size: 10px;
+  color: ${colors['White/White 30%']};
   &:hover {
     color: ${colors['White/White off']};
   }
@@ -33,6 +66,7 @@ const ImageSize = styled.div`
   align-items: center;
   justify-content: center;
   gap: 4px;
+  color: ${colors['White/White 70%']};
 `
 const ItemBoxStyles = {
   Wrap: styled.div`
@@ -49,27 +83,36 @@ const ItemBoxStyles = {
     color: ${colors['White/White 70%']};
     .image-box {
       font-size: 0;
-      background-color: #ffffff30;
       border-radius: 8px;
       overflow: hidden;
+    }
+    &.image {
+      ${CheckIcon} {
+        color: ${colors['Accent/Default']};
+      }
+      .image-box {
+        background-color: #c7faff40;
+      }
+    }
+    &.media {
+      ${MediaIcon} {
+        color: ${colors['Secondary/Default']};
+      }
+      .image-box {
+        background-color: #ff528640;
+      }
     }
     &.active {
       opacity: 1;
       border-radius: 8px;
-      background-color: ${colors['Accent/Light']};
-      .check {
-        position: absolute;
-        top: 8px;
-        left: 8px;
-        font-size: 16px;
-        color: #00bd1e;
-        width: 16px;
-        height: 16px;
-        border-radius: 50%;
-        background: #fff;
-      }
       ${ImageSize} {
         color: ${colors['Accent/Dark']};
+      }
+      &.image {
+        background-color: ${colors['Accent/Light']};
+      }
+      &.media {
+        background-color: ${colors['Secondary/Light']};
       }
     }
   `,
@@ -82,5 +125,8 @@ const ItemBoxStyles = {
   `,
   IconWrap,
   ImageItem,
+  VideoItem,
+  CheckIcon,
+  MediaIcon,
 }
 export default ItemBoxStyles

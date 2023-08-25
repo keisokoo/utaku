@@ -13,6 +13,9 @@ export interface ImageResponseDetails
 }
 const useWebRequests = (active = true) => {
   const [sourceList, set_sourceList] = useState<ImageResponseDetails[]>([])
+  const [videoList, set_videoList] = useState<
+    chrome.webRequest.WebResponseHeadersDetails[]
+  >([])
   const [tabIdList, set_tabIdList] = useState<number[]>([])
   const [tabList, set_tabList] = useState<TAB_LIST_TYPE[]>([])
   const handleTooltip = (item: TAB_LIST_TYPE, tooltip: string) => {
@@ -117,7 +120,10 @@ const useWebRequests = (active = true) => {
 
   useEffect(() => {
     function getCurrentResponse(req: ImageResponseDetails) {
-      if (req.type === 'image') {
+      if (req.type === 'media') {
+        set_videoList((prev) => uniqBy([...prev, req], (curr) => curr.url))
+      }
+      if (req.type === 'image' || req.type === 'media') {
         set_sourceList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
           chrome.tabs.get(req.tabId).then((tab) => {
@@ -140,6 +146,7 @@ const useWebRequests = (active = true) => {
   }, [active])
 
   return {
+    videoList,
     sourceList,
     set_sourceList,
     tabList,

@@ -5,10 +5,8 @@ import {
   PrimaryButton,
   WhiteFill,
 } from '../../components/Buttons'
-import Modal from '../../components/Modal/Modal'
 import Tooltip from '../../components/Tooltip'
 import PopupStyle from './Popup.styled'
-import UrlEditor, { UrlFilter } from './components/UrlEditor'
 import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
 import './index.scss'
@@ -16,11 +14,9 @@ import './index.scss'
 const App = (): JSX.Element => {
   const results = useWebRequests(true)
   const { folderName, downloadedItem, handleFolderName } = useFileDownload()
-  const { sourceGroup, tabList, set_sourceList } = results
+  const { sourceGroup, tabList, set_sourceList, videoList } = results
   const [openTabList, set_openTabList] = useState<number[]>([])
   const [folderNameList, set_folderNameList] = useState<string[]>([])
-  const [currentUrl, setCurrentUrl] = useState('')
-  const [urlFilter, set_urlFilter] = useState<UrlFilter | null>()
 
   const handleClickTab = (tabId?: number) => {
     if (!tabId) return
@@ -150,29 +146,8 @@ const App = (): JSX.Element => {
     folderName,
     folderNameList,
   ])
-  useEffect(() => {
-    console.log('sourceGroup', sourceGroup)
-  }, [sourceGroup])
-  useEffect(() => {
-    console.log('urlFilter', urlFilter)
-  }, [urlFilter])
   return (
     <>
-      <Modal
-        target="#popup-modal"
-        open={currentUrl !== ''}
-        onClose={() => {
-          setCurrentUrl('')
-        }}
-      >
-        <UrlEditor
-          currentUrl={currentUrl}
-          emitValue={(value) => {
-            set_urlFilter(value)
-            setCurrentUrl('')
-          }}
-        />
-      </Modal>
       <PopupStyle.Wrap>
         <WhiteFill
           onClick={() => {
@@ -185,15 +160,24 @@ const App = (): JSX.Element => {
         >
           Runtime Reload
         </WhiteFill>
-        {urlFilter && (
-          <WhiteFill
-            onClick={() => {
-              set_urlFilter(null)
-            }}
-          >
-            Reset Filter
-          </WhiteFill>
-        )}
+        <WhiteFill
+          onClick={() => {
+            console.log('videoList', videoList)
+          }}
+        >
+          videoList
+        </WhiteFill>
+        <WhiteFill
+          onClick={() => {
+            const downloadList = videoList.map((item) => item.url)
+            for (let i = 0; i < downloadList.length; i++) {
+              results.handleRemove(downloadList[i])
+              chrome.downloads.download({ url: downloadList[i] })
+            }
+          }}
+        >
+          download video
+        </WhiteFill>
         {tabList.map((tabItem) => {
           const tabId = tabItem.id as keyof typeof sourceGroup | undefined
           const groupList = tabId && sourceGroup ? sourceGroup[tabId] ?? {} : {}
@@ -272,16 +256,6 @@ const App = (): JSX.Element => {
                             </PopupStyle.SpanRow>
                           )}
                           <div className="url-details">{url}</div>
-                          <PopupStyle.SpanRow>
-                            <GrayScaleFill
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setCurrentUrl(url)
-                              }}
-                            >
-                              편집
-                            </GrayScaleFill>
-                          </PopupStyle.SpanRow>
                         </PopupStyle.InnerRow>
                       )
                     })}
