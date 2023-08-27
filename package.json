@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "prod": "rimraf build && cross-env NODE_ENV=production rollup -c && mkdir -p releases/$npm_package_name-$npm_package_version && mv build/* releases/$npm_package_name-$npm_package_version && rimraf build",
+    "prod": "rimraf build && rimraf releases/$npm_package_name-$npm_package_version && cross-env NODE_ENV=production rollup -c && mkdir -p releases/$npm_package_name-$npm_package_version && mv build/* releases/$npm_package_name-$npm_package_version && rimraf build",
     "start": "rollup -c -w",
     "dev": "cross-env NODE_ENV=watch webpack-dev-server --hot"
   },
