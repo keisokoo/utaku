@@ -20,9 +20,21 @@ const iconsCss = css`
 `
 const ImageItem = styled.img`
   ${mediaCss}
+  &.medium {
+    height: 160px;
+  }
+  &.large {
+    height: 240px;
+  }
 `
 const VideoItem = styled.video`
   ${mediaCss}
+  &.medium {
+    height: 160px;
+  }
+  &.large {
+    height: 240px;
+  }
 `
 const CheckIcon = styled.i`
   ${iconsCss}

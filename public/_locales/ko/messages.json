@@ -5,6 +5,9 @@
   "set_url_filter": {
     "message": "URL 필터 설정"
   },
+  "url_filter_list": {
+    "message": "URL 필터 목록"
+  },
   "edit_url_filter": {
     "message": "URL 필터 편집"
   },
@@ -14,16 +17,61 @@
   "change_add_text": {
     "message": "텍스트 변경/추가"
   },
+  "edit_filter_name": {
+    "message": "필터 이름"
+  },
+  "already_exists_name": {
+    "message": "이미 등록된 이름입니다."
+  },
+  "input_name": {
+    "message": "이름을 입력하세요."
+  },
   "apply": {
     "message": "적용"
+  },
+  "add_query": {
+    "message": "쿼리 추가"
   },
   "add": {
     "message": "추가"
   },
+  "name": {
+    "message": "이름"
+  },
   "save": {
     "message": "저장"
   },
+  "edit": {
+    "message": "편집"
+  },
+  "prev": {
+    "message": "이전"
+  },
+  "input_content": {
+    "message": "내용을 입력하세요."
+  },
   "delete": {
     "message": "삭제"
+  },
+  "empty_filter": {
+    "message": "필터가 없습니다."
+  },
+  "list": {
+    "message": "목록"
+  },
+  "enter": {
+    "message": "확인"
+  },
+  "refresh": {
+    "message": "새로고침"
+  },
+  "disposed_item": {
+    "message": "확인된 항목"
+  },
+  "queue": {
+    "message": "대기열"
+  },
+  "error": {
+    "message": "오류"
   }
 }

@@ -7,6 +7,16 @@ if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
 
 function onMessage(request: { message: string; data: object }) {
+  if (request?.message === 'utaku-mount') {
+    const container = document.getElementById('root-' + rootId) as HTMLElement
+    if (!root) {
+      root = ReactDOM.createRoot(container)
+      root.render(<App />)
+    } else {
+      container.style.opacity = ''
+      container.style.display = ''
+    }
+  }
   if (request?.message === 'utaku-active') {
     const elementTarget = document.querySelector('.floating-button')
     if (elementTarget) {
@@ -66,6 +76,7 @@ function createFloatingButton() {
   const floatingButton = document.createElement('button')
   getAvailable(floatingButton)
   floatingButton.classList.add('floating-button')
+  floatingButton.classList.add('hide')
   floatingButton.innerText = 'UTAKU'
   return floatingButton
 }
@@ -117,7 +128,7 @@ function main() {
     hideTimeout = setTimeout(() => {
       fadeOutElement(button)
       if (!reactRoot.contains(e.target as Node)) fadeOutElement(reactRoot)
-    }, 3000) // 3초 후에 fadeout 효과를 시작함
+    }, 5000) // 5초 후에 fadeout 효과를 시작함
   })
 }
 main()

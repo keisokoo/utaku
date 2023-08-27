@@ -163,6 +163,7 @@ export const GrayScaleOutline = ({
           disabledType: _icon ? 'icon' : 'fill',
           borderColor: 'Grayscale/Gray Light',
           backgroundColor: 'White/White off',
+          hoverTextColor: 'White/White off',
           hoverBackgroundColor: 'Grayscale/Background Dark',
           textColor: 'Grayscale/Gray Dark',
         })}

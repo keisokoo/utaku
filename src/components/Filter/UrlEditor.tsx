@@ -1,11 +1,15 @@
 import styled from '@emotion/styled'
-import React, { useMemo, useState } from 'react'
-import { colors } from '../../themes'
+import { produce } from 'immer'
+import React, { useEffect, useMemo, useState } from 'react'
+import { useRecoilState } from 'recoil'
+import { settings } from '../../content/atoms/settings'
 import { lang } from '../../utils'
 import highlight from '../../utils/highlight'
 import { PrimaryButton, SecondaryButton } from '../Buttons'
 import Checkbox from '../Checkbox/Checkbox'
 import ModalBody from '../Modal/ModalBody'
+import { PopupInputStyle } from './PopupInput.styled'
+import UrlEditorStyles from './UrlEditor.styled'
 const ButtonWrap = styled.div`
   margin-top: 8px;
   display: flex;
@@ -16,79 +20,7 @@ const ButtonWrap = styled.div`
     flex: 1;
   }
 `
-const EditorWrap = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  color: ${colors['Grayscale/Gray Dark']};
-  & > div {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    &.utaku-left {
-    }
-    &.utaku-right {
-      max-height: 400px;
-      overflow-y: auto;
-      justify-content: space-between;
-      .utaku-params-edit {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-      }
-    }
-  }
-  label {
-    display: block;
-    color: #494949;
-    font-weight: 700;
-    font-size: 14px;
-    text-align: left;
-  }
-  input {
-    width: 100%;
-  }
-  .filtered-url {
-    padding-bottom: 16px;
-    border-bottom: 1px solid #dadada;
-    padding-top: 8px;
-    margin-bottom: 8px;
-  }
-  .current-url,
-  .next-url {
-    color: #464646;
-    background-color: #dcdcdc;
-    padding: 8px 12px;
-    max-width: 400px;
-    word-break: break-all;
-    border-radius: 8px;
-    font-size: 12px;
-    span.highlight {
-      color: ${colors['Secondary/Dark']};
-    }
-  }
-  .next-url {
-    background-color: #d6f7d5;
-    span.highlight {
-      color: ${colors['Secondary/Dark']};
-    }
-  }
-  .utaku-popup-input {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    .utaku-popup-input-edit {
-      flex: 1;
-      input {
-        width: 100%;
-      }
-    }
-  }
-`
-
+const P = PopupInputStyle
 export type UrlFilter = {
   host: string
   selected: string[]
@@ -134,6 +66,7 @@ export const filterList = (
   })
   return results
 }
+const S = UrlEditorStyles
 interface UrlEditorProps
   extends React.DetailedHTMLProps<
     React.HTMLAttributes<HTMLDivElement>,
@@ -148,6 +81,9 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
   emitValue,
   ...props
 }) => {
+  const [settingState, set_settingState] = useRecoilState(settings)
+  const [filter, set_filter] = useState<UrlFilter | null>(null)
+  const [filterName, set_filterName] = useState<string>('')
   const [url, setUrl] = useState(new URL(currentUrl))
   const [filteredUrl, set_filteredUrl] = useState(new URL(currentUrl).host)
   const [searchParams, set_searchParams] = useState(
@@ -199,72 +135,148 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
     )
     setUrl(newUrl)
   }
+  useEffect(() => {
+    console.log('searchParams', searchParams)
+  }, [searchParams])
   return (
-    <ModalBody title={lang('set_url_filter')} {...props}>
-      <EditorWrap>
-        <div className="utaku-left">
-          <div className="current-url">
-            <div>{highlight(currentUrl.toString(), filteredUrl)}</div>
-          </div>
-          {(selected.length > 0 || selectedReplaceUrl) && (
-            <div className="next-url">
-              <div>{highlight(changedUrl.toString(), replaceUrl.to)}</div>
-            </div>
+    <ModalBody
+      title={lang('set_url_filter')}
+      btn={
+        <>
+          {filter && (
+            <SecondaryButton
+              _mini
+              onClick={() => {
+                set_filter(null)
+              }}
+            >
+              {lang('prev')}
+            </SecondaryButton>
           )}
-          <div className="filtered-url">
-            <label>{lang('edit_url_filter')}</label>
-            <input
+          {!filter && (
+            <SecondaryButton
+              _mini
+              _css={'width: 120px;'}
+              disabled={!(selected.length > 0 || selectedReplaceUrl)}
+              onClick={() => {
+                const urlFilter = {
+                  host: changedUrl.host,
+                  selected,
+                  params: searchParams,
+                  from: replaceUrl.from,
+                  to: replaceUrl.to,
+                }
+                set_filter(urlFilter)
+              }}
+            >
+              {lang('add')}
+            </SecondaryButton>
+          )}
+        </>
+      }
+      {...props}
+    >
+      {filter ? (
+        <S.Wrapper>
+          <S.Column>
+            <S.Row>
+              <S.PartLabel>{lang('edit_url_filter')}</S.PartLabel>
+              <div>{filter.host}</div>
+            </S.Row>
+            {selected.map((item) => {
+              return (
+                <S.Row key={item}>
+                  <label>{item}</label>
+                  {filter.params[item] && <div>{filter.params[item]}</div>}
+                </S.Row>
+              )
+            })}
+            {selectedReplaceUrl && (
+              <S.Row>
+                <label>Replace url</label>
+                <div>
+                  {filter.from}
+                  {' -> '}
+                  {filter.to}
+                </div>
+              </S.Row>
+            )}
+          </S.Column>
+          <S.InputWrap className="utaku-flex-center">
+            <S.InputBox>
+              <label>{lang('edit_filter_name')}</label>
+              <P.UnderlineInput
+                type="text"
+                value={filterName}
+                onChange={(e) => set_filterName(e.target.value)}
+              />
+            </S.InputBox>
+          </S.InputWrap>
+        </S.Wrapper>
+      ) : (
+        <S.Wrapper>
+          <S.CurrentUrl>
+            <div>{highlight(currentUrl.toString(), filteredUrl)}</div>
+          </S.CurrentUrl>
+          {(selected.length > 0 || selectedReplaceUrl) && (
+            <S.NextUrl>
+              <div>{highlight(changedUrl.toString(), replaceUrl.to)}</div>
+            </S.NextUrl>
+          )}
+          <S.FilteredUrl>
+            <S.PartLabel>{lang('edit_url_filter')}</S.PartLabel>
+            <P.UnderlineInput
               type="text"
               value={filteredUrl}
               onChange={(e) => {
                 set_filteredUrl(e.target.value)
               }}
             />
-          </div>
-        </div>
-        <div className="utaku-right">
-          <div className="utaku-query-edit">
-            <label>{lang('edit_query')}</label>
-            <div className="utaku-params-edit">
-              {Object.keys(searchParams).map((key) => (
-                <div key={key} className="utaku-popup-input">
-                  <Checkbox
-                    active={selected.includes(key)}
-                    onClick={() => {
-                      if (selected.includes(key)) {
-                        set_selected(selected.filter((item) => item !== key))
-                      } else {
-                        set_selected([...selected, key])
-                      }
-                    }}
-                  />
-                  <div className="utaku-popup-input-edit">
-                    <label>{key}</label>
-                    <input
-                      type="text"
-                      value={searchParams[key]}
-                      onChange={(e) =>
-                        handleSearchParamChange(key, e.target.value)
-                      }
-                      disabled={!selected.includes(key)}
+          </S.FilteredUrl>
+          {Object.keys(searchParams).length > 0 && (
+            <S.QueryBox>
+              <S.PartLabel>{lang('edit_query')}</S.PartLabel>
+              <S.QueryColumn>
+                {Object.keys(searchParams).map((key) => (
+                  <S.InputWrap key={key} className="utaku-flex-center">
+                    <Checkbox
+                      active={selected.includes(key)}
+                      onClick={() => {
+                        if (selected.includes(key)) {
+                          set_selected(selected.filter((item) => item !== key))
+                        } else {
+                          set_selected([...selected, key])
+                        }
+                      }}
                     />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div className="utaku-replace-url">
-            <label>{lang('change_add_text')}</label>
-            <div className="utaku-popup-input">
+                    <S.InputBox className="utaku-flex-center">
+                      <label>{key}</label>
+                      <P.UnderlineInput
+                        type="text"
+                        value={searchParams[key]}
+                        onChange={(e) =>
+                          handleSearchParamChange(key, e.target.value)
+                        }
+                        disabled={!selected.includes(key)}
+                      />
+                    </S.InputBox>
+                  </S.InputWrap>
+                ))}
+              </S.QueryColumn>
+            </S.QueryBox>
+          )}
+          <S.ReplaceBox>
+            <S.PartLabel>{lang('change_add_text')}</S.PartLabel>
+            <S.InputWrap className="utaku-flex-center">
               <Checkbox
                 active={selectedReplaceUrl}
                 onClick={() => {
                   set_selectedReplaceUrl(!selectedReplaceUrl)
                 }}
               />
-              <div className="utaku-popup-input-edit">
+              <S.InputBox>
                 <label>Replace url</label>
-                <input
+                <P.UnderlineInput
                   type="text"
                   value={replaceUrl.from}
                   onChange={(e) =>
@@ -273,7 +285,7 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
                   disabled={!selectedReplaceUrl}
                   placeholder="from"
                 />
-                <input
+                <P.UnderlineInput
                   type="text"
                   value={replaceUrl.to}
                   onChange={(e) =>
@@ -282,36 +294,68 @@ const UrlEditor: React.FC<UrlEditorProps> = ({
                   disabled={!selectedReplaceUrl}
                   placeholder="to"
                 />
-              </div>
-            </div>
-          </div>
-        </div>
-      </EditorWrap>
+              </S.InputBox>
+            </S.InputWrap>
+          </S.ReplaceBox>
+        </S.Wrapper>
+      )}
       <ButtonWrap>
-        <PrimaryButton onClick={EmitUrlFilter}>적용</PrimaryButton>
-        <SecondaryButton
-          onClick={() => {
-            const urlFilter: UrlFilter = {
-              host: changedUrl.host,
-              selected,
-              params: searchParams,
-              from: replaceUrl.from,
-              to: replaceUrl.to,
-            }
-            chrome.storage.sync.get('urlFilter', (result) => {
-              if (result.urlFilter) {
-                const nextUrlFilter = [...result.urlFilter, urlFilter]
-                chrome.storage.sync.set({ urlFilter: nextUrlFilter })
-              } else {
-                chrome.storage.sync.set({ urlFilter: [urlFilter] })
+        {!filter && (
+          <>
+            <PrimaryButton
+              disabled={!(selected.length > 0 || selectedReplaceUrl)}
+              onClick={EmitUrlFilter}
+            >
+              적용
+            </PrimaryButton>
+          </>
+        )}
+        {filter && (
+          <>
+            <PrimaryButton
+              disabled={
+                !filterName ||
+                !!settingState.filterList.find(
+                  (item) => item.name === filterName
+                )
               }
-            })
-            if (props.onClose) props.onClose()
-            return
-          }}
-        >
-          저장
-        </SecondaryButton>
+              onClick={() => {
+                if (!filterName) {
+                  return alert(lang('input_name'))
+                }
+                if (
+                  settingState.filterList.find(
+                    (item) => item.name === filterName
+                  )
+                )
+                  return alert(lang('already_exists_name'))
+                const currentFilter = {
+                  name: filterName,
+                  item: filter,
+                }
+                set_settingState(
+                  produce((draft) => {
+                    draft.filterList = [...draft.filterList, currentFilter]
+                  })
+                )
+                chrome.storage.sync.get('filterList', (result) => {
+                  if (result.filterList) {
+                    const nextUrlFilter = [...result.filterList, currentFilter]
+                    chrome.storage.sync.set({ filterList: nextUrlFilter })
+                  } else {
+                    chrome.storage.sync.set({ filterList: [currentFilter] })
+                  }
+                })
+                if (props.onClose) props.onClose()
+                return
+              }}
+            >
+              {settingState.filterList.find((item) => item.name === filterName)
+                ? lang('already_exists_name')
+                : '저장'}
+            </PrimaryButton>
+          </>
+        )}
       </ButtonWrap>
     </ModalBody>
   )

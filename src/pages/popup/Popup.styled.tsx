@@ -13,27 +13,52 @@ const PopupStyle = {
     flex-direction: column;
     gap: 8px;
   `,
-  Item: styled.div`
-    padding: 8px 16px;
+  ColumnWrap: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
     background-color: rgb(78 78 78 / 30%);
+    &.active {
+      background-color: rgb(78 78 78 / 70%);
+    }
+  `,
+  InfoWrap: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 16px;
+    border-top: 1px solid ${colors['White/White 30%']};
+  `,
+  List: styled.div`
+    padding: 8px 16px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
-    &.active {
-      background-color: rgb(78 78 78 / 70%);
-    }
     button {
       cursor: pointer;
       user-select: none;
     }
   `,
-  Column: styled.div`
+  Item: styled.div`
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    button {
+      cursor: pointer;
+      user-select: none;
+    }
+  `,
+  ColumnList: styled.div`
     width: 100%;
     display: flex;
     flex-direction: column;
     gap: 8px;
     flex-direction: column-reverse;
+    max-height: 500px;
+    overflow-y: auto;
   `,
   Row: styled.div`
     display: flex;

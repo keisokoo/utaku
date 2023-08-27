@@ -59,7 +59,7 @@ const assets = {
     'Grayscale/Gray Light': '#8e9196',
     'Grayscale/Gray Lighter': '#b2b5bb',
     'Grayscale/Background Dark': '#0f0f0f',
-    'Grayscale/Background Light': '#1d1d20',
+    'Grayscale/Background Light': '#f7f1f1',
     'White/White off': '#ffffff',
     'White/White 70%': '#ffffffb2',
     'White/White 50%': '#ffffff7f',

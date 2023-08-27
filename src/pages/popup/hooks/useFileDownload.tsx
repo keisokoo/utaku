@@ -15,9 +15,7 @@ const useFileDownload = () => {
 
   useEffect(() => {
     function handleDownloadChange(delta: chrome.downloads.DownloadDelta) {
-      getProgress(delta.id, (percent) => {
-        console.log('percent', delta, delta.id, percent)
-      })
+      getProgress(delta.id, () => {})
     }
     function getProgress(
       downloadId: number,

@@ -1,4 +1,4 @@
-import { isEqual } from 'lodash-es'
+import { cloneDeep, isEqual } from 'lodash-es'
 import React, {
   MutableRefObject,
   useEffect,
@@ -7,43 +7,72 @@ import React, {
   useState,
 } from 'react'
 
-import UrlEditor, { UrlFilter } from '../components/Filter/UrlEditor'
+import { produce } from 'immer'
+import { RecoilRoot, useRecoilState } from 'recoil'
+import { uniqBy } from 'remeda'
+import UrlEditor from '../components/Filter/UrlEditor'
 import ItemBox from '../components/ItemBox'
 import Modal from '../components/Modal/Modal'
 import ControlComp from './ControlComp'
 import Dispose from './DisposeComp'
 import DownloadComp from './DownloadComp'
 import UtakuStyle from './Utaku.styled'
+import { settings } from './atoms/settings'
 import './index.scss'
-import { itemTypes } from './sources'
-import { DataType, ImageInfo, RequestItem } from './types'
+import { DataType, ImageInfo, ItemType, RequestItem } from './types'
 
 const objectEntries = <T extends object>(item: T) => {
   return Object.entries(item) as Array<[keyof T, T[keyof T]]>
 }
-const App = (): JSX.Element => {
-  const [itemType, set_itemType] = useState<(typeof itemTypes)[number]>('all')
+const App = () => {
+  return (
+    <RecoilRoot>
+      <Main />
+    </RecoilRoot>
+  )
+}
+const Main = (): JSX.Element => {
   const [tooltip, set_tooltip] = useState<string>('')
   const [currentUrl, setCurrentUrl] = useState('')
-  const [urlFilter, set_urlFilter] = useState<UrlFilter | null>()
-  const [itemList, set_itemList] = useState<
-    (RequestItem & {
-      imageInfo: ImageInfo
-    })[]
-  >([])
+  const [itemList, set_itemList] = useState<ItemType[]>([])
   const [sources, set_sources] = useState<DataType | null>(null)
-  const [sizeLimit, set_sizeLimit] = useState<{
-    width: number
-    height: number
-  }>({
-    width: 600,
-    height: 600,
-  })
+  const [changedUrl, set_changedUrl] = useState<
+    chrome.webRequest.WebResponseHeadersDetails[]
+  >([])
   const [downloadedItem, set_downloadedItem] = useState<string[]>([])
+  const [settingState, set_settingState] = useRecoilState(settings)
+  useEffect(() => {
+    chrome.storage.sync.get(
+      [
+        'folderName',
+        'folderNameList',
+        'sizeLimit',
+        'sizeType',
+        'itemType',
+        'filterList',
+      ],
+      (items) => {
+        set_settingState(
+          produce((draft) => {
+            if (items.folderName) draft.folderName = items.folderName
+            if (items.folderNameList)
+              draft.folderNameList = items.folderNameList
+            if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
+            if (items.sizeType) draft.sizeType = items.sizeType
+            if (items.itemType) draft.itemType = items.itemType
+            if (items.filterList) draft.filterList = items.filterList
+          })
+        )
+      }
+    )
+  }, [])
   const filteredImages = useMemo(() => {
-    return itemList.filter((item) => {
+    if (!itemList.length) return []
+    const filtered = itemList.filter((item) => {
       if (!item.imageInfo) return false
       const { width, height } = item.imageInfo
+      const sizeLimit = settingState.sizeLimit
+      const itemType = settingState.itemType
       // let searchResult = true
       // if (searchTextOnUrl) searchResult = item.url.includes(searchTextOnUrl)
       let checkItemType = true
@@ -56,7 +85,8 @@ const App = (): JSX.Element => {
       if (sizeLimit.height) heightResult = height > sizeLimit.height
       return widthResult && heightResult && notDownloaded && checkItemType
     })
-  }, [itemList, sizeLimit, downloadedItem, itemType])
+    return uniqBy(filtered, (item) => item.url)
+  }, [itemList, settingState.sizeLimit, downloadedItem, settingState.itemType])
 
   const timeoutRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
   const selectedDownload = (all?: boolean) => {
@@ -71,9 +101,6 @@ const App = (): JSX.Element => {
       data: downloadList,
     })
   }
-  useEffect(() => {
-    console.log('urlFilter', urlFilter)
-  }, [urlFilter])
   useEffect(() => {
     function getData(): Promise<{
       data: DataType
@@ -102,17 +129,18 @@ const App = (): JSX.Element => {
         try {
           const { data, downloaded } = await getData()
           set_sources((prev) => {
+            if (!data) return null
             if (isEqual(prev, data)) return prev
-            return data
+            return data ?? null
           })
           set_downloadedItem((prev) => {
+            if (!downloaded.length) return prev
             if (isEqual(prev, downloaded)) return prev
             return downloaded
           })
           runDataPool()
         } catch (error) {
           if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
-          console.log('error', error)
         }
       }, 1000)
     }
@@ -122,69 +150,108 @@ const App = (): JSX.Element => {
       timeoutRef.current = null
     }
   }, [])
+  const handleRemove = (
+    item: chrome.webRequest.WebResponseHeadersDetails & {
+      imageInfo?: ImageInfo
+    },
+    error?: boolean
+  ) => {
+    set_sources(
+      produce((draft) => {
+        if (draft) delete draft[item.requestId]
+      })
+    )
+    chrome.runtime.sendMessage({
+      message: 'delete-image',
+      data: { ...item, error: error ?? false },
+    })
+  }
   const disposeVideo = (
     e: React.SyntheticEvent<HTMLVideoElement, Event>,
     value: chrome.webRequest.WebResponseHeadersDetails
   ) => {
-    const video = e.currentTarget
-    const canvas = document.createElement('canvas')
-    canvas.width = video.videoWidth
-    canvas.height = video.videoHeight
-    const context = canvas.getContext('2d')
-    if (context) context.drawImage(video, 0, 0, canvas.width, canvas.height)
-    const thumbnail = canvas.toDataURL('image/png')
-    const videoTarget = e.currentTarget
-    const { videoWidth, videoHeight } = videoTarget
-    chrome.runtime.sendMessage({
-      message: 'update-image-size',
-      data: {
-        requestId: value.requestId,
-        url: value.url,
-        width: videoWidth,
-        height: videoHeight,
-      },
-    })
-    set_itemList((prev) => {
-      const clone: RequestItem & {
-        imageInfo: ImageInfo
-      } = {
+    try {
+      const video = e.currentTarget
+      const canvas = document.createElement('canvas')
+      canvas.width = video.videoWidth
+      canvas.height = video.videoHeight
+      const context = canvas.getContext('2d')
+      if (context) context.drawImage(video, 0, 0, canvas.width, canvas.height)
+      const thumbnail = canvas.toDataURL('image/png')
+      const videoTarget = e.currentTarget
+      const { videoWidth, videoHeight } = videoTarget
+      chrome.runtime.sendMessage({
+        message: 'update-image-size',
+        data: {
+          requestId: value.requestId,
+          url: value.url,
+          width: videoWidth,
+          height: videoHeight,
+        },
+      })
+      set_itemList((prev) => {
+        const clone: RequestItem & {
+          imageInfo: ImageInfo
+        } = {
+          ...value,
+          imageInfo: {
+            thumbnail,
+            width: videoWidth,
+            height: videoHeight,
+          },
+        }
+        return uniqBy([...prev, clone], (item) => item.url)
+      })
+      handleRemove({
         ...value,
         imageInfo: {
           thumbnail,
           width: videoWidth,
           height: videoHeight,
         },
-      }
-      return [...prev, clone]
-    })
+      })
+    } catch (error) {
+      handleRemove(value, true)
+    }
   }
   const disposeImage = (
     e: React.SyntheticEvent<HTMLImageElement, Event>,
     value: chrome.webRequest.WebResponseHeadersDetails
   ) => {
-    const imageTarget = e.currentTarget
-    const { naturalWidth, naturalHeight } = imageTarget
-    chrome.runtime.sendMessage({
-      message: 'update-image-size',
-      data: {
-        requestId: value.requestId,
-        url: value.url,
-        width: naturalWidth,
-        height: naturalHeight,
-      },
-    })
-    set_itemList((prev) => {
-      const clone: RequestItem & {
-        imageInfo: ImageInfo
-      } = {
+    try {
+      const imageTarget = e.currentTarget
+      const { naturalWidth, naturalHeight } = imageTarget
+      chrome.runtime.sendMessage({
+        message: 'update-image-size',
+        data: {
+          requestId: value.requestId,
+          url: value.url,
+          width: naturalWidth,
+          height: naturalHeight,
+        },
+      })
+      set_itemList((prev) => {
+        const clone: RequestItem & {
+          imageInfo: ImageInfo
+        } = {
+          ...value,
+          imageInfo: {
+            width: naturalWidth,
+            height: naturalHeight,
+          },
+        }
+        return uniqBy([...prev, clone], (item) => item.url)
+      })
+      handleRemove({
         ...value,
         imageInfo: {
           width: naturalWidth,
           height: naturalHeight,
         },
-      }
-      return [...prev, clone]
-    })
+      })
+    } catch (error) {
+      handleRemove(value, true)
+    }
   }
   return (
     <>
@@ -197,7 +264,28 @@ const App = (): JSX.Element => {
         <UrlEditor
           currentUrl={currentUrl}
           emitValue={(value) => {
-            set_urlFilter(value)
+            const { from, to, params, host } = value
+            const replacedItemList = cloneDeep(itemList).filter((item) => {
+              if (host && !item.url.includes(host)) return false
+              return true
+            })
+            const nextImagePromises = replacedItemList.map((item) => {
+              if (host && !item.url.includes(host)) return item
+              if (Object.keys(params).length) {
+                const url = new URL(item.url)
+                Object.keys(params).forEach((key) => {
+                  url.searchParams.set(key, params[key])
+                })
+                item.url = url.toString()
+              }
+              if (from && item.url.includes(from)) {
+                item.url = item.url.replace(from, to)
+              } else if (!from && to) {
+                item.url = item.url + to
+              }
+              return item
+            })
+            set_changedUrl(nextImagePromises)
             setCurrentUrl('')
           }}
         />
@@ -225,22 +313,14 @@ const App = (): JSX.Element => {
           )}
         />
         <ControlComp
-          itemType={itemType}
           tooltip={tooltip}
           itemList={itemList}
-          sizeLimit={sizeLimit}
           current={
             filteredImages.filter((item) => item.imageInfo.active).length
           }
           total={filteredImages.length}
-          handleItemList={(arr) => {
-            set_itemList(arr)
-          }}
-          handleSizeLimit={(size) => {
-            set_sizeLimit(size)
-          }}
-          handleItemType={(type) => {
-            set_itemType(type)
+          handleReplace={(arr) => {
+            set_changedUrl(arr.map((item) => item))
           }}
         />
         <UtakuStyle.ItemContainer
@@ -257,6 +337,9 @@ const App = (): JSX.Element => {
                       key={key}
                       value={value}
                       disposeVideo={disposeVideo}
+                      onError={() => {
+                        handleRemove(value, true)
+                      }}
                     />
                   )
                 }
@@ -265,6 +348,48 @@ const App = (): JSX.Element => {
                     key={key}
                     value={value}
                     disposeImage={disposeImage}
+                    onError={() => {
+                      handleRemove(value, true)
+                    }}
+                  />
+                )
+              })}
+          </UtakuStyle.DisposeContainer>
+          <UtakuStyle.DisposeContainer>
+            {changedUrl.length > 0 &&
+              changedUrl.map((value, index) => {
+                if (value.type === 'media') {
+                  return (
+                    <Dispose.Video
+                      key={'changedUrl' + value.url + index}
+                      value={value}
+                      disposeVideo={(e, value) => {
+                        set_changedUrl((prev) => {
+                          return prev.filter((item) => item.url !== value.url)
+                        })
+                      }}
+                      onError={() => {
+                        set_changedUrl((prev) => {
+                          return prev.filter((item) => item.url !== value.url)
+                        })
+                      }}
+                    />
+                  )
+                }
+                return (
+                  <Dispose.Image
+                    key={'changedUrl' + value.url + index}
+                    value={value}
+                    disposeImage={(e, value) => {
+                      set_changedUrl((prev) => {
+                        return prev.filter((item) => item.url !== value.url)
+                      })
+                    }}
+                    onError={() => {
+                      set_changedUrl((prev) => {
+                        return prev.filter((item) => item.url !== value.url)
+                      })
+                    }}
                   />
                 )
               })}

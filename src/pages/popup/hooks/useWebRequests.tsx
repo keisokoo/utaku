@@ -13,6 +13,10 @@ export interface ImageResponseDetails
 }
 const useWebRequests = (active = true) => {
   const [sourceList, set_sourceList] = useState<ImageResponseDetails[]>([])
+  const [disposedList, set_disposedList] = useState<ImageResponseDetails[]>([])
+  const [errorList, set_errorList] = useState<
+    chrome.webRequest.WebResponseHeadersDetails[]
+  >([])
   const [videoList, set_videoList] = useState<
     chrome.webRequest.WebResponseHeadersDetails[]
   >([])
@@ -30,7 +34,6 @@ const useWebRequests = (active = true) => {
       changeInfo: chrome.tabs.TabChangeInfo,
       tab: TAB_LIST_TYPE
     ) => {
-      console.log('tab', tab)
       if (!tabId) return
       if (!tab) return
       set_tabList((prev) =>
@@ -78,6 +81,12 @@ const useWebRequests = (active = true) => {
       chrome.windows.onFocusChanged.removeListener(focusWindow)
     }
   }, [])
+  const disposedGroup = useMemo(() => {
+    return groupBy(disposedList, (curr) => curr.tabId)
+  }, [disposedList])
+  const errorGroup = useMemo(() => {
+    return groupBy(errorList, (curr) => curr.tabId)
+  }, [errorList])
   const sourceGroup = useMemo(() => {
     const groupByTabId = groupBy(sourceList, (curr) => curr.tabId)
     return Object.keys(groupByTabId).reduce(
@@ -114,9 +123,21 @@ const useWebRequests = (active = true) => {
   const handleSourceList = useCallback((item: ImageResponseDetails[]) => {
     set_sourceList(item)
   }, [])
-  const handleRemove = useCallback((url: string) => {
-    set_sourceList((prev) => prev.filter((curr) => curr.url !== url))
-  }, [])
+  const handleRemove = useCallback(
+    (
+      item: chrome.webRequest.WebResponseHeadersDetails & {
+        error: boolean
+      }
+    ) => {
+      set_sourceList((prev) => prev.filter((curr) => curr.url !== item.url))
+      if (item.error) {
+        set_errorList((prev) => [...prev, item])
+      } else {
+        set_disposedList((prev) => [...prev, item])
+      }
+    },
+    []
+  )
 
   useEffect(() => {
     function getCurrentResponse(req: ImageResponseDetails) {
@@ -146,6 +167,10 @@ const useWebRequests = (active = true) => {
   }, [active])
 
   return {
+    errorGroup,
+    disposedGroup,
+    disposedList,
+    errorList,
     videoList,
     sourceList,
     set_sourceList,

@@ -9,6 +9,8 @@ import {
   FaShare,
   FaVideo,
 } from 'react-icons/fa'
+import { useRecoilState } from 'recoil'
+import { settings } from '../../content/atoms/settings'
 import { ItemType } from '../../content/types'
 import S from './ItemBox.styles'
 
@@ -22,6 +24,7 @@ interface ItemBoxProps
   setTooltip?: (tooltip: string) => void
 }
 const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
+  const [settingState] = useRecoilState(settings)
   const { ImageItem, VideoItem } = S
   const copyToClipboard = (text: string) => {
     if (navigator.clipboard) {
@@ -65,7 +68,11 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
               <S.MediaIcon>
                 <FaVideo />
               </S.MediaIcon>
-              <VideoItem key={item.requestId} src={item.url} />
+              <VideoItem
+                className={settingState.sizeType}
+                key={item.requestId}
+                src={item.url}
+              />
             </>
           )}
           {item.type === 'image' && (
@@ -74,6 +81,7 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
                 <FaImage />
               </S.MediaIcon>
               <ImageItem
+                className={settingState.sizeType}
                 key={item.requestId}
                 src={item.url}
                 alt={item.requestId}

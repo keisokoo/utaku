@@ -5,6 +5,7 @@ interface DisposeVideoProps {
     e: React.SyntheticEvent<HTMLVideoElement, Event>,
     value: chrome.webRequest.WebResponseHeadersDetails
   ) => void
+  onError?: (e: React.SyntheticEvent<HTMLVideoElement, Event>) => void
 }
 interface DisposeImageProps {
   value: chrome.webRequest.WebResponseHeadersDetails
@@ -12,8 +13,9 @@ interface DisposeImageProps {
     e: React.SyntheticEvent<HTMLImageElement, Event>,
     value: chrome.webRequest.WebResponseHeadersDetails
   ) => void
+  onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void
 }
-const DisposeVideo = ({ value, disposeVideo }: DisposeVideoProps) => {
+const DisposeVideo = ({ value, onError, disposeVideo }: DisposeVideoProps) => {
   return (
     <video
       src={value.url}
@@ -24,16 +26,22 @@ const DisposeVideo = ({ value, disposeVideo }: DisposeVideoProps) => {
       onLoadedMetadata={(e) => {
         disposeVideo(e, value)
       }}
+      onError={(e) => {
+        onError && onError(e)
+      }}
     />
   )
 }
-const DisposeImage = ({ value, disposeImage }: DisposeImageProps) => {
+const DisposeImage = ({ value, onError, disposeImage }: DisposeImageProps) => {
   return (
     <img
       src={value.url}
       alt={value.requestId}
       onLoad={(e) => {
         disposeImage(e, value)
+      }}
+      onError={(e) => {
+        onError && onError(e)
       }}
     />
   )

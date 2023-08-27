@@ -1,3 +1,4 @@
+import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import { colors, typography } from '../themes'
 
@@ -14,7 +15,6 @@ const Controller = styled.div`
   & > div {
     display: flex;
     align-items: center;
-    gap: 4px;
   }
   button:disabled {
     background-color: ${colors['White/White 10%']};
@@ -70,7 +70,9 @@ const DisposeContainer = styled.div`
     height: 1px;
   }
 `
-const Left = styled.div``
+const Left = styled.div`
+  gap: 4px;
+`
 const Right = styled.div`
   display: flex;
   align-items: center;
@@ -93,25 +95,92 @@ const Grid = styled.div`
   gap: 8px;
 `
 const Center = styled.div``
-
-const UtakuStyle = {
-  SizeController: styled.div`
+const switchCss = css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 24px;
+  background-color: ${colors['White/White 10%']};
+  & > div {
+    color: ${colors['White/White off']};
+    ${typography['Body/Small/Bold']}
+    border-radius: 24px;
+    padding: 4px 12px;
+    text-transform: capitalize;
+    cursor: pointer;
+    &.active {
+      color: ${colors['Primary/Default']};
+      background-color: ${colors['White/White 70%']};
+    }
+  }
+`
+export const ModalList = {
+  NameList: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 400px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  `,
+  BottomList: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 16px;
+  `,
+  List: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+  Row: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+  `,
+  Name: styled.div`
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `,
+  Buttons: styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
-    padding: 8px;
-    & > div {
-      color: ${colors['White/White off']};
-      ${typography['Body/Small/Bold']}
-      border-radius: 24px;
-      padding: 4px 12px;
-      text-transform: capitalize;
-      cursor: pointer;
-      &.active {
-        color: ${colors['Primary/Default']};
-        background-color: ${colors['White/White 70%']};
-      }
-    }
+    justify-content: flex-end;
+  `,
+}
+const IconButton = styled.button`
+  appearance: none;
+  display: flex;
+  outline: none;
+  align-items: center;
+  border-radius: 8px;
+  background: #ffffff26;
+  color: #fff;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 12px;
+  margin-left: 4px;
+  border: none;
+  &:hover {
+    background: #ffffff70;
+  }
+`
+const UtakuStyle = {
+  IconButton,
+  SizeController: styled.div`
+    ${switchCss}
+  `,
+  QualityController: styled.div`
+    ${switchCss}
   `,
   Center,
   Input,

@@ -1,4 +1,4 @@
-import styled from '@emotion/styled/macro'
+import styled from '@emotion/styled'
 import classNames from 'classnames'
 import React from 'react'
 import { BsFillCheckCircleFill, BsFillCircleFill } from 'react-icons/bs'

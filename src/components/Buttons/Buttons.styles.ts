@@ -38,7 +38,7 @@ ${color.hoverBorderColor
   }
   &:disabled {
     background-color: ${colors['White/White 10%']};
-    color: ${colors['Grayscale/Gray Default']};
+    color: ${colors['Grayscale/Gray Light']};
     box-shadow: none;
     cursor: default;
   }

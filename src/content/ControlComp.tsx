@@ -1,70 +1,40 @@
-import React, { useEffect, useMemo, useState } from 'react'
-import { PrimaryButton } from '../components/Buttons'
+import classNames from 'classnames'
+import { produce } from 'immer'
+import { cloneDeep } from 'lodash-es'
+import React, { useState } from 'react'
+import { FaFilter, FaList } from 'react-icons/fa'
+import { useRecoilState } from 'recoil'
+import { PrimaryButton, WhiteFill } from '../components/Buttons'
+import FilterEditor from '../components/Filter/FilterEditor'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
 import Tooltip from '../components/Tooltip'
-import UtakuStyle from './Utaku.styled'
+import { lang } from '../utils'
+import UtakuStyle, { ModalList } from './Utaku.styled'
+import { settings, sizeTypes } from './atoms/settings'
 import { itemTypes } from './sources'
-import { ImageInfo, ItemType } from './types'
+import { ItemType } from './types'
 
-// 이미지 url을 받아서 ImageInfo 리턴하는 함수
-const getImageInfo = (url: string) => {
-  return new Promise<ImageInfo>((res, rej) => {
-    const image = new Image()
-    image.src = url
-    image.onload = () => {
-      res({
-        width: image.naturalWidth,
-        height: image.naturalHeight,
-      })
-    }
-    image.onerror = () => {
-      rej(new Error(`Failed to load image from URL: ${url}`))
-    }
-  })
-}
 interface ControlCompProps {
-  itemType: (typeof itemTypes)[number]
   tooltip: string
-  itemList: ItemType[]
-  sizeLimit: {
-    width: number
-    height: number
-  }
   current: number
   total: number
-  handleItemList: (itemList: ItemType[]) => void
-  handleSizeLimit: (size: { width: number; height: number }) => void
-  handleItemType: (type: (typeof itemTypes)[number]) => void
+  itemList: ItemType[]
+  handleReplace: (itemList: ItemType[]) => void
 }
 const ControlComp = ({
-  itemType,
   current,
   total,
   tooltip,
   itemList,
-  sizeLimit,
-  handleItemList,
-  handleSizeLimit,
-  handleItemType,
+  handleReplace,
 }: ControlCompProps) => {
-  const [folderName, set_folderName] = useState<string>('')
-  const [replaceUrl, set_replaceUrl] = useState<{ from: string; to: string }>({
-    from: '',
-    to: '',
-  })
-  const [searchTextOnUrl, set_searchTextOnUrl] = useState<string>('')
-  const [modalOpen, set_modalOpen] = useState<'folder' | 'more' | null>(null)
+  const [settingState, set_settingState] = useRecoilState(settings)
+  const { folderName, folderNameList, sizeType, sizeLimit, itemType } =
+    settingState
 
-  const hasReplaced = useMemo(() => {
-    return itemList.some((item) => item.imageInfo?.replaced)
-  }, [itemList])
-  useEffect(() => {
-    chrome.storage.sync.get(['folderName', 'folderNameList'], (items) => {
-      if (items.folderName) set_folderName(items.folderName)
-      // if (items.folderNameList) set_folderNameList(items.folderNameList)
-    })
-  }, [])
+  const [folderNameInput, set_folderNameInput] = useState<string>('')
+  const [modalOpen, set_modalOpen] = useState<'folder' | 'more' | null>(null)
   return (
     <>
       <Modal
@@ -73,113 +43,133 @@ const ControlComp = ({
           set_modalOpen(null)
         }}
       >
-        {modalOpen === 'folder' && <ModalBody title="folder">folder</ModalBody>}
-        {modalOpen === 'more' && (
-          <ModalBody title="more">
-            <div className="utaku-filter">
-              <div className="utaku-filter-title">
-                <span>URL Filter</span>
-              </div>
-              <div className="utaku-filter-search">
-                <div className="utaku-filter-item">
-                  <UtakuStyle.Input
-                    placeholder="URL Filter"
-                    type="text"
-                    value={searchTextOnUrl}
-                    onChange={(e) => {
-                      set_searchTextOnUrl(e.target.value)
-                    }}
-                  />
-                </div>
-              </div>
-              <div className="utaku-filter-title">
-                <span>Replace</span>
-              </div>
-              <div className="utaku-filter-replace">
-                <div className="utaku-filter-item">
-                  <UtakuStyle.Input
-                    placeholder="From"
-                    type="text"
-                    value={replaceUrl.from}
-                    onChange={(e) => {
-                      set_replaceUrl((prev) => ({
-                        ...prev,
-                        from: e.target.value,
-                      }))
-                    }}
-                    disabled={hasReplaced}
-                  />
-                </div>
-                <div className="utaku-filter-item">
-                  <UtakuStyle.Input
-                    placeholder="To"
-                    type="text"
-                    value={replaceUrl.to}
-                    onChange={(e) => {
-                      set_replaceUrl((prev) => ({
-                        ...prev,
-                        to: e.target.value,
-                      }))
-                    }}
-                    disabled={hasReplaced}
-                  />
-                </div>
-                <div className="replace-submit">
-                  {!hasReplaced && (
-                    <PrimaryButton
-                      onClick={async () => {
-                        const { from, to } = replaceUrl
-                        const nextImagePromises = itemList.map(async (item) => {
-                          const beforeUrl = item.url
-                          if (from && item.url.includes(from)) {
-                            item.url = item.url.replace(from, to)
-                          } else if (!from && to) {
-                            item.url = item.url + to
+        {modalOpen === 'folder' && (
+          <ModalBody title="folder">
+            <ModalList.NameList>
+              {folderNameList.map((name) => (
+                <ModalList.Row
+                  key={name}
+                  className={classNames({ active: name === folderName })}
+                >
+                  <ModalList.Name>{name}</ModalList.Name>
+                  <ModalList.Buttons>
+                    {name !== folderName && (
+                      <PrimaryButton
+                        _mini={true}
+                        onClick={() => {
+                          set_settingState(
+                            produce((draft) => {
+                              draft.folderName = name
+                            })
+                          )
+                          chrome.runtime.sendMessage(
+                            { message: 'setFolderName', data: name },
+                            () => {
+                              if (chrome.runtime.lastError)
+                                console.log(chrome.runtime.lastError)
+                            }
+                          )
+                          set_modalOpen(null)
+                        }}
+                      >
+                        {lang('apply')}
+                      </PrimaryButton>
+                    )}
+                    <WhiteFill
+                      _mini={true}
+                      onClick={() => {
+                        const nextFolderNameList = folderNameList.filter(
+                          (item) => {
+                            return item !== name
                           }
-                          item.imageInfo = {
-                            ...item.imageInfo,
-                            ...((await getImageInfo(item.url)) ?? {}),
-                            replaced: beforeUrl,
-                          }
-                          return item
+                        )
+                        set_settingState(
+                          produce((draft) => {
+                            draft.folderNameList = nextFolderNameList
+                          })
+                        )
+                        chrome.storage.sync.set({
+                          folderNameList: nextFolderNameList,
                         })
-                        const nextImage = (
-                          await Promise.all(nextImagePromises)
-                        ).filter(Boolean)
-                        handleItemList(nextImage)
                       }}
                     >
-                      Replace
-                    </PrimaryButton>
-                  )}
-                  {hasReplaced && (
-                    <button
-                      onClick={async () => {
-                        const nextImagePromises = itemList.map(async (item) => {
-                          const beforeUrl = item.imageInfo.replaced
-                          if (!beforeUrl) return item
-                          item.url = beforeUrl
-                          item.imageInfo = {
-                            ...item.imageInfo,
-                            ...((await getImageInfo(item.url)) ?? {}),
-                            replaced: '',
-                          }
-                          return item
+                      {lang('delete')}
+                    </WhiteFill>
+                  </ModalList.Buttons>
+                </ModalList.Row>
+              ))}
+            </ModalList.NameList>
+            <ModalList.BottomList>
+              <ModalList.Row>
+                <ModalList.Name>
+                  <input
+                    placeholder="Folder Name"
+                    type="text"
+                    value={folderNameInput}
+                    onChange={(e) => {
+                      set_folderNameInput(e.target.value)
+                    }}
+                  />
+                </ModalList.Name>
+                <ModalList.Buttons>
+                  <PrimaryButton
+                    _mini={true}
+                    onClick={() => {
+                      if (settingState.folderNameList.includes(folderNameInput))
+                        return alert(lang('already_exists_name'))
+                      const nextFolderNameList = [
+                        ...folderNameList,
+                        folderNameInput,
+                      ]
+                      set_settingState(
+                        produce((draft) => {
+                          draft.folderNameList = nextFolderNameList
                         })
-
-                        const nextImage = (
-                          await Promise.all(nextImagePromises)
-                        ).filter(Boolean)
-                        handleItemList(nextImage)
-                      }}
-                    >
-                      Reset
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
+                      )
+                      chrome.storage.sync.set({
+                        folderNameList: nextFolderNameList,
+                      })
+                      set_folderNameInput('')
+                    }}
+                  >
+                    {lang('add')}
+                  </PrimaryButton>
+                </ModalList.Buttons>
+              </ModalList.Row>
+            </ModalList.BottomList>
           </ModalBody>
+        )}
+        {modalOpen === 'more' && (
+          <FilterEditor
+            emitFilter={(value) => {
+              try {
+                const { from, to, params, host } = value
+                const replacedItemList = cloneDeep(itemList).filter((item) => {
+                  if (host && !item.url.includes(host)) return false
+                  return true
+                })
+                const nextImagePromises = replacedItemList.map((item) => {
+                  if (host && !item.url.includes(host)) return item
+                  if (Object.keys(params).length) {
+                    const url = new URL(item.url)
+                    Object.keys(params).forEach((key) => {
+                      url.searchParams.set(key, params[key])
+                    })
+                    item.url = url.toString()
+                  }
+                  if (from && item.url.includes(from)) {
+                    item.url = item.url.replace(from, to)
+                  } else if (!from && to) {
+                    item.url = item.url + to
+                  }
+                  return item
+                })
+                handleReplace(nextImagePromises)
+              } catch (error) {
+                console.log('error', error)
+              }
+            }}
+          />
         )}
       </Modal>
       <UtakuStyle.Editor>
@@ -189,7 +179,11 @@ const ControlComp = ({
             <UtakuStyle.Input
               value={folderName}
               onChange={(e) => {
-                set_folderName(e.target.value)
+                set_settingState(
+                  produce((draft) => {
+                    draft.folderName = e.target.value
+                  })
+                )
                 chrome.runtime.sendMessage(
                   { message: 'setFolderName', data: e.target.value },
                   () => {
@@ -199,13 +193,13 @@ const ControlComp = ({
                 )
               }}
             />
-            <div
+            <UtakuStyle.IconButton
               onClick={() => {
                 set_modalOpen('folder')
               }}
             >
-              More
-            </div>
+              <FaList />
+            </UtakuStyle.IconButton>
           </UtakuStyle.InputWrap>
           <UtakuStyle.InputWrap>
             <span>Size:</span>
@@ -214,10 +208,16 @@ const ControlComp = ({
               min={1}
               value={sizeLimit.width}
               onChange={(e) => {
-                handleSizeLimit({
+                const nextSizeLimit = {
                   ...sizeLimit,
                   width: Number(e.target.value),
-                })
+                }
+                set_settingState(
+                  produce((draft) => {
+                    draft.sizeLimit = nextSizeLimit
+                  })
+                )
+                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
               }}
             />
             <span>×</span>
@@ -226,35 +226,64 @@ const ControlComp = ({
               min={1}
               value={sizeLimit.height}
               onChange={(e) => {
-                handleSizeLimit({
+                const nextSizeLimit = {
                   ...sizeLimit,
                   height: Number(e.target.value),
-                })
+                }
+                set_settingState(
+                  produce((draft) => {
+                    draft.sizeLimit = nextSizeLimit
+                  })
+                )
+                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
               }}
             />
+            <UtakuStyle.IconButton
+              onClick={() => {
+                set_modalOpen('more')
+              }}
+            >
+              <FaFilter />
+            </UtakuStyle.IconButton>
           </UtakuStyle.InputWrap>
-          <div
-            onClick={() => {
-              set_modalOpen('more')
-            }}
-          >
-            More
-          </div>
         </UtakuStyle.Left>
         <UtakuStyle.Right>
           <UtakuStyle.SizeController>
-            {itemTypes.map((type) => (
+            {sizeTypes.map((type) => (
               <div
                 key={type}
-                className={type === itemType ? 'active' : ''}
+                className={type === sizeType ? 'active' : ''}
                 onClick={() => {
-                  handleItemType(type)
+                  set_settingState(
+                    produce((draft) => {
+                      draft.sizeType = type
+                    })
+                  )
+                  chrome.storage.sync.set({ sizeType: type })
                 }}
               >
                 {type}
               </div>
             ))}
           </UtakuStyle.SizeController>
+          <UtakuStyle.QualityController>
+            {itemTypes.map((type) => (
+              <div
+                key={type}
+                className={type === itemType ? 'active' : ''}
+                onClick={() => {
+                  set_settingState(
+                    produce((draft) => {
+                      draft.itemType = type
+                    })
+                  )
+                  chrome.storage.sync.set({ itemType: type })
+                }}
+              >
+                {type}
+              </div>
+            ))}
+          </UtakuStyle.QualityController>
           <div>
             {'( '}
             <span>

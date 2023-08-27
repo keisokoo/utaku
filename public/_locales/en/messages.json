@@ -8,22 +8,74 @@
   "edit_url_filter": {
     "message": "URL Filter Settings"
   },
+  "url_filter_list": {
+    "message": "URL Filter List"
+  },
   "edit_query": {
     "message": "Edit Query"
   },
   "change_add_text": {
     "message": "Change/Add Text"
   },
+  "edit_filter_name": {
+    "message": "Filter Name"
+  },
+  "already_exists_name": {
+    "message": "already exists name."
+  },
+  "input_name": {
+    "message": "Please input name."
+  },
+  "input_query": {
+    "message": "Please input name."
+  },
   "apply": {
     "message": "Apply"
   },
+  "add_query": {
+    "message": "Add Query"
+  },
   "add": {
-    "message": "add"
+    "message": "Add"
+  },
+  "name": {
+    "message": "Name"
   },
   "save": {
-    "message": "save"
+    "message": "Save"
+  },
+  "edit": {
+    "message": "Edit"
+  },
+  "prev": {
+    "message": "Prev"
+  },
+  "input_content": {
+    "message": "Please input content."
   },
   "delete": {
     "message": "delete"
+  },
+  "empty_filter": {
+    "message": "Empty Filter"
+  },
+  "list": {
+    "message": "List"
+  },
+  "enter": {
+    "message": "Enter"
+  },
+  "refresh": {
+    "message": "Refresh"
+  },
+
+  "disposed_item": {
+    "message": "Disposed Item"
+  },
+  "queue": {
+    "message": "Queue"
+  },
+  "error": {
+    "message": "Error"
   }
 }

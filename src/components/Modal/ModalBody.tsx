@@ -1,4 +1,4 @@
-import styled from '@emotion/styled/macro'
+import styled from '@emotion/styled'
 import React from 'react'
 import { lang } from '../../utils'
 import { GrayScaleOutline } from '../Buttons'
@@ -9,6 +9,12 @@ const ModalBodyWrap = styled.div`
     align-items: center;
     justify-content: space-between;
     padding: 16px 16px 8px;
+    .modal-btn {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+    }
   }
   .modal-title {
     font-size: 16px;
@@ -33,17 +39,27 @@ interface ModalBodyProps
     HTMLDivElement
   > {
   title?: string
+  btn?: React.ReactNode
   onClose?: () => void
 }
-const ModalBody = ({ onClose, children, title, ...props }: ModalBodyProps) => {
+const ModalBody = ({
+  btn,
+  onClose,
+  children,
+  title,
+  ...props
+}: ModalBodyProps) => {
   return (
     <>
       <ModalBodyWrap>
         <div className="modal-header" {...props}>
           <div className="modal-title">{title}</div>
-          <GrayScaleOutline className="close" onClick={onClose}>
-            {lang('close')}
-          </GrayScaleOutline>
+          <div className="modal-btn">
+            {btn}
+            <GrayScaleOutline _mini className="close" onClick={onClose}>
+              {lang('close')}
+            </GrayScaleOutline>
+          </div>
         </div>
         <div className="modal-body">{children}</div>
       </ModalBodyWrap>
