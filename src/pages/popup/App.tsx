@@ -204,6 +204,7 @@ const App = (): JSX.Element => {
                   </PopupStyle.Row>
                   <PopupStyle.Row>
                     <GrayScaleFill
+                      disabled={disposedList.length < 1}
                       onClick={(e) => {
                         e.stopPropagation()
                         if (!tabItem?.id) return
