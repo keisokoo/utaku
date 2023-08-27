@@ -23,11 +23,22 @@ const PopupStyle = {
     }
   `,
   InfoWrap: styled.div`
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    border-top: 1px solid ${colors['White/White 30%']};
+    button {
+      cursor: pointer;
+      user-select: none;
+    }
+  `,
+  Info: styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 4px 16px;
-    border-top: 1px solid ${colors['White/White 30%']};
   `,
   List: styled.div`
     padding: 8px 16px;

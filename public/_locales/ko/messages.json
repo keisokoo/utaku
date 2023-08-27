@@ -73,5 +73,11 @@
   },
   "error": {
     "message": "오류"
+  },
+  "clear": {
+    "message": "비우기"
+  },
+  "requeue": {
+    "message": "재시도"
   }
 }

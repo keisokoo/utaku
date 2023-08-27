@@ -12,16 +12,29 @@ export interface ImageResponseDetails
   }
 }
 const useWebRequests = (active = true) => {
-  const [sourceList, set_sourceList] = useState<ImageResponseDetails[]>([])
+  const [queueList, set_queueList] = useState<ImageResponseDetails[]>([])
   const [disposedList, set_disposedList] = useState<ImageResponseDetails[]>([])
   const [errorList, set_errorList] = useState<
     chrome.webRequest.WebResponseHeadersDetails[]
   >([])
-  const [videoList, set_videoList] = useState<
-    chrome.webRequest.WebResponseHeadersDetails[]
-  >([])
   const [tabIdList, set_tabIdList] = useState<number[]>([])
   const [tabList, set_tabList] = useState<TAB_LIST_TYPE[]>([])
+
+  const clearListByTabId = useCallback((tabId: number) => {
+    set_queueList((prev) => prev.filter((curr) => curr.tabId !== tabId))
+    set_disposedList((prev) => prev.filter((curr) => curr.tabId !== tabId))
+    set_errorList((prev) => prev.filter((curr) => curr.tabId !== tabId))
+  }, [])
+
+  const requeueDisposeList = useCallback(
+    (tabId: number) => {
+      set_queueList((prev) => [
+        ...prev,
+        ...disposedList.filter((curr) => curr.tabId === tabId),
+      ])
+    },
+    [disposedList]
+  )
   const handleTooltip = (item: TAB_LIST_TYPE, tooltip: string) => {
     set_tabList((prev) =>
       prev.map((curr) => (curr.id === item.id ? { ...curr, tooltip } : curr))
@@ -87,41 +100,21 @@ const useWebRequests = (active = true) => {
   const errorGroup = useMemo(() => {
     return groupBy(errorList, (curr) => curr.tabId)
   }, [errorList])
-  const sourceGroup = useMemo(() => {
-    const groupByTabId = groupBy(sourceList, (curr) => curr.tabId)
-    return Object.keys(groupByTabId).reduce(
-      (acc, curr) => {
-        acc[curr] = groupByTabId[curr].reduce(
-          (prev, current) => {
-            prev[current.requestId] = current
-            return prev
-          },
-          {} as {
-            [key in string]: ImageResponseDetails
-          }
-        )
-        return acc
-      },
-      {} as Record<
-        keyof typeof groupByTabId,
-        {
-          [key in string]: ImageResponseDetails
-        }
-      >
-    )
-  }, [sourceList])
+  const queueGroup = useMemo(() => {
+    return groupBy(queueList, (curr) => curr.tabId)
+  }, [queueList])
 
   useEffect(() => {
-    const TabIdList = Object.keys(sourceGroup).map((keyName) => Number(keyName))
+    const TabIdList = Object.keys(queueGroup).map((keyName) => Number(keyName))
     set_tabIdList((prev) => (isEqual(prev, TabIdList) ? prev : TabIdList))
-  }, [sourceGroup])
+  }, [queueGroup])
 
   const clearList = useCallback(() => {
-    set_sourceList([])
+    set_queueList([])
   }, [])
 
   const handleSourceList = useCallback((item: ImageResponseDetails[]) => {
-    set_sourceList(item)
+    set_queueList(uniqBy(item, (curr) => curr.url))
   }, [])
   const handleRemove = useCallback(
     (
@@ -129,11 +122,11 @@ const useWebRequests = (active = true) => {
         error: boolean
       }
     ) => {
-      set_sourceList((prev) => prev.filter((curr) => curr.url !== item.url))
+      set_queueList((prev) => prev.filter((curr) => curr.url !== item.url))
       if (item.error) {
-        set_errorList((prev) => [...prev, item])
+        set_errorList((prev) => uniqBy([...prev, item], (curr) => curr.url))
       } else {
-        set_disposedList((prev) => [...prev, item])
+        set_disposedList((prev) => uniqBy([...prev, item], (curr) => curr.url))
       }
     },
     []
@@ -141,11 +134,8 @@ const useWebRequests = (active = true) => {
 
   useEffect(() => {
     function getCurrentResponse(req: ImageResponseDetails) {
-      if (req.type === 'media') {
-        set_videoList((prev) => uniqBy([...prev, req], (curr) => curr.url))
-      }
       if (req.type === 'image' || req.type === 'media') {
-        set_sourceList((prev) => uniqBy([...prev, req], (curr) => curr.url))
+        set_queueList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
           chrome.tabs.get(req.tabId).then((tab) => {
             set_tabList((prev) => uniqBy([...prev, tab], (curr) => curr.id))
@@ -171,16 +161,17 @@ const useWebRequests = (active = true) => {
     disposedGroup,
     disposedList,
     errorList,
-    videoList,
-    sourceList,
-    set_sourceList,
+    queueList,
+    set_queueList,
     tabList,
     tabIdList,
-    sourceGroup,
+    queueGroup,
     handleTooltip,
     clearList,
     handleRemove,
     handleSourceList,
+    clearListByTabId,
+    requeueDisposeList,
   }
 }
 

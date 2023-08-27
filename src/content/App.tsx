@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual } from 'lodash-es'
+import { cloneDeep, isEqual, sortBy } from 'lodash-es'
 import React, {
   MutableRefObject,
   useEffect,
@@ -19,11 +19,8 @@ import DownloadComp from './DownloadComp'
 import UtakuStyle from './Utaku.styled'
 import { settings } from './atoms/settings'
 import './index.scss'
-import { DataType, ImageInfo, ItemType, RequestItem } from './types'
+import { ImageInfo, ItemType, RequestItem } from './types'
 
-const objectEntries = <T extends object>(item: T) => {
-  return Object.entries(item) as Array<[keyof T, T[keyof T]]>
-}
 const App = () => {
   return (
     <RecoilRoot>
@@ -35,7 +32,7 @@ const Main = (): JSX.Element => {
   const [tooltip, set_tooltip] = useState<string>('')
   const [currentUrl, setCurrentUrl] = useState('')
   const [itemList, set_itemList] = useState<ItemType[]>([])
-  const [sources, set_sources] = useState<DataType | null>(null)
+  const [queueList, set_queueList] = useState<ItemType[]>([])
   const [changedUrl, set_changedUrl] = useState<
     chrome.webRequest.WebResponseHeadersDetails[]
   >([])
@@ -67,6 +64,7 @@ const Main = (): JSX.Element => {
     )
   }, [])
   const filteredImages = useMemo(() => {
+    if (!itemList) return []
     if (!itemList.length) return []
     const filtered = itemList.filter((item) => {
       if (!item.imageInfo) return false
@@ -103,8 +101,9 @@ const Main = (): JSX.Element => {
   }
   useEffect(() => {
     function getData(): Promise<{
-      data: DataType
+      data: ItemType[]
       downloaded: string[]
+      downloadAble: ItemType[]
     }> {
       if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
       return new Promise((res, rej) => {
@@ -113,7 +112,11 @@ const Main = (): JSX.Element => {
             message: 'get-items',
             data: chrome.runtime.id,
           },
-          (response: { data: DataType; downloaded: string[] }) => {
+          (response: {
+            data: ItemType[]
+            downloaded: string[]
+            downloadAble: ItemType[]
+          }) => {
             if (chrome.runtime.lastError) {
               return rej
             }
@@ -123,15 +126,32 @@ const Main = (): JSX.Element => {
         )
       })
     }
+    function sortItem(arr: ItemType[]) {
+      if (!arr) return []
+      if (!arr.length) return []
+      return sortBy(
+        arr.map((item) => item.url),
+        (url) => url
+      )
+    }
     function runDataPool() {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       timeoutRef.current = setTimeout(async () => {
         try {
-          const { data, downloaded } = await getData()
-          set_sources((prev) => {
-            if (!data) return null
+          const { data, downloaded, downloadAble } = await getData()
+          set_itemList((prev) => {
+            if (isEqual(sortItem(prev), sortItem(downloadAble))) return prev
+            return downloadAble
+          })
+          set_queueList((prev) => {
+            if (!data) return []
             if (isEqual(prev, data)) return prev
-            return data ?? null
+            return data ?? []
+          })
+          set_queueList((prev) => {
+            if (!data) return []
+            if (isEqual(prev, data)) return prev
+            return data ?? []
           })
           set_downloadedItem((prev) => {
             if (!downloaded.length) return prev
@@ -156,9 +176,9 @@ const Main = (): JSX.Element => {
     },
     error?: boolean
   ) => {
-    set_sources(
+    set_queueList(
       produce((draft) => {
-        if (draft) delete draft[item.requestId]
+        return draft.filter((value) => value.url !== item.url)
       })
     )
     chrome.runtime.sendMessage({
@@ -180,15 +200,6 @@ const Main = (): JSX.Element => {
       const thumbnail = canvas.toDataURL('image/png')
       const videoTarget = e.currentTarget
       const { videoWidth, videoHeight } = videoTarget
-      chrome.runtime.sendMessage({
-        message: 'update-image-size',
-        data: {
-          requestId: value.requestId,
-          url: value.url,
-          width: videoWidth,
-          height: videoHeight,
-        },
-      })
       set_itemList((prev) => {
         const clone: RequestItem & {
           imageInfo: ImageInfo
@@ -221,15 +232,6 @@ const Main = (): JSX.Element => {
     try {
       const imageTarget = e.currentTarget
       const { naturalWidth, naturalHeight } = imageTarget
-      chrome.runtime.sendMessage({
-        message: 'update-image-size',
-        data: {
-          requestId: value.requestId,
-          url: value.url,
-          width: naturalWidth,
-          height: naturalHeight,
-        },
-      })
       set_itemList((prev) => {
         const clone: RequestItem & {
           imageInfo: ImageInfo
@@ -329,12 +331,12 @@ const Main = (): JSX.Element => {
           }}
         >
           <UtakuStyle.DisposeContainer>
-            {sources &&
-              objectEntries(sources).map(([key, value]) => {
+            {queueList &&
+              queueList.map((value) => {
                 if (value.type === 'media') {
                   return (
                     <Dispose.Video
-                      key={key}
+                      key={value.url}
                       value={value}
                       disposeVideo={disposeVideo}
                       onError={() => {
@@ -345,7 +347,7 @@ const Main = (): JSX.Element => {
                 }
                 return (
                   <Dispose.Image
-                    key={key}
+                    key={value.url}
                     value={value}
                     disposeImage={disposeImage}
                     onError={() => {

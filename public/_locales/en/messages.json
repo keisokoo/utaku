@@ -68,7 +68,6 @@
   "refresh": {
     "message": "Refresh"
   },
-
   "disposed_item": {
     "message": "Disposed Item"
   },
@@ -77,5 +76,11 @@
   },
   "error": {
     "message": "Error"
+  },
+  "clear": {
+    "message": "Clear"
+  },
+  "requeue": {
+    "message": "Requeue"
   }
 }

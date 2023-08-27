@@ -8,9 +8,8 @@ import path from 'path'
 import copy from 'rollup-plugin-copy'
 import postcss from 'rollup-plugin-postcss'
 
-import zip from 'rollup-plugin-zip'
-
 const isProduction = process.env.NODE_ENV === 'production'
+const dest = isProduction ? 'build' : 'dist'
 const defaultConfig = {
   context: 'window',
   input: {
@@ -19,7 +18,7 @@ const defaultConfig = {
     options: 'src/pages/options/index.tsx',
   },
   output: {
-    dir: 'dist',
+    dir: dest,
     format: 'esm',
     entryFileNames: '[name]/index.js',
     chunkFileNames: path.join('chunks', '[name].js'),
@@ -49,10 +48,9 @@ const defaultConfig = {
     }),
     copy({
       targets: [
-        { src: 'public/*', dest: 'dist' }, // public 폴더의 모든 파일을 dist 폴더로 복사
+        { src: 'public/*', dest: dest }, // public 폴더의 모든 파일을 dist 폴더로 복사
       ],
     }),
-    isProduction && zip({ dir: 'releases' }),
   ],
 }
 export default [
@@ -61,7 +59,7 @@ export default [
     plugins: [
       ...defaultConfig.plugins,
       postcss({
-        extract: path.resolve('dist/index.css'),
+        extract: path.resolve(`${dest}/index.css`),
         modules: false,
         use: ['sass'],
       }),
@@ -71,14 +69,14 @@ export default [
     ...defaultConfig,
     input: 'src/content/index.tsx',
     output: {
-      dir: 'dist',
+      dir: dest,
       format: 'iife',
       entryFileNames: 'content/index.js',
     },
     plugins: [
       ...defaultConfig.plugins,
       postcss({
-        extract: path.resolve('dist/content/index.css'),
+        extract: path.resolve(`${dest}/content/index.css`),
         modules: {
           generateScopedName: '[name]__[local]___[hash:base64:5]',
           autoModules: (filename) => filename.endsWith('.module.scss'),

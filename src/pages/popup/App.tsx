@@ -10,19 +10,20 @@ import Tooltip from '../../components/Tooltip'
 import { lang } from '../../utils'
 import PopupStyle from './Popup.styled'
 import useFileDownload from './hooks/useFileDownload'
-import useWebRequests from './hooks/useWebRequests'
+import useWebRequests, { ImageResponseDetails } from './hooks/useWebRequests'
 import './index.scss'
 
 const App = (): JSX.Element => {
   const results = useWebRequests(true)
   const { folderName, downloadedItem, handleFolderName } = useFileDownload()
   const {
-    sourceGroup,
+    queueGroup,
     tabList,
-    set_sourceList,
     handleRemove,
     disposedGroup,
     errorGroup,
+    clearListByTabId,
+    requeueDisposeList,
   } = results
   const [openTabList, set_openTabList] = useState<number[]>([])
   const [folderNameList, set_folderNameList] = useState<string[]>([])
@@ -97,7 +98,11 @@ const App = (): JSX.Element => {
         data: unknown
       },
       sender: chrome.runtime.MessageSender,
-      sendResponse: (response?: { data: object; downloaded?: string[] }) => void
+      sendResponse: (response?: {
+        data: object
+        downloaded?: string[]
+        downloadAble?: ImageResponseDetails[]
+      }) => void
     ) => {
       const senderTabId = sender?.tab?.id
       if (!senderTabId) return
@@ -108,28 +113,14 @@ const App = (): JSX.Element => {
           }
         handleRemove(disposedData)
       }
-      if (request.message === 'update-image-size') {
-        const { requestId, width, height } = request.data as {
-          requestId: string
-          width: number
-          height: number
-        }
-        set_sourceList((prev) => {
-          return prev.map((tabItem) => {
-            if (tabItem.requestId !== requestId) return tabItem
-            return {
-              ...tabItem,
-              imageInfo: {
-                width,
-                height,
-              },
-            }
-          })
-        })
-      }
       if (request.message === 'get-items') {
-        const data = sourceGroup[senderTabId]
-        sendResponse({ data, downloaded: downloadedItem })
+        const data = queueGroup[senderTabId]
+        const downloadAbleData = disposedGroup[senderTabId]
+        sendResponse({
+          data,
+          downloaded: downloadedItem,
+          downloadAble: downloadAbleData,
+        })
       }
       if (request.message === 'download') {
         const downloadList = request.data as string[]
@@ -160,7 +151,8 @@ const App = (): JSX.Element => {
       }
     }
   }, [
-    sourceGroup,
+    disposedGroup,
+    queueGroup,
     results.handleRemove,
     downloadedItem,
     folderName,
@@ -170,12 +162,11 @@ const App = (): JSX.Element => {
     <>
       <PopupStyle.Wrap>
         {tabList.map((tabItem) => {
-          const tabId = tabItem.id as keyof typeof sourceGroup | undefined
-          const groupList = tabId && sourceGroup ? sourceGroup[tabId] ?? {} : {}
+          const tabId = tabItem.id as keyof typeof queueGroup | undefined
+          const queueList = tabId && queueGroup ? queueGroup[tabId] ?? [] : []
           const disposedList =
             tabId && disposedGroup ? disposedGroup[tabId] ?? [] : []
           const errorList = tabId && errorGroup ? errorGroup[tabId] ?? [] : []
-          const sourceList = Object.values(groupList)
           return (
             <Fragment key={tabItem.id}>
               <PopupStyle.ColumnWrap
@@ -204,6 +195,43 @@ const App = (): JSX.Element => {
                   </PopupStyle.Row>
                   <PopupStyle.Row>
                     <GrayScaleFill
+                      _mini
+                      onClick={() => {
+                        if (!tabId) return
+                        if (typeof tabId !== 'number') return
+                        clearListByTabId(tabId)
+                      }}
+                    >
+                      {lang('clear')}
+                    </GrayScaleFill>
+                    <WhiteFill
+                      _mini
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleReloadTab(tabItem.id)
+                      }}
+                    >
+                      {lang('refresh')}
+                    </WhiteFill>
+                  </PopupStyle.Row>
+                </PopupStyle.Item>
+                <PopupStyle.InfoWrap
+                  className={classNames({ active: tabItem.active })}
+                >
+                  <PopupStyle.Info>
+                    <span className="length">
+                      ({lang('disposed_item')}: {disposedList?.length ?? 0})
+                    </span>
+                    <span className="length">
+                      ({lang('queue')}: {queueList?.length ?? 0})
+                    </span>
+                    <span className="length">
+                      ({lang('error')}: {errorList?.length ?? 0})
+                    </span>
+                  </PopupStyle.Info>
+                  <PopupStyle.Row>
+                    <GrayScaleFill
+                      _mini
                       disabled={disposedList.length < 1}
                       onClick={(e) => {
                         e.stopPropagation()
@@ -218,6 +246,7 @@ const App = (): JSX.Element => {
                       {lang('list')}
                     </GrayScaleFill>
                     <PrimaryButton
+                      _mini
                       onClick={(e) => {
                         e.stopPropagation()
                         handleClickTab(tabItem.id)
@@ -226,27 +255,17 @@ const App = (): JSX.Element => {
                       {lang('enter')}
                     </PrimaryButton>
                     <WhiteFill
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleReloadTab(tabItem.id)
+                      _mini
+                      disabled={disposedList.length < 1}
+                      onClick={() => {
+                        if (!tabId) return
+                        if (typeof tabId !== 'number') return
+                        requeueDisposeList(tabId)
                       }}
                     >
-                      {lang('refresh')}
+                      {lang('requeue')}
                     </WhiteFill>
                   </PopupStyle.Row>
-                </PopupStyle.Item>
-                <PopupStyle.InfoWrap
-                  className={classNames({ active: tabItem.active })}
-                >
-                  <span className="length">
-                    ({lang('disposed_item')}: {disposedList?.length ?? 0})
-                  </span>
-                  <span className="length">
-                    ({lang('queue')}: {sourceList?.length ?? 0})
-                  </span>
-                  <span className="length">
-                    ({lang('error')}: {errorList?.length ?? 0})
-                  </span>
                 </PopupStyle.InfoWrap>
               </PopupStyle.ColumnWrap>
               {typeof tabId === 'number' && openTabList.includes(tabId) && (
