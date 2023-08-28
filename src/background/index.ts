@@ -17,7 +17,18 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   }
 
 });
-
+function quitUtaku() {
+  chrome.tabs.query({}, (tabs) => {
+    tabs.forEach((tab) => {
+      if (tab.id && tab.id > 0)
+        chrome.tabs.sendMessage(tab.id, { message: 'utaku-quit' }, () => {
+          if (chrome.runtime.lastError) {
+            console.log('Error:', chrome.runtime.lastError);
+          }
+        });
+    });
+  });
+}
 chrome.runtime.onConnect.addListener(function (port) {
   if (port.name === 'popup') {
     chrome.tabs.query({}, (tabs) => {
@@ -33,30 +44,22 @@ chrome.runtime.onConnect.addListener(function (port) {
     chrome.action.setIcon({ path: '/icon34-active.png' })
     port.onDisconnect.addListener(function () {
       chrome.action.setIcon({ path: '/icon34.png' })
-      chrome.tabs.query({}, (tabs) => {
-        tabs.forEach((tab) => {
-          if (tab.id && tab.id > 0)
-            chrome.tabs.sendMessage(tab.id, { message: 'utaku-quit' }, () => {
-              if (chrome.runtime.lastError) {
-                console.log('Error:', chrome.runtime.lastError);
-              }
-            });
-        });
-      });
+      quitUtaku()
     })
   }
 })
+chrome.runtime.onSuspend.addListener(function () {
+  quitUtaku()
+});
 async function getPopupTab() {
   const currentTabs = await browser.tabs.query({
     url: browser.runtime.getURL('popup/index.html'),
   })
   return currentTabs.length > 0 && currentTabs[0].id ? currentTabs[0] : null
 }
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-async function createWindow(_tab: chrome.tabs.Tab) {
+async function createWindow() {
   const firstTab = await getPopupTab()
   if (firstTab && firstTab.windowId) {
-
     chrome.windows.update(firstTab.windowId, { focused: true }, () => {
       if (firstTab.id) chrome.tabs.update(firstTab.id, { active: true })
     })
@@ -93,4 +96,4 @@ function onMessage(
 if (!chrome.runtime.onMessage.hasListener(onMessage)) {
   chrome.runtime.onMessage.addListener(onMessage)
 }
-chrome.action.onClicked.addListener((tab) => createWindow(tab))
+chrome.action.onClicked.addListener(createWindow)

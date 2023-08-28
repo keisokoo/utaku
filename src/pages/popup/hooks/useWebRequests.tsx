@@ -138,6 +138,10 @@ const useWebRequests = (active = true) => {
         set_queueList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
           chrome.tabs.get(req.tabId).then((tab) => {
+            if (chrome.runtime.lastError) {
+              console.log(chrome.runtime.lastError.message)
+              return
+            }
             set_tabList((prev) => uniqBy([...prev, tab], (curr) => curr.id))
           })
       }

@@ -38,6 +38,7 @@ function onMessage(request: { message: string; data: object }) {
 chrome.runtime.onMessage.addListener(onMessage)
 const getAvailable = (el?: HTMLElement) => {
   try {
+    if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
     chrome.runtime.sendMessage(
       {
         message: 'available',
@@ -56,20 +57,45 @@ const getAvailable = (el?: HTMLElement) => {
       }
     )
   } catch (error) {
-    console.log('error', error)
+    if (root) root.unmount()
+    root = null
+    document.querySelector('.floating-button')?.classList.add('hide')
   }
 }
 document.addEventListener('visibilitychange', () => getAvailable())
 window.addEventListener('focus', () => getAvailable(), false)
 const rootId = uuid()
 function toggleMount() {
-  if (!root) {
-    const container = document.getElementById('root-' + rootId) as HTMLElement
-    root = ReactDOM.createRoot(container)
-    root.render(<App />)
-  } else {
-    root.unmount()
+  try {
+    if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
+    chrome.runtime.sendMessage(
+      {
+        message: 'available',
+      },
+      ({ data }: { data: chrome.tabs.Tab | null }) => {
+        if (chrome.runtime.lastError) {
+          return
+        }
+        if (data) {
+          if (!root) {
+            const container = document.getElementById(
+              'root-' + rootId
+            ) as HTMLElement
+            root = ReactDOM.createRoot(container)
+            root.render(<App />)
+          } else {
+            root.unmount()
+            root = null
+          }
+        }
+        return true
+      }
+    )
+  } catch (error) {
+    if (root) root.unmount()
     root = null
+    document.querySelector('.floating-button')?.classList.add('hide')
+    return
   }
 }
 function createFloatingButton() {

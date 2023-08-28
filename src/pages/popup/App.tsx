@@ -31,8 +31,10 @@ const App = (): JSX.Element => {
   const handleClickTab = (tabId?: number) => {
     if (!tabId) return
     chrome.tabs.get(tabId, (tab) => {
+      if (!tab) return
       if (chrome.runtime.lastError) {
         console.log(chrome.runtime.lastError.message)
+        return
       } else {
         chrome.windows.update(tab.windowId, { focused: true }, () => {
           chrome.tabs.update(tabId, { active: true })
@@ -48,11 +50,13 @@ const App = (): JSX.Element => {
 
   const handleReloadTab = (tabId?: number) => {
     if (!tabId) return
-    if (chrome.runtime.lastError) {
-      console.log(chrome.runtime.lastError.message)
-    } else {
-      chrome.tabs.reload(tabId)
-    }
+    chrome.tabs.get(tabId, () => {
+      if (chrome.runtime.lastError) {
+        console.log(chrome.runtime.lastError.message)
+      } else {
+        chrome.tabs.reload(tabId)
+      }
+    })
   }
   useEffect(() => {
     chrome.storage.sync.get(['folderName', 'folderNameList'], (items) => {
@@ -63,7 +67,6 @@ const App = (): JSX.Element => {
     const contentInit = () => {
       document.querySelector('.floating-button')?.classList.remove('hide')
     }
-
     chrome.runtime.sendMessage(
       {
         message: 'activeTabInfo',
@@ -80,13 +83,19 @@ const App = (): JSX.Element => {
         if (chrome.runtime.lastError) {
           return
         }
-        if (data) {
-          chrome.scripting.executeScript({
-            target: { tabId: data.tabId },
-            func: contentInit,
-            args: [],
-          })
-        }
+        if (!data) return
+        chrome.tabs.get(data.tabId, () => {
+          if (chrome.runtime.lastError) {
+            return
+          }
+          if (data) {
+            chrome.scripting.executeScript({
+              target: { tabId: data.tabId },
+              func: contentInit,
+              args: [],
+            })
+          }
+        })
         return true
       }
     )
