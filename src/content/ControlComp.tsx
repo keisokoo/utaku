@@ -1,40 +1,29 @@
 import classNames from 'classnames'
 import { produce } from 'immer'
-import { cloneDeep } from 'lodash-es'
 import React, { useState } from 'react'
-import { FaFilter, FaList } from 'react-icons/fa'
+import { FaList, FaRegEdit } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
+import { settings, sizeTypes } from '../atoms/settings'
 import { PrimaryButton, WhiteFill } from '../components/Buttons'
-import FilterEditor from '../components/Filter/FilterEditor'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
 import Tooltip from '../components/Tooltip'
 import { lang } from '../utils'
 import UtakuStyle, { ModalList } from './Utaku.styled'
-import { settings, sizeTypes } from './atoms/settings'
 import { itemTypes } from './sources'
-import { ItemType } from './types'
 
 interface ControlCompProps {
   tooltip: string
   current: number
   total: number
-  itemList: ItemType[]
-  handleReplace: (itemList: ItemType[]) => void
 }
-const ControlComp = ({
-  current,
-  total,
-  tooltip,
-  itemList,
-  handleReplace,
-}: ControlCompProps) => {
+const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
   const [settingState, set_settingState] = useRecoilState(settings)
   const { folderName, folderNameList, sizeType, sizeLimit, itemType } =
     settingState
 
   const [folderNameInput, set_folderNameInput] = useState<string>('')
-  const [modalOpen, set_modalOpen] = useState<'folder' | 'more' | null>(null)
+  const [modalOpen, set_modalOpen] = useState<'folder' | null>(null)
   return (
     <>
       <Modal
@@ -139,38 +128,6 @@ const ControlComp = ({
             </ModalList.BottomList>
           </ModalBody>
         )}
-        {modalOpen === 'more' && (
-          <FilterEditor
-            emitFilter={(value) => {
-              try {
-                const { from, to, params, host } = value
-                const replacedItemList = cloneDeep(itemList).filter((item) => {
-                  if (host && !item.url.includes(host)) return false
-                  return true
-                })
-                const nextImagePromises = replacedItemList.map((item) => {
-                  if (host && !item.url.includes(host)) return item
-                  if (Object.keys(params).length) {
-                    const url = new URL(item.url)
-                    Object.keys(params).forEach((key) => {
-                      url.searchParams.set(key, params[key])
-                    })
-                    item.url = url.toString()
-                  }
-                  if (from && item.url.includes(from)) {
-                    item.url = item.url.replace(from, to)
-                  } else if (!from && to) {
-                    item.url = item.url + to
-                  }
-                  return item
-                })
-                handleReplace(nextImagePromises)
-              } catch (error) {
-                console.log('error', error)
-              }
-            }}
-          />
-        )}
       </Modal>
       <UtakuStyle.Editor>
         <UtakuStyle.Left>
@@ -240,10 +197,10 @@ const ControlComp = ({
             />
             <UtakuStyle.IconButton
               onClick={() => {
-                set_modalOpen('more')
+                console.log('deprecated')
               }}
             >
-              <FaFilter />
+              <FaRegEdit />
             </UtakuStyle.IconButton>
           </UtakuStyle.InputWrap>
         </UtakuStyle.Left>

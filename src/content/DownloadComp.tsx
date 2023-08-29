@@ -111,7 +111,7 @@ const DownloadComp = ({
         <UtakuStyle.Right>
           <SecondaryButton
             _mini
-            disabled={!itemList.some((item) => item.imageInfo.active)}
+            disabled={!itemList?.some((item) => item.imageInfo?.active)}
             onClick={(e) => {
               e.stopPropagation()
               handleDownload()

@@ -1,19 +1,20 @@
 import { groupBy, isEqual, uniqBy } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
+import { UrlRemapItem } from '../../../atoms/settings'
+import { WebResponseItem } from '../../../content/types'
+import { parseItemWithUrlRemaps } from '../../../utils'
 
 interface TAB_LIST_TYPE extends chrome.tabs.Tab {
   tooltip?: string
 }
-export interface ImageResponseDetails
-  extends chrome.webRequest.WebResponseHeadersDetails {
-  imageInfo?: {
-    width: number
-    height: number
-  }
-}
-const useWebRequests = (active = true) => {
-  const [queueList, set_queueList] = useState<ImageResponseDetails[]>([])
-  const [disposedList, set_disposedList] = useState<ImageResponseDetails[]>([])
+
+const useWebRequests = (
+  active = true,
+  appliedRemapList: UrlRemapItem[] = []
+) => {
+  const [originalList, set_originalList] = useState<WebResponseItem[]>([])
+  const [queueList, set_queueList] = useState<WebResponseItem[]>([])
+  const [disposedList, set_disposedList] = useState<WebResponseItem[]>([])
   const [errorList, set_errorList] = useState<
     chrome.webRequest.WebResponseHeadersDetails[]
   >([])
@@ -94,6 +95,9 @@ const useWebRequests = (active = true) => {
       chrome.windows.onFocusChanged.removeListener(focusWindow)
     }
   }, [])
+  const originalGroup = useMemo(() => {
+    return groupBy(originalList, (curr) => curr.tabId)
+  }, [originalList])
   const disposedGroup = useMemo(() => {
     return groupBy(disposedList, (curr) => curr.tabId)
   }, [disposedList])
@@ -113,7 +117,7 @@ const useWebRequests = (active = true) => {
     set_queueList([])
   }, [])
 
-  const handleSourceList = useCallback((item: ImageResponseDetails[]) => {
+  const handleSourceList = useCallback((item: WebResponseItem[]) => {
     set_queueList(uniqBy(item, (curr) => curr.url))
   }, [])
   const handleRemove = useCallback(
@@ -131,10 +135,28 @@ const useWebRequests = (active = true) => {
     },
     []
   )
+  const reapplyRemaps = useCallback(
+    (tabId?: number) => {
+      if (tabId) {
+        set_queueList((prev) =>
+          prev
+            .filter((curr) => curr.tabId === tabId)
+            .map((curr) => parseItemWithUrlRemaps(appliedRemapList, curr))
+        )
+      } else {
+        set_queueList((prev) =>
+          prev.map((curr) => parseItemWithUrlRemaps(appliedRemapList, curr))
+        )
+      }
+    },
+    [appliedRemapList]
+  )
 
   useEffect(() => {
-    function getCurrentResponse(req: ImageResponseDetails) {
+    function getCurrentResponse(req: WebResponseItem) {
       if (req.type === 'image' || req.type === 'media') {
+        req = parseItemWithUrlRemaps(appliedRemapList, req)
+        set_originalList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         set_queueList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
           chrome.tabs.get(req.tabId).then((tab) => {
@@ -158,15 +180,18 @@ const useWebRequests = (active = true) => {
     } else if (!active && hasListener) {
       chrome.webRequest.onHeadersReceived.removeListener(getCurrentResponse)
     }
-  }, [active])
+    return () => {
+      chrome.webRequest.onHeadersReceived.removeListener(getCurrentResponse)
+    }
+  }, [active, appliedRemapList])
 
   return {
+    originalGroup,
     errorGroup,
     disposedGroup,
     disposedList,
     errorList,
     queueList,
-    set_queueList,
     tabList,
     tabIdList,
     queueGroup,
@@ -176,6 +201,7 @@ const useWebRequests = (active = true) => {
     handleSourceList,
     clearListByTabId,
     requeueDisposeList,
+    reapplyRemaps,
   }
 }
 

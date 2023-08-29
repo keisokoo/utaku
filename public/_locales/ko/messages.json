@@ -1,27 +1,45 @@
 {
+  "utaku_description": {
+    "message": "이 팝업을 열어둔채로, 새로운 페이지를 열거나 새로고침을 호출하면, URL을 수집합니다."
+  },
   "close": {
     "message": "닫기"
   },
-  "set_url_filter": {
-    "message": "URL 필터 설정"
+  "set_url_remap": {
+    "message": "URL 재구성 설정"
   },
-  "url_filter_list": {
-    "message": "URL 필터 목록"
+  "input_remap_name": {
+    "message": "이름을 입력하세요."
   },
-  "edit_url_filter": {
-    "message": "URL 필터 편집"
+  "url_remap_list": {
+    "message": "URL 재구성 목록"
+  },
+  "edit_url_match": {
+    "message": "URL 패턴"
+  },
+  "input_url_match": {
+    "message": "부합하는 URL 패턴을 입력해주세요."
   },
   "edit_query": {
     "message": "쿼리 편집"
   },
+  "remaps": {
+    "message": "재구성"
+  },
   "change_add_text": {
     "message": "텍스트 변경/추가"
   },
-  "edit_filter_name": {
-    "message": "필터 이름"
+  "edit_remap_name": {
+    "message": "재구성 이름"
+  },
+  "replace_url": {
+    "message": "URL 변경"
   },
   "already_exists_name": {
     "message": "이미 등록된 이름입니다."
+  },
+  "input_query_description": {
+    "message": "쿼리를 추가하여 변경,삭제 할 수 있습니다."
   },
   "input_name": {
     "message": "이름을 입력하세요."
@@ -50,11 +68,14 @@
   "input_content": {
     "message": "내용을 입력하세요."
   },
+  "input_query_content": {
+    "message": "내용을 입력하세요. 비워두면 쿼리가 제거됩니다."
+  },
   "delete": {
     "message": "삭제"
   },
-  "empty_filter": {
-    "message": "필터가 없습니다."
+  "empty_remap": {
+    "message": "재구성 항목이 없습니다."
   },
   "list": {
     "message": "목록"
@@ -77,7 +98,28 @@
   "clear": {
     "message": "비우기"
   },
+  "change": {
+    "message": "변경"
+  },
+  "remove": {
+    "message": "제거"
+  },
+  "query_change": {
+    "message": "쿼리 변경"
+  },
+  "query_remove": {
+    "message": "쿼리 제거"
+  },
   "requeue": {
     "message": "재시도"
+  },
+  "collect_description": {
+    "message": "보고 있는 페이지의 URL을 수집합니다.\n새로고침을 호출하거나 새 페이지에 액세스하세요."
+  },
+  "url_reference": {
+    "message": "URL 참조"
+  },
+  "reference_url_description": {
+    "message": "(선택 사항) 예시로 사용될 URL을 입력해주세요. 미리보기로 결과를 확인할 수 있습니다."
   }
 }

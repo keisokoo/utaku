@@ -47,6 +47,8 @@ const useFileDownload = () => {
       ) => void
     ) {
       try {
+        const manifestData = chrome.runtime.getManifest()
+        const extensionName = manifestData.name
         const trimmed = folderName
           .replace(/[^\x20-\x7E]/gim, '')
           .trim()
@@ -54,7 +56,7 @@ const useFileDownload = () => {
         const checked =
           trimmed[trimmed.length - 1] === '/' ? trimmed : trimmed + '/'
         const fileName = checked + downloadItem.filename
-        if (downloadItem.byExtensionName === 'utaku') {
+        if (downloadItem.byExtensionName === extensionName) {
           suggest({
             filename: fileName,
             conflictAction,

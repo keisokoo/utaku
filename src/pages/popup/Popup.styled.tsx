@@ -7,10 +7,53 @@ const Ellipsis = css`
   white-space: nowrap;
 `
 const PopupStyle = {
-  Wrap: styled.div`
-    padding: 32px 24px;
+  Container: styled.div`
+    width: 100%;
+    height: 100%;
+    position: relative;
     display: flex;
     flex-direction: column;
+    gap: 0px;
+  `,
+  Wrap: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  `,
+  Nothing: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    white-space: pre-line;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+  `,
+  Top: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 32px;
+    padding: 24px 32px;
+    & > div {
+      font-size: 14px;
+      color: ${colors['Grayscale/Gray Light']};
+      text-align: right;
+      flex: 1;
+    }
+  `,
+  Body: styled.div`
+    padding: 8px 32px;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    flex: 1;
+  `,
+  Bottom: styled.div`
+    padding: 24px 32px;
+    width: 100%;
+    display: flex;
+    align-items: center;
     gap: 8px;
   `,
   ColumnWrap: styled.div`
@@ -67,7 +110,6 @@ const PopupStyle = {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    flex-direction: column-reverse;
     max-height: 500px;
     overflow-y: auto;
   `,

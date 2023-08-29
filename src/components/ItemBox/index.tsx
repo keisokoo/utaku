@@ -4,13 +4,13 @@ import {
   FaCheck,
   FaClipboard,
   FaDownload,
-  FaFilter,
   FaImage,
+  FaRegEdit,
   FaShare,
   FaVideo,
 } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
-import { settings } from '../../content/atoms/settings'
+import { settings } from '../../atoms/settings'
 import { ItemType } from '../../content/types'
 import S from './ItemBox.styles'
 
@@ -116,13 +116,13 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
           </S.IconWrap>
           {setUrl && (
             <S.IconWrap
-              {...tooltipEventAttributes('Filter: ' + item.url)}
+              {...tooltipEventAttributes('Remap: ' + item.url)}
               onClick={(e) => {
                 e.stopPropagation()
                 setUrl(item.url)
               }}
             >
-              <FaFilter />
+              <FaRegEdit />
             </S.IconWrap>
           )}
           <S.IconWrap

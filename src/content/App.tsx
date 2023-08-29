@@ -1,4 +1,4 @@
-import { cloneDeep, isEqual, sortBy } from 'lodash-es'
+import { isEqual, sortBy } from 'lodash-es'
 import React, {
   MutableRefObject,
   useEffect,
@@ -10,16 +10,14 @@ import React, {
 import { produce } from 'immer'
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { uniqBy } from 'remeda'
-import UrlEditor from '../components/Filter/UrlEditor'
+import { settings } from '../atoms/settings'
 import ItemBox from '../components/ItemBox'
-import Modal from '../components/Modal/Modal'
 import ControlComp from './ControlComp'
 import Dispose from './DisposeComp'
 import DownloadComp from './DownloadComp'
 import UtakuStyle from './Utaku.styled'
-import { settings } from './atoms/settings'
 import './index.scss'
-import { ImageInfo, ItemType, RequestItem } from './types'
+import { ImageInfo, ItemType, WebResponseItem } from './types'
 
 const App = () => {
   return (
@@ -30,7 +28,6 @@ const App = () => {
 }
 const Main = (): JSX.Element => {
   const [tooltip, set_tooltip] = useState<string>('')
-  const [currentUrl, setCurrentUrl] = useState('')
   const [itemList, set_itemList] = useState<ItemType[]>([])
   const [queueList, set_queueList] = useState<ItemType[]>([])
   const [changedUrl, set_changedUrl] = useState<
@@ -46,7 +43,7 @@ const Main = (): JSX.Element => {
         'sizeLimit',
         'sizeType',
         'itemType',
-        'filterList',
+        'remapList',
       ],
       (items) => {
         set_settingState(
@@ -57,7 +54,7 @@ const Main = (): JSX.Element => {
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
             if (items.sizeType) draft.sizeType = items.sizeType
             if (items.itemType) draft.itemType = items.itemType
-            if (items.filterList) draft.filterList = items.filterList
+            if (items.remapList) draft.remapList = items.remapList
           })
         )
       }
@@ -71,8 +68,6 @@ const Main = (): JSX.Element => {
       const { width, height } = item.imageInfo
       const sizeLimit = settingState.sizeLimit
       const itemType = settingState.itemType
-      // let searchResult = true
-      // if (searchTextOnUrl) searchResult = item.url.includes(searchTextOnUrl)
       let checkItemType = true
       let widthResult = true
       let heightResult = true
@@ -141,7 +136,7 @@ const Main = (): JSX.Element => {
           const { data, downloaded, downloadAble } = await getData()
           set_itemList((prev) => {
             if (isEqual(sortItem(prev), sortItem(downloadAble))) return prev
-            return downloadAble
+            return downloadAble ?? []
           })
           set_queueList((prev) => {
             if (!data) return []
@@ -201,7 +196,7 @@ const Main = (): JSX.Element => {
       const videoTarget = e.currentTarget
       const { videoWidth, videoHeight } = videoTarget
       set_itemList((prev) => {
-        const clone: RequestItem & {
+        const clone: WebResponseItem & {
           imageInfo: ImageInfo
         } = {
           ...value,
@@ -233,7 +228,7 @@ const Main = (): JSX.Element => {
       const imageTarget = e.currentTarget
       const { naturalWidth, naturalHeight } = imageTarget
       set_itemList((prev) => {
-        const clone: RequestItem & {
+        const clone: WebResponseItem & {
           imageInfo: ImageInfo
         } = {
           ...value,
@@ -255,43 +250,9 @@ const Main = (): JSX.Element => {
       handleRemove(value, true)
     }
   }
+  if (!itemList) return <></>
   return (
     <>
-      <Modal
-        open={currentUrl !== ''}
-        onClose={() => {
-          setCurrentUrl('')
-        }}
-      >
-        <UrlEditor
-          currentUrl={currentUrl}
-          emitValue={(value) => {
-            const { from, to, params, host } = value
-            const replacedItemList = cloneDeep(itemList).filter((item) => {
-              if (host && !item.url.includes(host)) return false
-              return true
-            })
-            const nextImagePromises = replacedItemList.map((item) => {
-              if (host && !item.url.includes(host)) return item
-              if (Object.keys(params).length) {
-                const url = new URL(item.url)
-                Object.keys(params).forEach((key) => {
-                  url.searchParams.set(key, params[key])
-                })
-                item.url = url.toString()
-              }
-              if (from && item.url.includes(from)) {
-                item.url = item.url.replace(from, to)
-              } else if (!from && to) {
-                item.url = item.url + to
-              }
-              return item
-            })
-            set_changedUrl(nextImagePromises)
-            setCurrentUrl('')
-          }}
-        />
-      </Modal>
       <div className="utaku-wrapper">
         <DownloadComp
           itemList={itemList}
@@ -316,14 +277,10 @@ const Main = (): JSX.Element => {
         />
         <ControlComp
           tooltip={tooltip}
-          itemList={itemList}
           current={
             filteredImages.filter((item) => item.imageInfo.active).length
           }
           total={filteredImages.length}
-          handleReplace={(arr) => {
-            set_changedUrl(arr.map((item) => item))
-          }}
         />
         <UtakuStyle.ItemContainer
           onWheel={(e) => {
@@ -403,8 +360,8 @@ const Main = (): JSX.Element => {
                   <ItemBox
                     item={value}
                     key={value.requestId}
-                    setUrl={(url) => {
-                      setCurrentUrl(url)
+                    setUrl={() => {
+                      console.log('deprecated')
                     }}
                     setTooltip={(tooltip) => {
                       set_tooltip(tooltip)

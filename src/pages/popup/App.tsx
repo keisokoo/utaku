@@ -1,21 +1,51 @@
 import classNames from 'classnames'
-import React, { Fragment, useEffect, useState } from 'react'
-import { FaDownload, FaShare } from 'react-icons/fa'
+import { produce } from 'immer'
+import React, { Fragment, useEffect, useMemo, useState } from 'react'
+import { FaDownload, FaRegEdit, FaShare } from 'react-icons/fa'
+import { RecoilRoot, useRecoilState } from 'recoil'
+import { UtakuW } from '../../assets'
+import {
+  UrlRemapItem,
+  initialUrlRemapItem,
+  settings,
+} from '../../atoms/settings'
 import {
   GrayScaleFill,
   PrimaryButton,
   WhiteFill,
 } from '../../components/Buttons'
+import Modal from '../../components/Modal/Modal'
+import ModalBody from '../../components/Modal/ModalBody'
+import Editor from '../../components/Remap/Editor'
+import Remaps from '../../components/Remap/Remaps'
 import Tooltip from '../../components/Tooltip'
+import { WebResponseItem } from '../../content/types'
 import { lang } from '../../utils'
 import PopupStyle from './Popup.styled'
 import useFileDownload from './hooks/useFileDownload'
-import useWebRequests, { ImageResponseDetails } from './hooks/useWebRequests'
+import useWebRequests from './hooks/useWebRequests'
 import './index.scss'
 
-const App = (): JSX.Element => {
-  const results = useWebRequests(true)
+const App = () => {
+  return (
+    <RecoilRoot>
+      <Main />
+    </RecoilRoot>
+  )
+}
+const Main = (): JSX.Element => {
   const { folderName, downloadedItem, handleFolderName } = useFileDownload()
+  const [openTabList, set_openTabList] = useState<number[]>([])
+  const [settingState, set_settingState] = useRecoilState(settings)
+  const [modalOpen, set_modalOpen] = useState<'remaps' | UrlRemapItem | null>(
+    null
+  )
+  const appliedRemapList = useMemo(() => {
+    return settingState.remapList.filter((item) =>
+      settingState.applyRemapList.includes(item.name)
+    )
+  }, [settingState.applyRemapList, settingState.remapList])
+  const results = useWebRequests(true, appliedRemapList)
   const {
     queueGroup,
     tabList,
@@ -23,46 +53,40 @@ const App = (): JSX.Element => {
     disposedGroup,
     errorGroup,
     clearListByTabId,
-    requeueDisposeList,
   } = results
-  const [openTabList, set_openTabList] = useState<number[]>([])
-  const [folderNameList, set_folderNameList] = useState<string[]>([])
-
-  const handleClickTab = (tabId?: number) => {
-    if (!tabId) return
-    chrome.tabs.get(tabId, (tab) => {
-      if (!tab) return
-      if (chrome.runtime.lastError) {
-        console.log(chrome.runtime.lastError.message)
-        return
-      } else {
-        chrome.windows.update(tab.windowId, { focused: true }, () => {
-          chrome.tabs.update(tabId, { active: true })
-        })
-        chrome.tabs.sendMessage(tabId, { message: 'utaku-mount' }, () => {
-          if (chrome.runtime.lastError) {
-            console.log(chrome.runtime.lastError.message)
-          }
-        })
-      }
-    })
-  }
-
-  const handleReloadTab = (tabId?: number) => {
-    if (!tabId) return
-    chrome.tabs.get(tabId, () => {
-      if (chrome.runtime.lastError) {
-        console.log(chrome.runtime.lastError.message)
-      } else {
-        chrome.tabs.reload(tabId)
-      }
-    })
-  }
   useEffect(() => {
-    chrome.storage.sync.get(['folderName', 'folderNameList'], (items) => {
-      if (items.folderName) handleFolderName(items.folderName)
-      if (items.folderNameList) set_folderNameList(items.folderNameList)
-    })
+    chrome.storage.sync.get(
+      [
+        'folderName',
+        'folderNameList',
+        'sizeLimit',
+        'sizeType',
+        'itemType',
+        'remapList',
+        'applyRemapList',
+      ],
+      (items) => {
+        console.log('items.remapList', items.remapList)
+        set_settingState(
+          produce((draft) => {
+            if (items.folderName) {
+              draft.folderName = items.folderName
+              handleFolderName(items.folderName)
+            }
+            if (items.folderNameList)
+              draft.folderNameList = items.folderNameList
+            if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
+            if (items.sizeType) draft.sizeType = items.sizeType
+            if (items.itemType) draft.itemType = items.itemType
+            if (items.remapList) draft.remapList = items.remapList
+            if (items.applyRemapList)
+              draft.applyRemapList = items.applyRemapList
+          })
+        )
+      }
+    )
+  }, [])
+  useEffect(() => {
     chrome.runtime.connect({ name: 'popup' })
     const contentInit = () => {
       document.querySelector('.floating-button')?.classList.remove('hide')
@@ -100,6 +124,7 @@ const App = (): JSX.Element => {
       }
     )
   }, [])
+
   useEffect(() => {
     const onMessage = (
       request: {
@@ -110,7 +135,7 @@ const App = (): JSX.Element => {
       sendResponse: (response?: {
         data: object
         downloaded?: string[]
-        downloadAble?: ImageResponseDetails[]
+        downloadAble?: WebResponseItem[]
       }) => void
     ) => {
       const senderTabId = sender?.tab?.id
@@ -124,7 +149,7 @@ const App = (): JSX.Element => {
       }
       if (request.message === 'get-items') {
         const data = queueGroup[senderTabId]
-        const downloadAbleData = disposedGroup[senderTabId]
+        const downloadAbleData = disposedGroup[senderTabId] ?? []
         sendResponse({
           data,
           downloaded: downloadedItem,
@@ -141,7 +166,7 @@ const App = (): JSX.Element => {
         sendResponse({
           data: {
             folderName,
-            folderNameList,
+            folderNameList: settingState.folderNameList,
           },
         })
       }
@@ -165,164 +190,270 @@ const App = (): JSX.Element => {
     results.handleRemove,
     downloadedItem,
     folderName,
-    folderNameList,
+    settingState.folderNameList,
   ])
+  const handleClickTab = (tabId?: number) => {
+    if (!tabId) return
+    chrome.tabs.get(tabId, (tab) => {
+      if (!tab) return
+      if (chrome.runtime.lastError) {
+        console.log(chrome.runtime.lastError.message)
+        return
+      } else {
+        chrome.windows.update(tab.windowId, { focused: true }, () => {
+          chrome.tabs.update(tabId, { active: true })
+        })
+        chrome.tabs.sendMessage(tabId, { message: 'utaku-mount' }, () => {
+          if (chrome.runtime.lastError) {
+            console.log(chrome.runtime.lastError.message)
+          }
+        })
+      }
+    })
+  }
+
+  const handleReloadTab = (tabId?: number) => {
+    if (!tabId) return
+    chrome.tabs.get(tabId, () => {
+      if (chrome.runtime.lastError) {
+        console.log(chrome.runtime.lastError.message)
+      } else {
+        chrome.tabs.reload(tabId)
+      }
+    })
+  }
   return (
     <>
-      <PopupStyle.Wrap>
-        {tabList.map((tabItem) => {
-          const tabId = tabItem.id as keyof typeof queueGroup | undefined
-          const queueList = tabId && queueGroup ? queueGroup[tabId] ?? [] : []
-          const disposedList =
-            tabId && disposedGroup ? disposedGroup[tabId] ?? [] : []
-          const errorList = tabId && errorGroup ? errorGroup[tabId] ?? [] : []
-          return (
-            <Fragment key={tabItem.id}>
-              <PopupStyle.ColumnWrap
-                className={classNames({ active: tabItem.active })}
-              >
-                <PopupStyle.Item>
-                  {tabItem.tooltip && <Tooltip>{tabItem.tooltip}</Tooltip>}
-                  <PopupStyle.Row
-                    className="description"
-                    onMouseEnter={(e) => {
-                      const targetText = e.currentTarget
-                      results.handleTooltip(
-                        tabItem,
-                        targetText
-                          ? targetText.innerText.replace(/\n/g, '')
-                          : ''
-                      )
-                    }}
-                    onMouseLeave={() => {
-                      results.handleTooltip(tabItem, '')
-                    }}
-                  >
-                    <span className="title">{tabItem.title}</span>::
-                    <span className="url">{tabItem.url}</span>
-                    <span className="id">[{tabItem.id}]</span>
-                  </PopupStyle.Row>
-                  <PopupStyle.Row>
-                    <GrayScaleFill
-                      _mini
-                      onClick={() => {
-                        if (!tabId) return
-                        if (typeof tabId !== 'number') return
-                        clearListByTabId(tabId)
-                      }}
+      <Modal
+        target="#popup-modal"
+        open={modalOpen !== null}
+        onClose={() => {
+          set_modalOpen(null)
+        }}
+      >
+        {modalOpen === 'remaps' && (
+          <Remaps
+            applyRemapList={settingState.applyRemapList}
+            emitRemap={(value) => {
+              set_settingState(
+                produce((draft) => {
+                  draft.applyRemapList = value
+                })
+              )
+              chrome.storage.sync.set({ applyRemapList: value })
+            }}
+          />
+        )}
+        {typeof modalOpen !== 'string' && modalOpen && (
+          <ModalBody title={lang('url_remap_list')} btn={<></>}>
+            <Editor
+              mode="add"
+              remapItem={modalOpen}
+              onClose={() => {
+                set_modalOpen(null)
+              }}
+            />
+          </ModalBody>
+        )}
+      </Modal>
+      <PopupStyle.Container>
+        <PopupStyle.Top>
+          <UtakuW />
+          <div></div>
+        </PopupStyle.Top>
+        <PopupStyle.Body>
+          {tabList.length < 1 && (
+            <PopupStyle.Nothing>
+              {lang('collect_description')}
+            </PopupStyle.Nothing>
+          )}
+          {tabList.length > 0 && (
+            <PopupStyle.Wrap>
+              {tabList.map((tabItem) => {
+                const tabId = tabItem.id as keyof typeof queueGroup | undefined
+                const queueList =
+                  tabId && queueGroup ? queueGroup[tabId] ?? [] : []
+                const disposedList =
+                  tabId && disposedGroup ? disposedGroup[tabId] ?? [] : []
+                const errorList =
+                  tabId && errorGroup ? errorGroup[tabId] ?? [] : []
+                return (
+                  <Fragment key={tabItem.id}>
+                    <PopupStyle.ColumnWrap
+                      className={classNames({ active: tabItem.active })}
                     >
-                      {lang('clear')}
-                    </GrayScaleFill>
-                    <WhiteFill
-                      _mini
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleReloadTab(tabItem.id)
-                      }}
-                    >
-                      {lang('refresh')}
-                    </WhiteFill>
-                  </PopupStyle.Row>
-                </PopupStyle.Item>
-                <PopupStyle.InfoWrap
-                  className={classNames({ active: tabItem.active })}
-                >
-                  <PopupStyle.Info>
-                    <span className="length">
-                      ({lang('disposed_item')}: {disposedList?.length ?? 0})
-                    </span>
-                    <span className="length">
-                      ({lang('queue')}: {queueList?.length ?? 0})
-                    </span>
-                    <span className="length">
-                      ({lang('error')}: {errorList?.length ?? 0})
-                    </span>
-                  </PopupStyle.Info>
-                  <PopupStyle.Row>
-                    <GrayScaleFill
-                      _mini
-                      disabled={disposedList.length < 1}
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        if (!tabItem?.id) return
-                        set_openTabList((prev) => {
-                          if (typeof tabId !== 'number') return prev
-                          if (!prev.includes(tabId)) return [...prev, tabId]
-                          return prev.filter((curr) => curr !== tabId)
-                        })
-                      }}
-                    >
-                      {lang('list')}
-                    </GrayScaleFill>
-                    <PrimaryButton
-                      _mini
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleClickTab(tabItem.id)
-                      }}
-                    >
-                      {lang('enter')}
-                    </PrimaryButton>
-                    <WhiteFill
-                      _mini
-                      disabled={disposedList.length < 1}
-                      onClick={() => {
-                        if (!tabId) return
-                        if (typeof tabId !== 'number') return
-                        requeueDisposeList(tabId)
-                      }}
-                    >
-                      {lang('requeue')}
-                    </WhiteFill>
-                  </PopupStyle.Row>
-                </PopupStyle.InfoWrap>
-              </PopupStyle.ColumnWrap>
-              {typeof tabId === 'number' && openTabList.includes(tabId) && (
-                <PopupStyle.List>
-                  <PopupStyle.ColumnList>
-                    {disposedList.map((item) => {
-                      const { url, requestId, imageInfo } = item
-                      return (
-                        <PopupStyle.InnerRow
-                          key={requestId}
+                      <PopupStyle.Item>
+                        {tabItem.tooltip && (
+                          <Tooltip>{tabItem.tooltip}</Tooltip>
+                        )}
+                        <PopupStyle.Row
                           className="description"
+                          onMouseEnter={(e) => {
+                            const targetText = e.currentTarget
+                            results.handleTooltip(
+                              tabItem,
+                              targetText
+                                ? targetText.innerText.replace(/\n/g, '')
+                                : ''
+                            )
+                          }}
+                          onMouseLeave={() => {
+                            results.handleTooltip(tabItem, '')
+                          }}
                         >
-                          {imageInfo && (
-                            <PopupStyle.SpanRow>
-                              ({imageInfo.width}
-                              <span>×</span>
-                              {imageInfo.height})
-                            </PopupStyle.SpanRow>
-                          )}
-                          <div className="url-details">{url}</div>
-                          <PopupStyle.Row>
-                            <GrayScaleFill
-                              _mini
-                              onClick={() => {
-                                window.open(url, '_blank')
-                              }}
-                            >
-                              <FaShare />
-                            </GrayScaleFill>
-                            <PrimaryButton
-                              _mini
-                              onClick={() => {
-                                chrome.downloads.download({ url })
-                              }}
-                            >
-                              <FaDownload />
-                            </PrimaryButton>
-                          </PopupStyle.Row>
-                        </PopupStyle.InnerRow>
-                      )
-                    })}
-                  </PopupStyle.ColumnList>
-                </PopupStyle.List>
-              )}
-            </Fragment>
-          )
-        })}
-      </PopupStyle.Wrap>
+                          <span className="title">{tabItem.title}</span>::
+                          <span className="url">{tabItem.url}</span>
+                          <span className="id">[{tabItem.id}]</span>
+                        </PopupStyle.Row>
+                        <PopupStyle.Row>
+                          <GrayScaleFill
+                            _mini
+                            onClick={() => {
+                              if (!tabId) return
+                              if (typeof tabId !== 'number') return
+                              clearListByTabId(tabId)
+                            }}
+                          >
+                            {lang('clear')}
+                          </GrayScaleFill>
+                          <WhiteFill
+                            _mini
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleReloadTab(tabItem.id)
+                            }}
+                          >
+                            {lang('refresh')}
+                          </WhiteFill>
+                        </PopupStyle.Row>
+                      </PopupStyle.Item>
+                      <PopupStyle.InfoWrap
+                        className={classNames({ active: tabItem.active })}
+                      >
+                        <PopupStyle.Info>
+                          <span className="length">
+                            ({lang('disposed_item')}:{' '}
+                            {disposedList?.length ?? 0})
+                          </span>
+                          <span className="length">
+                            ({lang('queue')}: {queueList?.length ?? 0})
+                          </span>
+                          <span className="length">
+                            ({lang('error')}: {errorList?.length ?? 0})
+                          </span>
+                        </PopupStyle.Info>
+                        <PopupStyle.Row>
+                          <GrayScaleFill
+                            _mini
+                            disabled={disposedList.length < 1}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              if (!tabItem?.id) return
+                              set_openTabList((prev) => {
+                                if (typeof tabId !== 'number') return prev
+                                if (!prev.includes(tabId))
+                                  return [...prev, tabId]
+                                return prev.filter((curr) => curr !== tabId)
+                              })
+                            }}
+                          >
+                            {lang('list')}
+                          </GrayScaleFill>
+                          <PrimaryButton
+                            _mini
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleClickTab(tabItem.id)
+                            }}
+                          >
+                            {lang('enter')}
+                          </PrimaryButton>
+                        </PopupStyle.Row>
+                      </PopupStyle.InfoWrap>
+                    </PopupStyle.ColumnWrap>
+                    {typeof tabId === 'number' &&
+                      openTabList.includes(tabId) && (
+                        <PopupStyle.List>
+                          <PopupStyle.ColumnList>
+                            {disposedList.map((item) => {
+                              const { url, requestId, imageInfo } = item
+                              return (
+                                <PopupStyle.InnerRow
+                                  key={requestId}
+                                  className="description"
+                                >
+                                  {imageInfo && (
+                                    <PopupStyle.SpanRow>
+                                      ({imageInfo.width}
+                                      <span>×</span>
+                                      {imageInfo.height})
+                                    </PopupStyle.SpanRow>
+                                  )}
+                                  <div className="url-details">{url}</div>
+                                  <PopupStyle.Row>
+                                    <WhiteFill
+                                      _mini
+                                      onClick={() => {
+                                        try {
+                                          const currentUrl = new URL(url)
+                                          set_modalOpen({
+                                            ...initialUrlRemapItem,
+                                            item: {
+                                              ...initialUrlRemapItem.item,
+                                              reference_url: url,
+                                              host: currentUrl.host,
+                                              params: Object.fromEntries(
+                                                currentUrl.searchParams
+                                              ),
+                                            },
+                                          })
+                                        } catch (error) {
+                                          console.log('err')
+                                        }
+                                      }}
+                                    >
+                                      <FaRegEdit />
+                                    </WhiteFill>
+                                    <GrayScaleFill
+                                      _mini
+                                      onClick={() => {
+                                        window.open(url, '_blank')
+                                      }}
+                                    >
+                                      <FaShare />
+                                    </GrayScaleFill>
+                                    <PrimaryButton
+                                      _mini
+                                      onClick={() => {
+                                        chrome.downloads.download({ url })
+                                      }}
+                                    >
+                                      <FaDownload />
+                                    </PrimaryButton>
+                                  </PopupStyle.Row>
+                                </PopupStyle.InnerRow>
+                              )
+                            })}
+                          </PopupStyle.ColumnList>
+                        </PopupStyle.List>
+                      )}
+                  </Fragment>
+                )
+              })}
+            </PopupStyle.Wrap>
+          )}
+        </PopupStyle.Body>
+        <PopupStyle.Bottom>
+          <WhiteFill
+            onClick={() => {
+              set_modalOpen('remaps')
+            }}
+          >
+            {lang('remaps')}
+          </WhiteFill>
+          <WhiteFill>({appliedRemapList.length})개의 필터 적용 중</WhiteFill>
+        </PopupStyle.Bottom>
+      </PopupStyle.Container>
     </>
   )
 }

@@ -1,3 +1,6 @@
+import { cloneDeep } from "lodash-es"
+import { UrlRemap, UrlRemapItem } from "../atoms/settings"
+import { WebResponseItem } from "../content/types"
 
 export function getTransformXY(el: HTMLElement) {
   const transform = window.getComputedStyle(el).transform
@@ -29,49 +32,61 @@ export function adjustPositionOnResize(el: HTMLButtonElement) {
 
   el.style.transform = `translate(${nextX}px, ${nextY}px)`
 }
-const testLocale = {
-  "close": {
-    "message": "닫기"
-  },
-  "set_url_filter": {
-    "message": "URL 필터 설정"
-  },
-  "edit_url_filter": {
-    "message": "URL 필터 편집"
-  },
-  "edit_query": {
-    "message": "쿼리 편집"
-  },
-  "change_add_text": {
-    "message": "텍스트 변경/추가"
-  },
-  "edit_filter_name": {
-    "message": "필터 이름"
-  },
-  "already_exists_name": {
-    "message": "이미 등록된 이름입니다."
-  },
-  "input_name": {
-    "message": "이름을 입력하세요."
-  },
-  "apply": {
-    "message": "적용"
-  },
-  "add_query": {
-    "message": "쿼리 추가"
-  },
-  "add": {
-    "message": "추가"
-  },
-  "save": {
-    "message": "저장"
-  },
-  "delete": {
-    "message": "삭제"
-  }
-}
 
 export function lang(value: string) {
-  if (!chrome?.i18n) return testLocale[value as keyof typeof testLocale]?.message || value
+  if (!chrome?.i18n) return value
   return chrome.i18n.getMessage(value)
+}
+export function isValidUrl(url?: string | null) {
+  try {
+    if (!url) return false
+    new URL(url)
+    return true
+  } catch (error) {
+    return false
+  }
+}
+export function parseUrlRemap(value: UrlRemap, url: string) {
+  try {
+    const { from, to, params, host } = value
+    if (host && !url.includes(host)) return url
+    if (Object.keys(params).length) {
+      URL
+      const urlObj = new URL(url)
+      Object.keys(params).forEach((key) => {
+        if (params[key]) {
+          urlObj.searchParams.set(key, params[key])
+        } else {
+          urlObj.searchParams.delete(key)
+        }
+      })
+      url = urlObj.toString()
+    }
+    if (from && url.includes(from)) {
+      url = url.replace(from, to)
+    } else if (!from && to) {
+      url = url + to
+    }
+    return url
+  } catch (error) {
+    return url
+  }
+}
+export function parseItemWithUrlRemap(value: UrlRemap, item: WebResponseItem) {
+  const nextItem = cloneDeep(item)
+  if (value.host && !nextItem.url.includes(value.host)) return nextItem
+  nextItem.url = parseUrlRemap(value, nextItem.url)
+  return nextItem
+}
+export function parseItemWithUrlRemaps(urlRemaps: UrlRemapItem[], item: WebResponseItem) {
+  let nextItem = cloneDeep(item)
+  console.log('urlRemaps', urlRemaps);
+
+  urlRemaps.forEach((value) => {
+    nextItem = parseItemWithUrlRemap(value.item, nextItem)
+  })
+  return nextItem
+}
+export function parseItemListWithUrlRemaps(urlRemaps: UrlRemapItem[], items: WebResponseItem[]) {
+  return items.map((item) => parseItemWithUrlRemaps(urlRemaps, item))
 }

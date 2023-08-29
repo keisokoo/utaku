@@ -3,18 +3,30 @@ import { atom } from 'recoil'
 export const itemTypes = ['all', 'image', 'media'] as const
 export const sizeTypes = ['small', 'medium', 'large'] as const
 
-export type UrlFilter = {
+export type UrlRemap = {
+  reference_url?: string
   host: string
-  selected: string[]
   params: {
     [k: string]: string
   }
   from: string
   to: string
 }
-type UrlFilterItem = {
+export type UrlRemapItem = {
+  id: string
   name: string
-  item: UrlFilter
+  item: UrlRemap
+}
+export const initialUrlRemapItem: UrlRemapItem = {
+  id: '',
+  name: '',
+  item: {
+    reference_url: '',
+    host: '',
+    params: {},
+    from: '',
+    to: '',
+  },
 }
 export interface SettingsType {
   sizeType: (typeof sizeTypes)[number]
@@ -25,7 +37,8 @@ export interface SettingsType {
   }
   folderName: string
   folderNameList: string[]
-  filterList: UrlFilterItem[]
+  remapList: UrlRemapItem[]
+  applyRemapList: string[]
 }
 
 export const settings = atom<SettingsType>({
@@ -39,6 +52,7 @@ export const settings = atom<SettingsType>({
     },
     folderName: 'utaku',
     folderNameList: [],
-    filterList: [],
+    remapList: [],
+    applyRemapList: [],
   },
 })

@@ -1,6 +1,8 @@
 
-export type RequestItem = chrome.webRequest.WebResponseHeadersDetails
-export type DataType = { [key in string]: RequestItem }
+export type WebResponseItem = chrome.webRequest.WebResponseHeadersDetails & {
+  imageInfo?: ImageInfo
+}
+export type DataType = { [key in string]: WebResponseItem }
 export type ImageInfo = {
   width: number
   height: number
@@ -8,6 +10,6 @@ export type ImageInfo = {
   active?: boolean
   replaced?: string
 }
-export type ItemType = RequestItem & {
+export type ItemType = WebResponseItem & {
   imageInfo: ImageInfo
 }

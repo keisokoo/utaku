@@ -31,11 +31,6 @@ Here are the permissions UTAKU requires and their explanations:
   - **Purpose**: To check the currently active tab and manage resources per tab.
   - **Usage**: UTAKU identifies the active tab to avoid duplicate popups and to manage resources for each tab.
 
-- `"unlimitedStorage"`
-
-  - **Purpose**: To save user settings without storage limits.
-  - **Usage**: UTAKU stores user settings and configurations.
-
 - `"scripting"`
 
   - **Purpose**: To insert content scripts into web pages.
@@ -53,12 +48,12 @@ Here are the permissions UTAKU requires and their explanations:
 
 - `"webRequest"`
 
-  - **Purpose**: To monitor and manipulate web requests.
+  - **Purpose**: To Monitor web requests and collect image or video urls.
   - **Usage**: UTAKU checks the headers of the network resources requested by the website for further operations like media downloading.
 
 - `"<all_urls>"`
   - **Purpose**: To allow content scripts, stylesheets, and webRequest operations on all websites.
-  - **Usage**: UTAKU needs access to all URLs for its content scripts, stylesheets, and webRequest functionalities to work properly.
+  - **Usage**: UTAKU needs access to all URLs for its content scripts, stylesheets, and webRequest functionalities to work properly. In addition to the pop-up window, UTAKU requires a download control screen for each tab.
 
 **Note: UTAKU does not collect any personal or sensitive data.**
 
@@ -95,11 +90,6 @@ UTAKU가 요구하는 권한과 그 설명은 다음과 같습니다:
   - **목적**: 현재 활성화된 탭을 확인하고 탭별로 리소스를 관리합니다.
   - **사용**: UTAKU는 활성화된 탭을 확인하여 팝업창의 중복 실행을 방지하고, 각 탭별로 리소스를 관리합니다.
 
-- `"unlimitedStorage"`
-
-  - **목적**: 사용자 설정을 저장 제한 없이 저장합니다.
-  - **사용**: UTAKU는 사용자의 설정과 구성을 저장합니다.
-
 - `"scripting"`
 
   - **목적**: 웹 페이지에 콘텐츠 스크립트를 삽입합니다.
@@ -117,11 +107,11 @@ UTAKU가 요구하는 권한과 그 설명은 다음과 같습니다:
 
 - `"webRequest"`
 
-  - **목적**: 웹 요청을 모니터링하고 조작합니다.
+  - **목적**: 웹 요청을 모니터링하고 이미지 또는 비디오 주소를 수집합니다.
   - **사용**: UTAKU는 미디어 다운로드와 같은 추가 작업을 위해 웹사이트가 요청한 네트워크 리소스의 헤더를 확인합니다.
 
 - `"<all_urls>"`
   - **목적**: 모든 웹사이트에 대해 콘텐츠 스크립트, 스타일시트, 그리고 webRequest 작업을 허용합니다.
-  - **사용**: UTAKU는 콘텐츠 스크립트, 스타일시트, 그리고 webRequest 기능이 제대로 작동하기 위해 모든 URL에 대한 접근이 필요합니다.
+  - **사용**: UTAKU는 콘텐츠 스크립트, 스타일시트, 그리고 webRequest 기능이 제대로 작동하기 위해 모든 URL에 대한 접근이 필요합니다. UTAKU는 팝업창 이외에도 각 탭별로 다운로드 컨트롤 화면이 필요합니다.
 
 **UTAKU는 개인정보 또는 민감한 데이터를 수집하지 않습니다.**

@@ -1,15 +1,27 @@
 {
+  "utaku_description": {
+    "message": "When you leave this popup open and open a new page or call refresh, the URL is collected."
+  },
   "close": {
     "message": "Close"
   },
-  "set_url_filter": {
-    "message": "Filtered URL"
+  "set_url_remap": {
+    "message": "Remapped URL"
   },
-  "edit_url_filter": {
-    "message": "URL Filter Settings"
+  "input_remap_name": {
+    "message": "Please input remap name."
   },
-  "url_filter_list": {
-    "message": "URL Filter List"
+  "edit_url_match": {
+    "message": "URL Remap Settings"
+  },
+  "input_url_match": {
+    "message": "Please enter a matching URL pattern."
+  },
+  "url_remap_list": {
+    "message": "URL Remap List"
+  },
+  "remaps": {
+    "message": "Remaps"
   },
   "edit_query": {
     "message": "Edit Query"
@@ -17,8 +29,8 @@
   "change_add_text": {
     "message": "Change/Add Text"
   },
-  "edit_filter_name": {
-    "message": "Filter Name"
+  "edit_remap_name": {
+    "message": "Remap Name"
   },
   "already_exists_name": {
     "message": "already exists name."
@@ -26,8 +38,8 @@
   "input_name": {
     "message": "Please input name."
   },
-  "input_query": {
-    "message": "Please input name."
+  "input_query_description": {
+    "message": "You can change and delete by adding a query."
   },
   "apply": {
     "message": "Apply"
@@ -53,11 +65,14 @@
   "input_content": {
     "message": "Please input content."
   },
+  "input_query_content": {
+    "message": "Input content or Remove with empty input."
+  },
   "delete": {
     "message": "delete"
   },
-  "empty_filter": {
-    "message": "Empty Filter"
+  "empty_remap": {
+    "message": "Empty Remap"
   },
   "list": {
     "message": "List"
@@ -80,7 +95,31 @@
   "clear": {
     "message": "Clear"
   },
+  "change": {
+    "message": "Change"
+  },
+  "replace_url": {
+    "message": "Replace URL"
+  },
+  "remove": {
+    "message": "Remove"
+  },
+  "query_change": {
+    "message": "Query Change"
+  },
+  "query_remove": {
+    "message": "Query Remove"
+  },
   "requeue": {
     "message": "Requeue"
+  },
+  "collect_description": {
+    "message": "I collect the URL of the page that you are viewing.\nplease call refresh or access new page."
+  },
+  "url_reference": {
+    "message": "URL Reference"
+  },
+  "reference_url_description": {
+    "message": "(Optional) Please enter the URL to be used as an example. You can check the result through a preview."
   }
 }

@@ -143,18 +143,15 @@ function main() {
 
   let hideTimeout: NodeJS.Timeout | null = null
 
-  window.addEventListener('mousemove', (e) => {
+  window.addEventListener('mousemove', () => {
     if (hideTimeout) {
       clearTimeout(hideTimeout)
     }
     button.style.opacity = '1'
-    reactRoot.style.opacity = '1'
     button.style.display = ''
-    reactRoot.style.display = ''
     hideTimeout = setTimeout(() => {
       fadeOutElement(button)
-      if (!reactRoot.contains(e.target as Node)) fadeOutElement(reactRoot)
-    }, 5000) // 5초 후에 fadeout 효과를 시작함
+    }, 3000) // 3초 후에 fadeout 효과를 시작함
   })
 }
 main()

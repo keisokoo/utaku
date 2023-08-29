@@ -8,15 +8,15 @@ const CheckboxWrap = styled.div<{ active?: boolean }>`
   display: flex;
   align-items: center;
   gap: 8px;
-  .checkbox-icon {
-    font-size: 16px;
-    color: ${colors['Grayscale/Gray Lighter']};
-    cursor: pointer;
-  }
+`
+const CheckboxIcon = styled.div`
+  font-size: 16px;
+  color: ${colors['Grayscale/Gray Lighter']};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
   &.active {
-    .checkbox-icon {
-      color: ${colors['Primary/Default']};
-    }
+    color: ${colors['Primary/Default']};
   }
 `
 
@@ -28,10 +28,14 @@ const Checkbox = ({ ...props }: CheckboxProps) => {
   return (
     <>
       <CheckboxWrap className={classNames({ active: props.active })} {...props}>
-        <div className="checkbox-icon">
+        <CheckboxIcon
+          className={classNames({ active: props.active }, 'checkbox-icon')}
+        >
           {props.active ? <BsFillCheckCircleFill /> : <BsFillCircleFill />}
-        </div>
-        {props.children && <div>{props.children}</div>}
+        </CheckboxIcon>
+        {props.children && (
+          <div className="checkbox-label">{props.children}</div>
+        )}
       </CheckboxWrap>
     </>
   )

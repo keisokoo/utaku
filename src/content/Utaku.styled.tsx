@@ -94,7 +94,12 @@ const Grid = styled.div`
   display: flex;
   gap: 8px;
 `
-const Center = styled.div``
+const Center = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+`
 const switchCss = css`
   display: flex;
   align-items: center;

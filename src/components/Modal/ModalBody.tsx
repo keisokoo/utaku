@@ -4,6 +4,7 @@ import { lang } from '../../utils'
 import { GrayScaleOutline } from '../Buttons'
 
 const ModalBodyWrap = styled.div`
+  color: #333;
   .modal-header {
     display: flex;
     align-items: center;
@@ -26,6 +27,7 @@ const ModalBodyWrap = styled.div`
     padding: 8px 16px 32px;
     max-height: calc(100vh - 64px - 60px);
     overflow-y: auto;
+    overflow-x: hidden;
   }
   max-height: 100vh;
   border-radius: 8px;
