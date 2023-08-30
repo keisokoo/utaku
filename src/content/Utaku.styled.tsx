@@ -38,26 +38,34 @@ const Controller = styled.div`
 const Editor = styled(Controller)`
   background-color: rgb(7 121 255 / 50%);
 `
+const inputCss = css`
+  width: 80px;
+  border-radius: 4px;
+  backdrop-filter: blur(6px);
+  background-color: #fff;
+  color: ${colors['Grayscale/Gray Dark']};
+  padding: 2px 6px;
+  border: none;
+  outline: none;
+  &:focus {
+    outline: none;
+  }
+  ${typography['Body/Small/Bold']}
+`
 const InputWrap = styled.div`
   display: flex;
   align-items: center;
   gap: 4px;
   margin-right: 16px;
   color: #fff;
+  input[type='text'],
+  input[type='number'],
+  input[type='password'] {
+    ${inputCss}
+  }
 `
 const Input = styled.input`
-  width: 80px;
-  border-radius: 4px;
-  backdrop-filter: blur(6px);
-  background-color: rgb(255 255 255 / 80%);
-  color: ${colors['Grayscale/Gray Dark']};
-  padding: 2px 6px;
-  border: none;
-  &:focus {
-    outline: none;
-    background-color: rgb(255 255 255 / 100%);
-  }
-  ${typography['Body/Small/Bold']}
+  ${inputCss}
 `
 const DisposeContainer = styled.div`
   position: absolute;
@@ -85,17 +93,50 @@ const ItemContainer = styled.div`
   overflow: auto hidden;
   overscroll-behavior: contain;
   width: 100%;
-  height: calc(100% - 100px);
+  &:not([data-wrapper-size='tiny']) {
+    flex: 1;
+  }
   padding: 16px;
   backdrop-filter: blur(6px);
   background-color: rgba(0, 0, 0, 0.5);
+  &[data-wrapper-size='expand'],
+  &[data-wrapper-size='tile'] {
+    overflow: hidden auto;
+  }
+  &[data-wrapper-size='tiny'] {
+    height: 1px;
+    overflow: hidden;
+    padding: 0;
+  }
 `
 const Grid = styled.div`
-  flex-direction: row-reverse;
-  justify-content: flex-end;
-  column-count: initial;
-  display: flex;
-  gap: 8px;
+  &:not([data-wrapper-size='expand']) {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    column-count: initial;
+    display: flex;
+    gap: 8px;
+  }
+  &[data-wrapper-size='tile'] {
+    flex-direction: row;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  &[data-wrapper-size='expand'] {
+    gap: 8px;
+    column-count: 8;
+    column-gap: 16px;
+    img,
+    video {
+      height: auto;
+    }
+    &[data-item-size='small'] {
+      column-count: 12;
+    }
+    &[data-item-size='large'] {
+      column-count: 6;
+    }
+  }
 `
 const Center = styled.div`
   display: flex;
@@ -203,6 +244,28 @@ const pulseCss = css`
   justify-content: center;
 `
 const UtakuStyle = {
+  IconWrap: styled.i`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    padding: 0;
+    padding-left: 12px;
+    cursor: default;
+  `,
+  Wrap: styled.div`
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    &[data-wrapper-size='expand'],
+    &[data-wrapper-size='tile'] {
+      width: 100%;
+      height: calc(100vh - 32px);
+    }
+    &[data-wrapper-size='tiny'] {
+      height: auto;
+    }
+  `,
   Circle: styled.div`
     ${pulseCss}
   `,
@@ -217,6 +280,12 @@ const UtakuStyle = {
   `,
   QualityController: styled.div`
     ${switchCss}
+  `,
+  ItemLength: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 100px;
   `,
   Center,
   Input,

@@ -41,6 +41,15 @@ const Main = (): JSX.Element => {
   const toggleActive = useCallback(() => {
     set_active((prev) => !prev)
   }, [])
+
+  useEffect(() => {
+    const elements = document.querySelectorAll('[classname]')
+    if (!elements) return
+    if (!elements.length) return
+    elements.forEach((el) => {
+      el.setAttribute('class', el.getAttribute('classname')!)
+    })
+  })
   useEffect(() => {
     chrome.storage.local.get(
       [
@@ -50,6 +59,7 @@ const Main = (): JSX.Element => {
         'sizeType',
         'itemType',
         'remapList',
+        'containerSize',
       ],
       (items) => {
         set_settingState(
@@ -61,6 +71,7 @@ const Main = (): JSX.Element => {
             if (items.sizeType) draft.sizeType = items.sizeType
             if (items.itemType) draft.itemType = items.itemType
             if (items.remapList) draft.remapList = items.remapList
+            if (items.containerSize) draft.containerSize = items.containerSize
           })
         )
       }
@@ -274,7 +285,7 @@ const Main = (): JSX.Element => {
   if (!itemList) return <></>
   return (
     <>
-      <div className="utaku-wrapper">
+      <UtakuStyle.Wrap data-wrapper-size={settingState.containerSize}>
         <DownloadComp
           itemList={itemList}
           handleItemList={(arr) => {
@@ -307,8 +318,10 @@ const Main = (): JSX.Element => {
         />
         <UtakuStyle.ItemContainer
           onWheel={(e) => {
+            if (settingState.containerSize !== 'normal') return
             e.currentTarget.scrollLeft += e.deltaY
           }}
+          data-wrapper-size={settingState.containerSize}
         >
           <UtakuStyle.DisposeContainer>
             {queueList &&
@@ -376,11 +389,15 @@ const Main = (): JSX.Element => {
                 )
               })}
           </UtakuStyle.DisposeContainer>
-          <UtakuStyle.Grid>
+          <UtakuStyle.Grid
+            data-item-size={settingState.sizeType}
+            data-wrapper-size={settingState.containerSize}
+          >
             {filteredImages &&
               filteredImages.map((value) => {
                 return (
                   <ItemBox
+                    data-wrapper-size={settingState.containerSize}
                     item={value}
                     key={'filteredImages' + value.url}
                     setTooltip={(tooltip) => {
@@ -402,10 +419,16 @@ const Main = (): JSX.Element => {
                   />
                 )
               })}
-            {queueList.length > 0 && <LoadingImage length={queueList.length} />}
+            {queueList.length > 0 && (
+              <LoadingImage
+                data-item-size={settingState.sizeType}
+                data-wrapper-size={settingState.containerSize}
+                length={queueList.length}
+              />
+            )}
           </UtakuStyle.Grid>
         </UtakuStyle.ItemContainer>
-      </div>
+      </UtakuStyle.Wrap>
     </>
   )
 }

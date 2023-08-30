@@ -18,12 +18,13 @@ const OptionStyle = {
   Header: styled.div`
     background-color: #313131;
     position: sticky;
-    top: -254px;
+    top: -104px;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: flex-end;
     flex-direction: column;
-    height: 320px;
+    height: 170px;
     border-bottom: 2px solid #fff;
     padding-bottom: 16px;
   `,
@@ -33,10 +34,12 @@ const OptionStyle = {
     display: flex;
     flex-direction: column;
     gap: 16px;
+    line-height: 1.4;
   `,
   Nav: styled.div`
     position: sticky;
     top: 3px;
+    z-index: 2;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -52,33 +55,46 @@ const OptionStyle = {
   `,
   Introduction: styled.div`
     font-size: 18px;
-    line-height: 1.2;
     font-weight: 400;
     white-space: pre-line;
+  `,
+  Responsive: styled.div`
+    padding-top: 56.25%;
+    position: relative;
+    width: 100%;
+    z-index: 0;
+  `,
+  Iframe: styled.iframe`
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
   `,
 }
 const navList = [
   {
-    name: 'About',
-    id: 'about',
-  },
-  {
-    name: 'Documents',
-    id: 'documents',
-  },
-  {
-    name: '',
-    id: 'empty',
+    name: 'Tutorial',
+    id: 'tutorial',
   },
   {
     name: 'Faq',
     id: 'faq',
   },
   {
+    name: '',
+    id: 'empty',
+  },
+  {
     name: 'Support',
     id: 'support',
   },
+  {
+    name: 'Contact',
+    id: 'contact',
+  },
 ]
+
 const Main = (): JSX.Element => {
   return (
     <OptionStyle.Wrap>
@@ -107,6 +123,24 @@ const Main = (): JSX.Element => {
           UTAKU를 사용하는 것은 자유이지만, 다운받은 이미지나 영상을 사용함에 있어서, 어떠한 책임도 지지 않습니다.\n\n 앞으로 팝업이나 설정 창에 광고가 나타날 수 있습니다. 광고는 아무도 좋아하지 않지만, 한 잔의 커피 가격으로도 큰 도움이 되니 이해해 주세요. 특히나 어려운 환경에서 버티고 있는 연장자 개발자에게는 더욱 그렇습니다.\n\n UTAKU를 즐겁게 사용하시고, 여유가 되신다면 개발자에게 커피 한 잔 값의 지원을 해주세요. 그것만으로도 큰 의미가 있습니다.`}
         </OptionStyle.Introduction>
         <h1>Introductions</h1>
+        <OptionStyle.Responsive>
+          <OptionStyle.Iframe
+            src="https://www.youtube.com/embed/skKaxFyFuEo"
+            title="UTAKU Remap Tutorial"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+            allowFullScreen
+          ></OptionStyle.Iframe>
+        </OptionStyle.Responsive>
+        <OptionStyle.Responsive>
+          <OptionStyle.Iframe
+            src="https://www.youtube.com/embed/yAkgqnzNFyM"
+            title="UTAKU url 변경 사용법"
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+            allowFullScreen
+          ></OptionStyle.Iframe>
+        </OptionStyle.Responsive>
         <div id="options" className="options">
           {`사용법은 간단합니다. UTAKU 아이콘을 클릭해서 팝업을 열고, 원하는 사이트를 방문 하면 됩니다.
           팝업이 활성화되면, UTAKU는 자동으로 이미지를 수집하고, 다운로드할 수 있습니다.

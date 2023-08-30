@@ -2,6 +2,7 @@ import { atom } from 'recoil'
 
 export const itemTypes = ['all', 'image', 'media'] as const
 export const sizeTypes = ['small', 'medium', 'large'] as const
+export const containerTypes = ['tiny', 'normal', 'tile', 'expand'] as const
 
 export type UrlRemap = {
   reference_url?: string
@@ -39,6 +40,7 @@ export interface SettingsType {
   folderNameList: string[]
   remapList: UrlRemapItem[]
   applyRemapList: string[]
+  containerSize: (typeof containerTypes)[number]
 }
 
 export const settings = atom<SettingsType>({
@@ -54,5 +56,6 @@ export const settings = atom<SettingsType>({
     folderNameList: [],
     remapList: [],
     applyRemapList: [],
+    containerSize: 'normal',
   },
 })

@@ -42,3 +42,8 @@ export const sampleList: UrlRemapItem[] = [
     "name": "Unsplash"
   }
 ]
+export const sampleApply = [
+  "c7e5e31f-a2cc-4966-8ba5-8a81d5d24e13",
+  "4926c86d-26f6-4837-bac6-d254d1b41f68",
+  "1c44c17d-fe6b-4328-b1fc-c8938f26bc97"
+]

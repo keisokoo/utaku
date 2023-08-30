@@ -10,18 +10,24 @@ const syncRotateKeyframes = keyframes`
   }
 `
 const mediaCss = css`
-  width: auto;
-  height: 120px;
-  min-width: 100px;
-  max-width: initial;
+  &:not([data-wrapper-size='expand']) {
+    height: 120px;
+    min-width: 100px;
+    width: auto;
+    max-width: initial;
+    &[data-item-size='medium'] {
+      height: 160px;
+    }
+    &[data-item-size='large'] {
+      height: 240px;
+    }
+  }
   object-fit: contain;
   break-inside: avoid;
   box-sizing: border-box;
-  &.medium {
-    height: 160px;
-  }
-  &.large {
-    height: 240px;
+  &[data-wrapper-size='expand'] {
+    height: auto;
+    width: 100%;
   }
 `
 const iconsCss = css`
@@ -56,32 +62,34 @@ const MediaIcon = styled.i`
   height: 24px;
 `
 const IconWrap = styled.i`
-  width: 16px;
-  height: 16px;
   border-radius: 50%;
   background-color: #0000006e;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
   color: ${colors['White/White 30%']};
   &:hover {
     color: ${colors['White/White off']};
   }
-  svg {
-    width: 8px;
-    height: 8px;
-  }
 `
 const ImageSize = styled.div`
   ${typography['Body/Small/Regular']}
-  font-size: 12px;
+  font-size: 14px;
+  line-height: 24px;
   padding: 0px 0 2px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 4px;
   color: ${colors['White/White 70%']};
+  &[data-item-size='small'] {
+    font-size: 12px;
+    line-height: 20px;
+  }
+  &[data-item-size='large'] {
+    font-size: 16px;
+    line-height: 28px;
+  }
 `
 const ImageBox = styled.div`
   font-size: 0;
@@ -123,6 +131,7 @@ const ItemBoxStyles = {
     justify-content: center;
   `,
   Wrap: styled.div`
+    user-select: none;
     break-inside: avoid;
     box-sizing: border-box;
     opacity: 0.8;
@@ -135,6 +144,11 @@ const ItemBoxStyles = {
     padding: 6px;
     color: ${colors['White/White 70%']};
 
+    &[data-wrapper-size='expand'] {
+      width: 100%;
+      break-inside: avoid;
+      margin-bottom: 16px;
+    }
     &.image {
       ${CheckIcon} {
         color: ${colors['Accent/Default']};
@@ -171,6 +185,18 @@ const ItemBoxStyles = {
     align-items: center;
     justify-content: center;
     gap: 8px;
+    & > i {
+      padding: 4px;
+      font-size: 11px;
+      &[data-item-size='small'] {
+        padding: 3px;
+        font-size: 10px;
+      }
+      &[data-item-size='large'] {
+        padding: 4px;
+        font-size: 12px;
+      }
+    }
   `,
   IconWrap,
   ImageItem,

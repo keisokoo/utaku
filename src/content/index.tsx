@@ -1,16 +1,19 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { v4 as uuid } from 'uuid'
 import App from './App'
 import './index.scss'
+
+const rootId = `b7414be4-15e6-4442-8ae4-ae6337e17e53`
 if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
 
 function onMessage(request: { message: string; data: object }) {
   if (request?.message === 'utaku-mount') {
     const container = document.getElementById('root-' + rootId) as HTMLElement
+    // if (!container.shadowRoot) container.attachShadow({ mode: 'open' })
     if (!root) {
       root = ReactDOM.createRoot(container)
+
       root.render(<App />)
     } else {
       container.style.opacity = ''
@@ -64,7 +67,6 @@ const getAvailable = (el?: HTMLElement) => {
 }
 document.addEventListener('visibilitychange', () => getAvailable())
 window.addEventListener('focus', () => getAvailable(), false)
-const rootId = uuid()
 function toggleMount() {
   try {
     if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
@@ -81,6 +83,7 @@ function toggleMount() {
             const container = document.getElementById(
               'root-' + rootId
             ) as HTMLElement
+            // if (!container.shadowRoot) container.attachShadow({ mode: 'open' })
             root = ReactDOM.createRoot(container)
             root.render(<App />)
           } else {

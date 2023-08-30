@@ -1,9 +1,9 @@
 import classNames from 'classnames'
 import { produce } from 'immer'
 import React, { useState } from 'react'
-import { FaList } from 'react-icons/fa'
+import { FaList, FaPhotoVideo, FaSlidersH, FaTh } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
-import { settings, sizeTypes } from '../atoms/settings'
+import { containerTypes, settings, sizeTypes } from '../atoms/settings'
 import { PrimaryButton, WhiteFill } from '../components/Buttons'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
@@ -27,8 +27,14 @@ const ControlComp = ({
   tooltip,
 }: ControlCompProps) => {
   const [settingState, set_settingState] = useRecoilState(settings)
-  const { folderName, folderNameList, sizeType, sizeLimit, itemType } =
-    settingState
+  const {
+    folderName,
+    folderNameList,
+    sizeType,
+    sizeLimit,
+    itemType,
+    containerSize,
+  } = settingState
 
   const [folderNameInput, set_folderNameInput] = useState<string>('')
   const [modalOpen, set_modalOpen] = useState<'folder' | null>(null)
@@ -99,7 +105,7 @@ const ControlComp = ({
             <ModalList.BottomList>
               <ModalList.Row>
                 <ModalList.Name>
-                  <input
+                  <UtakuStyle.Input
                     placeholder="Folder Name"
                     type="text"
                     value={folderNameInput}
@@ -207,6 +213,30 @@ const ControlComp = ({
         </UtakuStyle.Left>
         <UtakuStyle.Right>
           <UtakuStyle.SizeController>
+            <UtakuStyle.IconWrap>
+              <FaTh />
+            </UtakuStyle.IconWrap>
+            {containerTypes.map((type) => (
+              <div
+                key={type}
+                className={type === containerSize ? 'active' : ''}
+                onClick={() => {
+                  set_settingState(
+                    produce((draft) => {
+                      draft.containerSize = type
+                    })
+                  )
+                  chrome.storage.local.set({ containerSize: type })
+                }}
+              >
+                {type}
+              </div>
+            ))}
+          </UtakuStyle.SizeController>
+          <UtakuStyle.SizeController>
+            <UtakuStyle.IconWrap>
+              <FaSlidersH />
+            </UtakuStyle.IconWrap>
             {sizeTypes.map((type) => (
               <div
                 key={type}
@@ -225,6 +255,9 @@ const ControlComp = ({
             ))}
           </UtakuStyle.SizeController>
           <UtakuStyle.QualityController>
+            <UtakuStyle.IconWrap>
+              <FaPhotoVideo />
+            </UtakuStyle.IconWrap>
             {itemTypes.map((type) => (
               <div
                 key={type}
@@ -242,15 +275,17 @@ const ControlComp = ({
               </div>
             ))}
           </UtakuStyle.QualityController>
-          <div>
-            {'( '}
-            <span>
-              {current}
-              {' / '}
-              {total}
-            </span>
-            {' )'}
-          </div>
+          <UtakuStyle.ItemLength>
+            <div>
+              {'( '}
+              <span>
+                {current}
+                {' / '}
+                {total}
+              </span>
+              {' )'}
+            </div>
+          </UtakuStyle.ItemLength>
           <div onClick={toggleActive}>
             {active && <UtakuStyle.CircleActive />}
             {!active && <UtakuStyle.Circle />}

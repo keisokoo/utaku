@@ -74,9 +74,11 @@ const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
                 <FaVideo />
               </S.MediaIcon>
               <VideoItem
-                className={settingState.sizeType}
+                data-item-size={settingState.sizeType}
                 key={item.url}
                 src={item.url}
+                draggable="false"
+                data-wrapper-size={settingState.containerSize}
               />
             </>
           )}
@@ -86,21 +88,26 @@ const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
                 <FaImage />
               </S.MediaIcon>
               <ImageItem
-                className={settingState.sizeType}
                 key={item.url}
                 src={item.url}
                 alt={item.requestId}
+                draggable="false"
+                data-item-size={settingState.sizeType}
+                data-wrapper-size={settingState.containerSize}
               />
             </>
           )}
         </S.ImageBox>
-        <S.ImageSize className="image-size">
+        <S.ImageSize
+          className="image-size"
+          data-item-size={settingState.sizeType}
+        >
           <span>{item.imageInfo.width}px</span>
           <span>×</span>
           <span>{item.imageInfo.height}px</span>
           {item.imageInfo.replaced && <span>(Replaced)</span>}
         </S.ImageSize>
-        <S.Icons className="image-icons">
+        <S.Icons className="image-icons" data-item-size={settingState.sizeType}>
           <S.IconWrap
             {...tooltipEventAttributes('Copy')}
             onClick={(e) => {
