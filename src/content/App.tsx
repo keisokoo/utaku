@@ -370,7 +370,7 @@ const Main = (): JSX.Element => {
                 return (
                   <ItemBox
                     item={value}
-                    key={value.requestId}
+                    key={'filteredImages' + value.url}
                     setUrl={() => {
                       console.log('deprecated')
                     }}
@@ -380,7 +380,7 @@ const Main = (): JSX.Element => {
                     onClick={() => {
                       set_itemList((prev) => {
                         return prev.map((item) => {
-                          if (item.requestId === value.requestId) {
+                          if (item.url === value.url) {
                             item.imageInfo = {
                               ...value.imageInfo,
                               active: !value.imageInfo.active,

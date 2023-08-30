@@ -76,7 +76,7 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
               </S.MediaIcon>
               <VideoItem
                 className={settingState.sizeType}
-                key={item.requestId}
+                key={item.url}
                 src={item.url}
               />
             </>
@@ -88,7 +88,7 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
               </S.MediaIcon>
               <ImageItem
                 className={settingState.sizeType}
-                key={item.requestId}
+                key={item.url}
                 src={item.url}
                 alt={item.requestId}
               />
