@@ -25,6 +25,7 @@ import PopupStyle from './Popup.styled'
 import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
 import './index.scss'
+import { sampleList } from './sources'
 
 function focusPopup() {
   chrome.tabs.query(
@@ -91,6 +92,9 @@ const Main = (): JSX.Element => {
         'applyRemapList',
       ],
       (items) => {
+        if (!items.remapList) {
+          chrome.storage.local.set({ remapList: sampleList })
+        }
         set_settingState(
           produce((draft) => {
             if (items.folderName) {
@@ -102,7 +106,11 @@ const Main = (): JSX.Element => {
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
             if (items.sizeType) draft.sizeType = items.sizeType
             if (items.itemType) draft.itemType = items.itemType
-            if (items.remapList) draft.remapList = items.remapList
+            if (items.remapList) {
+              draft.remapList = items.remapList
+            } else {
+              draft.remapList = sampleList
+            }
             if (items.applyRemapList)
               draft.applyRemapList = items.applyRemapList
           })

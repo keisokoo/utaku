@@ -117,7 +117,7 @@
     "message": "Requeue"
   },
   "collect_description": {
-    "message": "I collect the URL of the page that you are viewing.\nplease call refresh or access new page."
+    "message": "t collects the URL of the page you're viewing.\nPlease refresh or access a new page."
   },
   "url_reference": {
     "message": "URL Reference"

@@ -16,6 +16,9 @@ const OptionStyle = {
     max-width: 1200px;
   `,
   Header: styled.div`
+    background-color: #313131;
+    position: sticky;
+    top: -254px;
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -32,13 +35,14 @@ const OptionStyle = {
     gap: 16px;
   `,
   Nav: styled.div`
+    position: sticky;
+    top: 3px;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
     margin-bottom: 16px;
     padding: 16px;
-    border-bottom: 2px solid #fff;
     font-size: 24px;
     font-weight: 700;
     & > div {
@@ -55,20 +59,24 @@ const OptionStyle = {
 }
 const navList = [
   {
-    name: 'Home',
-    id: 'home',
+    name: 'About',
+    id: 'about',
   },
   {
     name: 'Documents',
     id: 'documents',
   },
   {
-    name: 'Blog',
-    id: 'blog',
+    name: '',
+    id: 'empty',
   },
   {
-    name: 'Contact',
-    id: 'contact',
+    name: 'Faq',
+    id: 'faq',
+  },
+  {
+    name: 'Support',
+    id: 'support',
   },
 ]
 const Main = (): JSX.Element => {
