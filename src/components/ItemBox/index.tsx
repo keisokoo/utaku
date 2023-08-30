@@ -7,6 +7,7 @@ import {
   FaImage,
   FaRegEdit,
   FaShare,
+  FaSync,
   FaVideo,
 } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
@@ -62,6 +63,11 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
             <S.CheckIcon>
               <FaCheck />
             </S.CheckIcon>
+          )}
+          {item.imageInfo?.download && (
+            <S.DownloadIcon>
+              <FaSync />
+            </S.DownloadIcon>
           )}
           {item.type === 'media' && (
             <>
@@ -119,7 +125,10 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
               {...tooltipEventAttributes('Remap: ' + item.url)}
               onClick={(e) => {
                 e.stopPropagation()
-                setUrl(item.url)
+                chrome.runtime.sendMessage({
+                  message: 'create-remap',
+                  data: item.url,
+                })
               }}
             >
               <FaRegEdit />

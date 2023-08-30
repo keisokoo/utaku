@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import { produce } from 'immer'
 import React, { useState } from 'react'
-import { FaList, FaRegEdit } from 'react-icons/fa'
+import { FaList } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
 import { settings, sizeTypes } from '../atoms/settings'
 import { PrimaryButton, WhiteFill } from '../components/Buttons'
@@ -77,7 +77,7 @@ const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
                             draft.folderNameList = nextFolderNameList
                           })
                         )
-                        chrome.storage.sync.set({
+                        chrome.storage.local.set({
                           folderNameList: nextFolderNameList,
                         })
                       }}
@@ -115,7 +115,7 @@ const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
                           draft.folderNameList = nextFolderNameList
                         })
                       )
-                      chrome.storage.sync.set({
+                      chrome.storage.local.set({
                         folderNameList: nextFolderNameList,
                       })
                       set_folderNameInput('')
@@ -174,7 +174,7 @@ const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
                     draft.sizeLimit = nextSizeLimit
                   })
                 )
-                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
+                chrome.storage.local.set({ sizeLimit: nextSizeLimit })
               }}
             />
             <span>×</span>
@@ -192,16 +192,9 @@ const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
                     draft.sizeLimit = nextSizeLimit
                   })
                 )
-                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
+                chrome.storage.local.set({ sizeLimit: nextSizeLimit })
               }}
             />
-            <UtakuStyle.IconButton
-              onClick={() => {
-                console.log('deprecated')
-              }}
-            >
-              <FaRegEdit />
-            </UtakuStyle.IconButton>
           </UtakuStyle.InputWrap>
         </UtakuStyle.Left>
         <UtakuStyle.Right>
@@ -216,7 +209,7 @@ const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
                       draft.sizeType = type
                     })
                   )
-                  chrome.storage.sync.set({ sizeType: type })
+                  chrome.storage.local.set({ sizeType: type })
                 }}
               >
                 {type}
@@ -234,7 +227,7 @@ const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
                       draft.itemType = type
                     })
                   )
-                  chrome.storage.sync.set({ itemType: type })
+                  chrome.storage.local.set({ itemType: type })
                 }}
               >
                 {type}

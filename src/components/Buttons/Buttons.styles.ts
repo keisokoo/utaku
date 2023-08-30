@@ -55,6 +55,10 @@ export const ButtonStyle = styled.button(
     justify-content: center;
     gap: 4px;
     ${props._css && props._css}
+    ${props._icon && css`
+      padding: 8px;
+      border-radius: 50%;
+    `}
   `
 )
 export const CSVDownloadButton = styled.button`

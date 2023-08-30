@@ -63,7 +63,6 @@ async function createWindow() {
     chrome.windows.update(firstTab.windowId, { focused: true }, () => {
       if (firstTab.id) chrome.tabs.update(firstTab.id, { active: true })
     })
-
   } else {
     chrome.windows.create({
       type: 'popup',

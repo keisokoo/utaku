@@ -1,10 +1,19 @@
-import { css } from '@emotion/react'
+import { css, keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
 import { colors, typography } from '../../themes'
+const syncRotateKeyframes = keyframes`
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+`
 const mediaCss = css`
   width: auto;
   height: 120px;
   min-width: 100px;
+  max-width: initial;
   object-fit: contain;
   break-inside: avoid;
   box-sizing: border-box;
@@ -140,5 +149,22 @@ const ItemBoxStyles = {
   VideoItem,
   CheckIcon,
   MediaIcon,
+  DownloadIcon: styled.i`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    background-color: #8e8c009e;
+    width: 100%;
+    height: 100%;
+    font-size: 16px;
+    color: #fff;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    & > svg {
+      animation: ${syncRotateKeyframes} 1s linear infinite;
+    }
+  `,
 }
 export default ItemBoxStyles

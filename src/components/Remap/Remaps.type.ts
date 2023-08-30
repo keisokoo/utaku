@@ -1,1 +1,1 @@
-export type RemapBodyMode = 'add' | { name: string } | null
+export type RemapBodyMode = 'add' | { id: string } | null

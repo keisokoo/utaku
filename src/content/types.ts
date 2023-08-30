@@ -9,6 +9,8 @@ export type ImageInfo = {
   thumbnail?: string
   active?: boolean
   replaced?: string
+  hide?: boolean
+  download?: boolean
 }
 export type ItemType = WebResponseItem & {
   imageInfo: ImageInfo

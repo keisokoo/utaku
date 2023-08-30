@@ -31,15 +31,15 @@ const RemapList = ({
         )}
         {settingState.remapList.map((item) => {
           return (
-            <F.ItemRow key={item.name}>
+            <F.ItemRow key={item.id}>
               <F.Row>
                 <Checkbox
-                  active={selected.includes(item.name)}
+                  active={selected.includes(item.id)}
                   onClick={() => {
-                    if (selected.includes(item.name)) {
-                      setSelected(selected.filter((curr) => curr !== item.name))
+                    if (selected.includes(item.id)) {
+                      setSelected(selected.filter((curr) => curr !== item.id))
                     } else {
-                      setSelected([...selected, item.name])
+                      setSelected([...selected, item.id])
                     }
                   }}
                 />
@@ -49,7 +49,7 @@ const RemapList = ({
                 <GrayScaleFill
                   _mini
                   onClick={() => {
-                    setRemapMode({ name: item.name })
+                    setRemapMode({ id: item.id })
                   }}
                 >
                   {lang('edit')}
@@ -60,13 +60,19 @@ const RemapList = ({
                     set_settingState({
                       ...settingState,
                       remapList: settingState.remapList.filter(
-                        (curr) => curr.name !== item.name
+                        (curr) => curr.id !== item.id
+                      ),
+                      applyRemapList: settingState.applyRemapList.filter(
+                        (curr) => curr !== item.id
                       ),
                     })
                     if (chrome?.storage)
-                      chrome.storage.sync.set({
+                      chrome.storage.local.set({
                         remapList: settingState.remapList.filter(
-                          (curr) => curr.name !== item.name
+                          (curr) => curr.id !== item.id
+                        ),
+                        applyRemapList: settingState.applyRemapList.filter(
+                          (curr) => curr !== item.id
                         ),
                       })
                   }}

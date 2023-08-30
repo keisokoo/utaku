@@ -36,7 +36,7 @@ const Main = (): JSX.Element => {
   const [downloadedItem, set_downloadedItem] = useState<string[]>([])
   const [settingState, set_settingState] = useRecoilState(settings)
   useEffect(() => {
-    chrome.storage.sync.get(
+    chrome.storage.local.get(
       [
         'folderName',
         'folderNameList',
@@ -65,6 +65,7 @@ const Main = (): JSX.Element => {
     if (!itemList.length) return []
     const filtered = itemList.filter((item) => {
       if (!item.imageInfo) return false
+      if (item.imageInfo.hide) return false
       const { width, height } = item.imageInfo
       const sizeLimit = settingState.sizeLimit
       const itemType = settingState.itemType
@@ -74,8 +75,8 @@ const Main = (): JSX.Element => {
       let notDownloaded = true
       if (itemType && itemType !== 'all') checkItemType = item.type === itemType
       if (downloadedItem.includes(item.url)) notDownloaded = false
-      if (sizeLimit.width) widthResult = width > sizeLimit.width
-      if (sizeLimit.height) heightResult = height > sizeLimit.height
+      if (sizeLimit.width) widthResult = width >= sizeLimit.width
+      if (sizeLimit.height) heightResult = height >= sizeLimit.height
       return widthResult && heightResult && notDownloaded && checkItemType
     })
     return uniqBy(filtered, (item) => item.url)
@@ -89,6 +90,16 @@ const Main = (): JSX.Element => {
           .filter((item) => item.imageInfo.active)
           .map((item) => item.url)
     if (!downloadList.length) return
+    set_itemList((prev) => {
+      return prev.map((item) => {
+        if (downloadList.includes(item.url)) {
+          item.imageInfo.active = false
+          item.imageInfo.download = true
+        }
+        return item
+      })
+    })
+
     chrome.runtime.sendMessage({
       message: 'download',
       data: downloadList,
@@ -177,7 +188,7 @@ const Main = (): JSX.Element => {
       })
     )
     chrome.runtime.sendMessage({
-      message: 'delete-image',
+      message: 'delete-from-queue',
       data: { ...item, error: error ?? false },
     })
   }

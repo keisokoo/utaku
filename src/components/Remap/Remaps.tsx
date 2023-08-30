@@ -24,7 +24,7 @@ const Remaps = ({ applyRemapList, emitRemap, ...props }: RemapsProps) => {
   const currentRemap = useMemo(() => {
     if (!mode) return null
     if (typeof mode === 'string') return null
-    return settingState.remapList.find((item) => item.name === mode?.name)
+    return settingState.remapList.find((item) => item.id === mode?.id)
   }, [settingState.remapList, mode])
   return (
     <>

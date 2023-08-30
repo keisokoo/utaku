@@ -1,4 +1,4 @@
-import { css } from '@emotion/react'
+import { css, keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
 import { colors } from '../../themes'
 const Ellipsis = css`
@@ -6,7 +6,35 @@ const Ellipsis = css`
   text-overflow: ellipsis;
   white-space: nowrap;
 `
+const pulse = keyframes`
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(0, 174, 35, 0.7);
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 10px rgba(0, 174, 35, 0);
+  }
+`
+const pulseCss = css`
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #ed2700;
+  display: flex;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+`
 const PopupStyle = {
+  Circle: styled.div`
+    ${pulseCss}
+  `,
+  CircleActive: styled.div`
+    ${pulseCss}
+    animation: ${pulse} 3s infinite;
+    background-color: rgb(0, 174, 35);
+  `,
   Container: styled.div`
     width: 100%;
     height: 100%;
@@ -43,18 +71,38 @@ const PopupStyle = {
       flex: 1;
     }
   `,
+  TopRight: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+  `,
   Body: styled.div`
     padding: 8px 32px;
     overflow-y: auto;
     overscroll-behavior-y: contain;
     flex: 1;
+    background-color: #202020;
   `,
   Bottom: styled.div`
     padding: 24px 32px;
     width: 100%;
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  `,
+  BottomButtons: styled.div`
+    display: flex;
+    align-items: center;
     gap: 8px;
+  `,
+  BottomDescription: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: ${colors['Primary/Light']};
+    margin-left: 8px;
   `,
   ColumnWrap: styled.div`
     display: flex;

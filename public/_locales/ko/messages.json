@@ -101,6 +101,9 @@
   "change": {
     "message": "변경"
   },
+  "return_removed": {
+    "message": "제거 되돌리기"
+  },
   "remove": {
     "message": "제거"
   },
@@ -121,5 +124,14 @@
   },
   "reference_url_description": {
     "message": "(선택 사항) 예시로 사용될 URL을 입력해주세요. 미리보기로 결과를 확인할 수 있습니다."
+  },
+  "applied_remaps": {
+    "message": "$count$개의 구성 항목 적용 중",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "0"
+      }
+    }
   }
 }

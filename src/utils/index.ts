@@ -1,5 +1,5 @@
 import { cloneDeep } from "lodash-es"
-import { UrlRemap, UrlRemapItem } from "../atoms/settings"
+import { UrlRemap, UrlRemapItem, initialUrlRemapItem } from "../atoms/settings"
 import { WebResponseItem } from "../content/types"
 
 export function getTransformXY(el: HTMLElement) {
@@ -33,9 +33,9 @@ export function adjustPositionOnResize(el: HTMLButtonElement) {
   el.style.transform = `translate(${nextX}px, ${nextY}px)`
 }
 
-export function lang(value: string) {
+export function lang(value: string, ...content: string[]) {
   if (!chrome?.i18n) return value
-  return chrome.i18n.getMessage(value)
+  return chrome.i18n.getMessage(value, content)
 }
 export function isValidUrl(url?: string | null) {
   try {
@@ -44,6 +44,24 @@ export function isValidUrl(url?: string | null) {
     return true
   } catch (error) {
     return false
+  }
+}
+export function urlToRemapItem(url: string): UrlRemapItem {
+  try {
+    const currentUrl = new URL(url)
+    return {
+      ...initialUrlRemapItem,
+      item: {
+        ...initialUrlRemapItem.item,
+        reference_url: url,
+        host: currentUrl.host,
+        params: Object.fromEntries(
+          currentUrl.searchParams
+        ),
+      },
+    }
+  } catch (error) {
+    return initialUrlRemapItem
   }
 }
 export function parseUrlRemap(value: UrlRemap, url: string) {
@@ -80,8 +98,6 @@ export function parseItemWithUrlRemap(value: UrlRemap, item: WebResponseItem) {
 }
 export function parseItemWithUrlRemaps(urlRemaps: UrlRemapItem[], item: WebResponseItem) {
   let nextItem = cloneDeep(item)
-  console.log('urlRemaps', urlRemaps);
-
   urlRemaps.forEach((value) => {
     nextItem = parseItemWithUrlRemap(value.item, nextItem)
   })

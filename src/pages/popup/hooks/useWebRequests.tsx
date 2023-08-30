@@ -13,6 +13,7 @@ const useWebRequests = (
   appliedRemapList: UrlRemapItem[] = []
 ) => {
   const [originalList, set_originalList] = useState<WebResponseItem[]>([])
+  const [removedList, set_removedList] = useState<WebResponseItem[]>([])
   const [queueList, set_queueList] = useState<WebResponseItem[]>([])
   const [disposedList, set_disposedList] = useState<WebResponseItem[]>([])
   const [errorList, set_errorList] = useState<
@@ -95,6 +96,9 @@ const useWebRequests = (
       chrome.windows.onFocusChanged.removeListener(focusWindow)
     }
   }, [])
+  const removedGroup = useMemo(() => {
+    return groupBy(removedList, (curr) => curr.tabId)
+  }, [removedList])
   const originalGroup = useMemo(() => {
     return groupBy(originalList, (curr) => curr.tabId)
   }, [originalList])
@@ -120,7 +124,7 @@ const useWebRequests = (
   const handleSourceList = useCallback((item: WebResponseItem[]) => {
     set_queueList(uniqBy(item, (curr) => curr.url))
   }, [])
-  const handleRemove = useCallback(
+  const removeQueueItem = useCallback(
     (
       item: chrome.webRequest.WebResponseHeadersDetails & {
         error: boolean
@@ -135,6 +139,21 @@ const useWebRequests = (
     },
     []
   )
+  const removeDisposedItem = useCallback((item: WebResponseItem) => {
+    set_removedList((prev) => {
+      if (item.imageInfo?.active) item.imageInfo.active = false
+      return uniqBy([...prev, item], (curr) => curr.url)
+    })
+    set_disposedList((prev) => prev.filter((curr) => curr.url !== item.url))
+  }, [])
+  const returnRemoved = useCallback((item: WebResponseItem[]) => {
+    if (item.length === 0) return
+    set_removedList((prev) => {
+      const next = prev.filter((curr) => item[0].tabId !== curr.tabId)
+      return next
+    })
+    set_disposedList((prev) => [...prev, ...item])
+  }, [])
   const reapplyRemaps = useCallback(
     (tabId?: number) => {
       if (tabId) {
@@ -186,6 +205,7 @@ const useWebRequests = (
   }, [active, appliedRemapList])
 
   return {
+    removedGroup,
     originalGroup,
     errorGroup,
     disposedGroup,
@@ -195,9 +215,11 @@ const useWebRequests = (
     tabList,
     tabIdList,
     queueGroup,
+    returnRemoved,
+    removeDisposedItem,
     handleTooltip,
     clearList,
-    handleRemove,
+    removeQueueItem,
     handleSourceList,
     clearListByTabId,
     requeueDisposeList,

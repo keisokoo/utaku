@@ -15,6 +15,7 @@ const Controller = styled.div`
   & > div {
     display: flex;
     align-items: center;
+    flex: 1;
   }
   button:disabled {
     background-color: ${colors['White/White 10%']};
@@ -72,10 +73,12 @@ const DisposeContainer = styled.div`
 `
 const Left = styled.div`
   gap: 4px;
+  justify-content: flex-start;
 `
 const Right = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 16px;
 `
 const ItemContainer = styled.div`

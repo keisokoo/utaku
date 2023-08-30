@@ -50,7 +50,13 @@ const DownloadComp = ({
             disabled={disabledTrashDeselected}
             onClick={(e) => {
               e.stopPropagation()
-              handleItemList(itemList.filter((item) => item.imageInfo.active))
+              const onlyDeSelected = itemList.filter(
+                (item) => !item.imageInfo.active
+              )
+              chrome.runtime.sendMessage({
+                message: 'delete-from-disposed',
+                data: onlyDeSelected,
+              })
             }}
           >
             <FaTrash />
@@ -61,7 +67,13 @@ const DownloadComp = ({
             disabled={disabledTrashSelected}
             onClick={(e) => {
               e.stopPropagation()
-              handleItemList(itemList.filter((item) => !item.imageInfo.active))
+              const onlySelected = itemList.filter(
+                (item) => item.imageInfo.active
+              )
+              chrome.runtime.sendMessage({
+                message: 'delete-from-disposed',
+                data: onlySelected,
+              })
             }}
           >
             <FaTrash />

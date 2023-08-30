@@ -4,6 +4,8 @@ import { colors } from '../../themes'
 export type ColorKey = keyof typeof colors
 export interface ButtonProps {
   _css: SerializedStyles
+  _mini?: boolean
+  _icon?: boolean
 }
 export interface ButtonTemplateProps
   extends React.DetailedHTMLProps<

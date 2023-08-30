@@ -1,7 +1,7 @@
 import classNames from 'classnames'
 import { produce } from 'immer'
 import React, { Fragment, useEffect, useMemo, useState } from 'react'
-import { FaDownload, FaRegEdit, FaShare } from 'react-icons/fa'
+import { FaDownload, FaQuestion, FaRegEdit, FaShare } from 'react-icons/fa'
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { UtakuW } from '../../assets'
 import {
@@ -20,12 +20,28 @@ import Editor from '../../components/Remap/Editor'
 import Remaps from '../../components/Remap/Remaps'
 import Tooltip from '../../components/Tooltip'
 import { WebResponseItem } from '../../content/types'
-import { lang } from '../../utils'
+import { lang, urlToRemapItem } from '../../utils'
 import PopupStyle from './Popup.styled'
 import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
 import './index.scss'
 
+function focusPopup() {
+  chrome.tabs.query(
+    {
+      url: chrome.runtime.getURL('popup/index.html'),
+    },
+    (currentTabs) => {
+      const firstTab =
+        currentTabs.length > 0 && currentTabs[0].id ? currentTabs[0] : null
+      if (firstTab && firstTab.windowId) {
+        chrome.windows.update(firstTab.windowId, { focused: true }, () => {
+          if (firstTab.id) chrome.tabs.update(firstTab.id, { active: true })
+        })
+      }
+    }
+  )
+}
 const App = () => {
   return (
     <RecoilRoot>
@@ -34,7 +50,13 @@ const App = () => {
   )
 }
 const Main = (): JSX.Element => {
-  const { folderName, downloadedItem, handleFolderName } = useFileDownload()
+  const [active, set_active] = useState(true)
+  const [onProgress, set_onProgress] = useState<string[]>([])
+  const { folderName, downloadedItem, handleFolderName } = useFileDownload(
+    (item) => {
+      set_onProgress((prev) => prev.filter((curr) => curr !== item.url))
+    }
+  )
   const [openTabList, set_openTabList] = useState<number[]>([])
   const [settingState, set_settingState] = useRecoilState(settings)
   const [modalOpen, set_modalOpen] = useState<'remaps' | UrlRemapItem | null>(
@@ -42,20 +64,24 @@ const Main = (): JSX.Element => {
   )
   const appliedRemapList = useMemo(() => {
     return settingState.remapList.filter((item) =>
-      settingState.applyRemapList.includes(item.name)
+      settingState.applyRemapList.includes(item.id)
     )
   }, [settingState.applyRemapList, settingState.remapList])
-  const results = useWebRequests(true, appliedRemapList)
+  const results = useWebRequests(active, appliedRemapList)
   const {
+    removedGroup,
     queueGroup,
     tabList,
-    handleRemove,
+    returnRemoved,
+    removeDisposedItem,
+    removeQueueItem,
     disposedGroup,
     errorGroup,
     clearListByTabId,
   } = results
   useEffect(() => {
-    chrome.storage.sync.get(
+    chrome.storage.local.set({ applyRemapList: [] })
+    chrome.storage.local.get(
       [
         'folderName',
         'folderNameList',
@@ -66,7 +92,6 @@ const Main = (): JSX.Element => {
         'applyRemapList',
       ],
       (items) => {
-        console.log('items.remapList', items.remapList)
         set_settingState(
           produce((draft) => {
             if (items.folderName) {
@@ -140,12 +165,18 @@ const Main = (): JSX.Element => {
     ) => {
       const senderTabId = sender?.tab?.id
       if (!senderTabId) return
-      if (request.message === 'delete-image') {
+      if (request.message === 'delete-from-queue') {
         const disposedData =
           request.data as chrome.webRequest.WebResponseHeadersDetails & {
             error: boolean
           }
-        handleRemove(disposedData)
+        removeQueueItem(disposedData)
+      }
+      if (request.message === 'delete-from-disposed') {
+        const disposedData = request.data as WebResponseItem[]
+        disposedData.forEach((item) => {
+          removeDisposedItem(item)
+        })
       }
       if (request.message === 'get-items') {
         const data = queueGroup[senderTabId]
@@ -159,8 +190,14 @@ const Main = (): JSX.Element => {
       if (request.message === 'download') {
         const downloadList = request.data as string[]
         for (let i = 0; i < downloadList.length; i++) {
+          set_onProgress((prev) => [...prev, downloadList[i]])
           chrome.downloads.download({ url: downloadList[i] })
         }
+      }
+      if (request.message === 'create-remap') {
+        focusPopup()
+        const remapUrl = request.data as string
+        set_modalOpen(urlToRemapItem(remapUrl))
       }
       if (request.message === 'getFolderName') {
         sendResponse({
@@ -173,7 +210,7 @@ const Main = (): JSX.Element => {
       if (request.message === 'setFolderName') {
         const folderName = request.data as string
         handleFolderName(folderName)
-        chrome.storage.sync.set({ folderName })
+        chrome.storage.local.set({ folderName })
       }
     }
     if (!chrome.runtime.onMessage.hasListener(onMessage)) {
@@ -187,7 +224,8 @@ const Main = (): JSX.Element => {
   }, [
     disposedGroup,
     queueGroup,
-    results.handleRemove,
+    removeDisposedItem,
+    removeQueueItem,
     downloadedItem,
     folderName,
     settingState.folderNameList,
@@ -240,7 +278,7 @@ const Main = (): JSX.Element => {
                   draft.applyRemapList = value
                 })
               )
-              chrome.storage.sync.set({ applyRemapList: value })
+              chrome.storage.local.set({ applyRemapList: value })
             }}
           />
         )}
@@ -259,7 +297,19 @@ const Main = (): JSX.Element => {
       <PopupStyle.Container>
         <PopupStyle.Top>
           <UtakuW />
-          <div></div>
+          <PopupStyle.TopRight>
+            {onProgress.length > 0 && (
+              <div>Downloading {onProgress.length} files ...</div>
+            )}
+            <div
+              onClick={() => {
+                set_active((prev) => !prev)
+              }}
+            >
+              {active && <PopupStyle.CircleActive />}
+              {!active && <PopupStyle.Circle />}
+            </div>
+          </PopupStyle.TopRight>
         </PopupStyle.Top>
         <PopupStyle.Body>
           {tabList.length < 1 && (
@@ -269,7 +319,7 @@ const Main = (): JSX.Element => {
           )}
           {tabList.length > 0 && (
             <PopupStyle.Wrap>
-              {tabList.map((tabItem) => {
+              {tabList.map((tabItem, index) => {
                 const tabId = tabItem.id as keyof typeof queueGroup | undefined
                 const queueList =
                   tabId && queueGroup ? queueGroup[tabId] ?? [] : []
@@ -277,8 +327,10 @@ const Main = (): JSX.Element => {
                   tabId && disposedGroup ? disposedGroup[tabId] ?? [] : []
                 const errorList =
                   tabId && errorGroup ? errorGroup[tabId] ?? [] : []
+                const removedList =
+                  tabId && removedGroup ? removedGroup[tabId] ?? [] : []
                 return (
-                  <Fragment key={tabItem.id}>
+                  <Fragment key={tabItem.id + String(index)}>
                     <PopupStyle.ColumnWrap
                       className={classNames({ active: tabItem.active })}
                     >
@@ -341,8 +393,20 @@ const Main = (): JSX.Element => {
                           <span className="length">
                             ({lang('error')}: {errorList?.length ?? 0})
                           </span>
+                          <span className="length">
+                            ({lang('remove')}: {removedList?.length ?? 0})
+                          </span>
                         </PopupStyle.Info>
                         <PopupStyle.Row>
+                          {removedList.length > 0 && (
+                            <WhiteFill
+                              onClick={() => {
+                                returnRemoved(removedList)
+                              }}
+                            >
+                              {lang('return_removed')}
+                            </WhiteFill>
+                          )}
                           <GrayScaleFill
                             _mini
                             disabled={disposedList.length < 1}
@@ -375,11 +439,11 @@ const Main = (): JSX.Element => {
                       openTabList.includes(tabId) && (
                         <PopupStyle.List>
                           <PopupStyle.ColumnList>
-                            {disposedList.map((item) => {
+                            {disposedList.map((item, index) => {
                               const { url, requestId, imageInfo } = item
                               return (
                                 <PopupStyle.InnerRow
-                                  key={requestId}
+                                  key={url + index + requestId + tabId}
                                   className="description"
                                 >
                                   {imageInfo && (
@@ -426,6 +490,7 @@ const Main = (): JSX.Element => {
                                       _mini
                                       onClick={() => {
                                         chrome.downloads.download({ url })
+                                        set_onProgress((prev) => [...prev, url])
                                       }}
                                     >
                                       <FaDownload />
@@ -444,14 +509,30 @@ const Main = (): JSX.Element => {
           )}
         </PopupStyle.Body>
         <PopupStyle.Bottom>
-          <WhiteFill
-            onClick={() => {
-              set_modalOpen('remaps')
-            }}
-          >
-            {lang('remaps')}
-          </WhiteFill>
-          <WhiteFill>({appliedRemapList.length})개의 필터 적용 중</WhiteFill>
+          <PopupStyle.BottomButtons>
+            <WhiteFill
+              onClick={() => {
+                set_modalOpen('remaps')
+              }}
+            >
+              {lang('remaps')}
+            </WhiteFill>
+            <PopupStyle.BottomDescription>
+              {lang('applied_remaps', String(appliedRemapList.length))}
+            </PopupStyle.BottomDescription>
+          </PopupStyle.BottomButtons>
+          <PopupStyle.BottomButtons>
+            <GrayScaleFill
+              _icon
+              _mini
+              style={{ backgroundColor: 'transparent' }}
+              onClick={() => {
+                chrome.runtime.openOptionsPage()
+              }}
+            >
+              <FaQuestion />
+            </GrayScaleFill>
+          </PopupStyle.BottomButtons>
         </PopupStyle.Bottom>
       </PopupStyle.Container>
     </>

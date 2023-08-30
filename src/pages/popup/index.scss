@@ -15,12 +15,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0f0f0f;
   overscroll-behavior-y: contain;
-  @media screen and (max-width: 676px) {
-    background-color: #1d1d20;
-  }
-  color: #fff;
   font-size: 16px;
 }
 * {
@@ -43,6 +38,12 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+#popup-root {
+  background-color: #0f0f0f;
+  color: #fff;
+  width: 100%;
+  height: 100%;
+}
 p,
 h1,
 h2,
@@ -50,7 +51,6 @@ h3,
 h4,
 h5 {
   margin: 0;
-  color: #fff;
 }
 button {
   outline: none;
@@ -58,7 +58,12 @@ button {
   border: none;
   cursor: pointer;
   padding: 0;
-  color: #fff;
+}
+a {
+  text-decoration: none;
+}
+.primary {
+  color: #ec366e;
 }
 /* width */
 ::-webkit-scrollbar {
@@ -82,33 +87,4 @@ button {
   border-radius: 16px;
   border: 2px solid #8e9196;
   background-clip: padding-box;
-}
-
-a {
-  text-decoration: none;
-  color: #fff;
-  &:visited,
-  &:active {
-    color: #fff;
-  }
-}
-.primary {
-  color: #ec366e;
-}
-
-#modal {
-  display: none;
-}
-body.modal-visible {
-  #modal {
-    position: fixed;
-    width: 100%;
-    height: 100%;
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    top: 0;
-    left: 0;
-  }
 }

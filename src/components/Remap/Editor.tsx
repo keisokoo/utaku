@@ -215,11 +215,11 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                     return curr
                   })
                 } else {
-                  draft.remapList.push(currentRemap)
+                  draft.remapList.push({ ...currentRemap, id: v4() })
                 }
               })
             )
-            chrome.storage.sync.get('remapList', (result) => {
+            chrome.storage.local.get('remapList', (result) => {
               if (result.remapList) {
                 if (mode === 'edit' && remapItem) {
                   const idx = result.remapList.findIndex(
@@ -229,9 +229,9 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                 } else {
                   result.remapList.push({ ...currentRemap, id: v4() })
                 }
-                chrome.storage.sync.set({ remapList: [...result.remapList] })
+                chrome.storage.local.set({ remapList: [...result.remapList] })
               } else {
-                chrome.storage.sync.set({
+                chrome.storage.local.set({
                   remapList: [{ ...currentRemap, id: v4() }],
                 })
               }

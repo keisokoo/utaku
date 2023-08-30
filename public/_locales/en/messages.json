@@ -101,6 +101,9 @@
   "replace_url": {
     "message": "Replace URL"
   },
+  "return_removed": {
+    "message": "Return Removed"
+  },
   "remove": {
     "message": "Remove"
   },
@@ -121,5 +124,14 @@
   },
   "reference_url_description": {
     "message": "(Optional) Please enter the URL to be used as an example. You can check the result through a preview."
+  },
+  "applied_remaps": {
+    "message": "Applying $count$ remaps",
+    "placeholders": {
+      "count": {
+        "content": "$1",
+        "example": "0"
+      }
+    }
   }
 }

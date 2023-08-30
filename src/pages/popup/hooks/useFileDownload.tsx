@@ -1,7 +1,9 @@
 import { uniq } from 'lodash-es'
 import { useCallback, useEffect, useState } from 'react'
 type CONFLICT_ACTION = 'overwrite' | 'uniquify'
-const useFileDownload = () => {
+const useFileDownload = (
+  endCallback?: (item: chrome.downloads.DownloadItem) => void
+) => {
   const [conflictAction, set_conflictAction] =
     useState<CONFLICT_ACTION>('uniquify')
   const [downloadedItem, set_downloadedItem] = useState<string[]>([])
@@ -14,8 +16,10 @@ const useFileDownload = () => {
   }, [])
 
   useEffect(() => {
-    function handleDownloadChange(delta: chrome.downloads.DownloadDelta) {
-      getProgress(delta.id, () => {})
+    function handleDownloadChange(
+      downloadDelta: chrome.downloads.DownloadDelta
+    ) {
+      getProgress(downloadDelta.id, () => {})
     }
     function getProgress(
       downloadId: number,
@@ -25,6 +29,7 @@ const useFileDownload = () => {
         if (item[0].totalBytes > 0) {
           set_downloadedItem((prev) => uniq([...prev, item[0].url]))
           callback(item[0].bytesReceived / item[0].totalBytes)
+          endCallback && endCallback(item[0])
         } else {
           callback(-1)
         }
@@ -87,6 +92,7 @@ const useFileDownload = () => {
       }
     }
   }, [conflictAction, folderName])
+
   return {
     conflictAction,
     folderName,
