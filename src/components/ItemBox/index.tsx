@@ -21,10 +21,9 @@ interface ItemBoxProps
     HTMLDivElement
   > {
   item: ItemType
-  setUrl?: (url: string) => void
   setTooltip?: (tooltip: string) => void
 }
-const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
+const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
   const [settingState] = useRecoilState(settings)
   const { ImageItem, VideoItem } = S
   const copyToClipboard = (text: string) => {
@@ -58,7 +57,7 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
         className={classNames({ active: item.imageInfo.active }, item.type)}
         {...props}
       >
-        <div className="image-box">
+        <S.ImageBox>
           {item.imageInfo.active && (
             <S.CheckIcon>
               <FaCheck />
@@ -94,7 +93,7 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
               />
             </>
           )}
-        </div>
+        </S.ImageBox>
         <S.ImageSize className="image-size">
           <span>{item.imageInfo.width}px</span>
           <span>×</span>
@@ -120,20 +119,18 @@ const ItemBox = ({ item, setUrl, setTooltip, ...props }: ItemBoxProps) => {
           >
             <FaDownload />
           </S.IconWrap>
-          {setUrl && (
-            <S.IconWrap
-              {...tooltipEventAttributes('Remap: ' + item.url)}
-              onClick={(e) => {
-                e.stopPropagation()
-                chrome.runtime.sendMessage({
-                  message: 'create-remap',
-                  data: item.url,
-                })
-              }}
-            >
-              <FaRegEdit />
-            </S.IconWrap>
-          )}
+          <S.IconWrap
+            {...tooltipEventAttributes('Remap: ' + item.url)}
+            onClick={(e) => {
+              e.stopPropagation()
+              chrome.runtime.sendMessage({
+                message: 'create-remap',
+                data: item.url,
+              })
+            }}
+          >
+            <FaRegEdit />
+          </S.IconWrap>
           <S.IconWrap
             {...tooltipEventAttributes('New Window')}
             onClick={(e) => {

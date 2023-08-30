@@ -1,6 +1,7 @@
 import { isEqual, sortBy } from 'lodash-es'
 import React, {
   MutableRefObject,
+  useCallback,
   useEffect,
   useMemo,
   useRef,
@@ -12,6 +13,7 @@ import { RecoilRoot, useRecoilState } from 'recoil'
 import { uniqBy } from 'remeda'
 import { settings } from '../atoms/settings'
 import ItemBox from '../components/ItemBox'
+import LoadingImage from '../components/ItemBox/LoadingImage'
 import ControlComp from './ControlComp'
 import Dispose from './DisposeComp'
 import DownloadComp from './DownloadComp'
@@ -35,6 +37,10 @@ const Main = (): JSX.Element => {
   >([])
   const [downloadedItem, set_downloadedItem] = useState<string[]>([])
   const [settingState, set_settingState] = useRecoilState(settings)
+  const [active, set_active] = useState<boolean>(true)
+  const toggleActive = useCallback(() => {
+    set_active((prev) => !prev)
+  }, [])
   useEffect(() => {
     chrome.storage.local.get(
       [
@@ -170,12 +176,16 @@ const Main = (): JSX.Element => {
         }
       }, 1000)
     }
-    runDataPool()
+    if (active) {
+      runDataPool()
+    } else {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    }
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       timeoutRef.current = null
     }
-  }, [])
+  }, [active])
   const handleRemove = (
     item: chrome.webRequest.WebResponseHeadersDetails & {
       imageInfo?: ImageInfo
@@ -287,6 +297,8 @@ const Main = (): JSX.Element => {
           )}
         />
         <ControlComp
+          active={active}
+          toggleActive={toggleActive}
           tooltip={tooltip}
           current={
             filteredImages.filter((item) => item.imageInfo.active).length
@@ -371,9 +383,6 @@ const Main = (): JSX.Element => {
                   <ItemBox
                     item={value}
                     key={'filteredImages' + value.url}
-                    setUrl={() => {
-                      console.log('deprecated')
-                    }}
                     setTooltip={(tooltip) => {
                       set_tooltip(tooltip)
                     }}
@@ -393,6 +402,7 @@ const Main = (): JSX.Element => {
                   />
                 )
               })}
+            {queueList.length > 0 && <LoadingImage length={queueList.length} />}
           </UtakuStyle.Grid>
         </UtakuStyle.ItemContainer>
       </div>

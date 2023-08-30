@@ -75,6 +75,7 @@ const PopupStyle = {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+    gap: 8px;
   `,
   Body: styled.div`
     padding: 8px 32px;

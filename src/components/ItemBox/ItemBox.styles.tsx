@@ -17,6 +17,12 @@ const mediaCss = css`
   object-fit: contain;
   break-inside: avoid;
   box-sizing: border-box;
+  &.medium {
+    height: 160px;
+  }
+  &.large {
+    height: 240px;
+  }
 `
 const iconsCss = css`
   position: absolute;
@@ -29,21 +35,9 @@ const iconsCss = css`
 `
 const ImageItem = styled.img`
   ${mediaCss}
-  &.medium {
-    height: 160px;
-  }
-  &.large {
-    height: 240px;
-  }
 `
 const VideoItem = styled.video`
   ${mediaCss}
-  &.medium {
-    height: 160px;
-  }
-  &.large {
-    height: 240px;
-  }
 `
 const CheckIcon = styled.i`
   ${iconsCss}
@@ -89,7 +83,45 @@ const ImageSize = styled.div`
   gap: 4px;
   color: ${colors['White/White 70%']};
 `
+const ImageBox = styled.div`
+  font-size: 0;
+  border-radius: 8px;
+  overflow: hidden;
+`
+const DummyBox = styled.div`
+  ${mediaCss}
+  width: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #fff;
+  gap: 8px;
+  svg {
+    font-size: 24px;
+    animation: ${syncRotateKeyframes} 1s linear infinite;
+  }
+  span {
+    font-size: 16px;
+  }
+`
 const ItemBoxStyles = {
+  ImageBox,
+  DummyBox,
+  LoadingWrap: styled.div`
+    break-inside: avoid;
+    box-sizing: border-box;
+    opacity: 0.8;
+    cursor: pointer;
+    transition: ease-out 0.15s;
+    position: relative;
+    &:hover {
+      opacity: 1;
+    }
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  `,
   Wrap: styled.div`
     break-inside: avoid;
     box-sizing: border-box;
@@ -102,16 +134,12 @@ const ItemBoxStyles = {
     }
     padding: 6px;
     color: ${colors['White/White 70%']};
-    .image-box {
-      font-size: 0;
-      border-radius: 8px;
-      overflow: hidden;
-    }
+
     &.image {
       ${CheckIcon} {
         color: ${colors['Accent/Default']};
       }
-      .image-box {
+      ${ImageBox} {
         background-color: #c7faff40;
       }
     }
@@ -119,7 +147,7 @@ const ItemBoxStyles = {
       ${MediaIcon} {
         color: ${colors['Secondary/Default']};
       }
-      .image-box {
+      ${ImageBox} {
         background-color: #ff528640;
       }
     }

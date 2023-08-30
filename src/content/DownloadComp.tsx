@@ -40,7 +40,9 @@ const DownloadComp = ({
             _mini
             onClick={(e) => {
               e.stopPropagation()
-              handleItemList([])
+              chrome.runtime.sendMessage({
+                message: 'delete-all-disposed',
+              })
             }}
           >
             <FaTrash /> All

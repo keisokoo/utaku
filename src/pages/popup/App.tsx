@@ -171,6 +171,9 @@ const Main = (): JSX.Element => {
           }
         removeQueueItem(disposedData)
       }
+      if (request.message === 'delete-all-disposed') {
+        clearListByTabId(senderTabId)
+      }
       if (request.message === 'delete-from-disposed') {
         const disposedData = request.data as WebResponseItem[]
         disposedData.forEach((item) => {

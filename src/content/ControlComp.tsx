@@ -16,8 +16,16 @@ interface ControlCompProps {
   tooltip: string
   current: number
   total: number
+  toggleActive: () => void
+  active: boolean
 }
-const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
+const ControlComp = ({
+  active,
+  toggleActive,
+  current,
+  total,
+  tooltip,
+}: ControlCompProps) => {
   const [settingState, set_settingState] = useRecoilState(settings)
   const { folderName, folderNameList, sizeType, sizeLimit, itemType } =
     settingState
@@ -242,6 +250,10 @@ const ControlComp = ({ current, total, tooltip }: ControlCompProps) => {
               {total}
             </span>
             {' )'}
+          </div>
+          <div onClick={toggleActive}>
+            {active && <UtakuStyle.CircleActive />}
+            {!active && <UtakuStyle.Circle />}
           </div>
         </UtakuStyle.Right>
         {tooltip && <Tooltip className="utaku-url-tooltip">{tooltip}</Tooltip>}
