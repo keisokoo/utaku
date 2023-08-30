@@ -80,7 +80,6 @@ const Main = (): JSX.Element => {
     clearListByTabId,
   } = results
   useEffect(() => {
-    chrome.storage.local.set({ applyRemapList: [] })
     chrome.storage.local.get(
       [
         'folderName',
