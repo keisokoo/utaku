@@ -264,29 +264,17 @@ const Main = (): JSX.Element => {
           </O.Box>
           <O.Box id="support">
             <O.Title>Support</O.Title>
-            <O.Description>
-              <div>
-                <table border={0} cellPadding={10} cellSpacing={0} align="left">
-                  <tr>
-                    <td align="left"></td>
-                  </tr>
-                  <tr>
-                    <td align="left">
-                      <a
-                        href="https://paypal.me/keisokoo"
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        <img
-                          src="https://www.paypalobjects.com/digitalassets/c/website/marketing/apac/C2/logos-buttons/optimize/44_Grey_PayPal_Pill_Button.png"
-                          alt="PayPal"
-                        />
-                      </a>
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <br />
+            <O.Support>
+              <a
+                href="https://paypal.me/keisokoo"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  src="https://www.paypalobjects.com/digitalassets/c/website/marketing/apac/C2/logos-buttons/optimize/44_Grey_PayPal_Pill_Button.png"
+                  alt="PayPal"
+                />
+              </a>
               <a
                 href="https://www.buymeacoffee.com/keisokoo"
                 target="_blank"
@@ -298,7 +286,7 @@ const Main = (): JSX.Element => {
                   style={{ height: '60px', width: '217px' }}
                 />
               </a>
-            </O.Description>
+            </O.Support>
           </O.Box>
           <O.Box id="contact">
             <O.Title>Contact</O.Title>

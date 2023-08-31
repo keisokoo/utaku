@@ -10,6 +10,12 @@ export const OptionStyle = {
     flex-direction: column;
     gap: 32px;
   `,
+  Support: styled.div`
+    display: flex;
+    align-items: center;
+    padding: 16px;
+    gap: 16px;
+  `,
   Box: styled.div`
     padding: 16px;
     &.center {
