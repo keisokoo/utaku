@@ -148,5 +148,38 @@
   },
   "no_folder": {
     "message": "Not found folder name ist"
+  },
+  "basic_usage": {
+    "message": "Basic Usage"
+  },
+  "basic_usage_description": {
+    "message": "1. Click the UTAKU extension button to open the popup window.\n2. Visit the page you want to collect or refresh it.\n3. Images are collected dynamically. Explore the pages while keeping the popup window open, and images will be automatically collected for each tab.\n4. Click the activated utaku button at the bottom of the page, or click the confirm button in the popup window.\n5. Select the images and download them."
+  },
+  "remap_usage": {
+    "message": "Remap Usage"
+  },
+  "remap_usage_description": {
+    "message": "Remap helps you download desired images by modifying the URL.*If you enter a reference URL, you can check the results of the changes.\n* Path changes can only be edited if there is a reference URL.\n* Please enter the editing URL pattern. URL reconstruction will only be applied to matching addresses.\n1. Click the third button below the collected image, or click the first icon in the list in the popup window.\n2. The default values are set according to the URL.\n3. Enter the changes you want and add them.\n4. Click the reconstruction button at the bottom left of the popup window.\n5. Check the items you want and click apply.\n6. The changes will be applied sequentially. query -> path -> replace\n7. Remap only works after being applied. If you want to apply it to existing images, please refresh.\n8. Methods for reconstruction are uploaded on YouTube. Please check the following."
+  },
+  "remap_by_query_edit": {
+    "message": "Edit Query to Remap"
+  },
+  "remap_by_query_edit_description": {
+    "message": "By using the reconstruction button, the queries included in the URL will be automatically registered. If you register a query key and leave its value empty, that query will be deleted."
+  },
+  "remap_by_path_edit": {
+    "message": "Edit Path to Remap"
+  },
+  "remap_by_path_edit_description": {
+    "message": "You can extract the path from the reference URL, excluding the query and host address, and choose it. You can change it to the text you want at that location. If there's no reference URL, registration/editing is not possible because the location value must be implemented."
+  },
+  "remap_by_replace_edit": {
+    "message": "Edit URL Replace to Remap"
+  },
+  "remap_by_replace_edit_description": {
+    "message": "You can change the desired part of the URL to different text. If you leave the 'from' value empty and write the 'to', it will be added at the end of the URL. This logic operates last."
+  },
+  "utaku_about": {
+    "message": "UTAKU is an image/media downloader designed to save you time.\nIt can remap URLs to fetch original source URLs, which are all customizable to your settings.\n\n Upon activation of the pop-up, you may need to open or refresh your browser to enable UTAKU to read your network resource headers and collect resources.\nThe pop-up stays active, dynamically updating as new images are downloaded. To make sure all images are displayed correctly, UTAKU ingeniously verifies image sizes right in the browser tab where they appear, bypassing technical barriers in a lawful manner.\n\n Be cautious though, as using UTAKU may sometimes cause excessive traffic, potentially resulting in temporary loss of access to certain sites. Use it at your own risk and refrain from using images or videos with copyright issues.\nYou are free to use UTAKU, but we do not take any responsibility for using downloaded images or videos."
   }
 }

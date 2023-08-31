@@ -1,76 +1,17 @@
-import styled from '@emotion/styled'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { FaRegEdit } from 'react-icons/fa'
 import { RecoilRoot } from 'recoil'
-import { UtakuW } from '../../assets'
+import { LogoBoxW, UtakuW } from '../../assets'
+import { lang } from '../../utils'
+import { OptionStyle } from './Options.styled'
 import './index.scss'
+const O = OptionStyle
 const App = (): JSX.Element => {
   return (
     <RecoilRoot>
       <Main />
     </RecoilRoot>
   )
-}
-const OptionStyle = {
-  Wrap: styled.div`
-    margin: 0 auto;
-    max-width: 1200px;
-  `,
-  Header: styled.div`
-    background-color: #313131;
-    position: sticky;
-    top: -104px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-direction: column;
-    height: 170px;
-    border-bottom: 2px solid #fff;
-    padding-bottom: 16px;
-  `,
-  Body: styled.div`
-    white-space: pre-line;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-    line-height: 1.4;
-  `,
-  Nav: styled.div`
-    position: sticky;
-    top: 3px;
-    z-index: 2;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 16px;
-    padding: 16px;
-    font-size: 24px;
-    font-weight: 700;
-    & > div {
-      cursor: pointer;
-      user-select: none;
-    }
-  `,
-  Introduction: styled.div`
-    font-size: 18px;
-    font-weight: 400;
-    white-space: pre-line;
-  `,
-  Responsive: styled.div`
-    padding-top: 56.25%;
-    position: relative;
-    width: 100%;
-    z-index: 0;
-  `,
-  Iframe: styled.iframe`
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-  `,
 }
 const navList = [
   {
@@ -96,78 +37,278 @@ const navList = [
 ]
 
 const Main = (): JSX.Element => {
+  const [language, setLanguage] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (chrome && chrome.i18n) {
+      const uiLanguage = chrome.i18n.getUILanguage()
+      setLanguage(uiLanguage)
+      console.log('uiLanguage', uiLanguage)
+    }
+  }, [])
   return (
-    <OptionStyle.Wrap>
-      <OptionStyle.Header>
+    <O.Wrap>
+      <O.Header>
         <UtakuW />
-      </OptionStyle.Header>
-      <OptionStyle.Nav>
+      </O.Header>
+      <O.Nav>
         {navList.map((item) => (
-          <div key={item.id}>{item.name}</div>
+          <div key={item.id}>
+            <a href={'#' + item.id}>{item.name}</a>
+          </div>
         ))}
-      </OptionStyle.Nav>
-      <OptionStyle.Body>
-        <OptionStyle.Introduction>
-          <h1>From developer</h1>
-          {`
-            UTAKU is an image/media downloader designed to save you time.
-            It can remap URLs to fetch original source URLs, which are all customizable to your settings.\n\n Upon activation of the pop-up, you may need to open or refresh your browser to enable UTAKU to read your network resource headers and collect resources.
-            The pop-up stays active, dynamically updating as new images are downloaded. To make sure all images are displayed correctly, UTAKU ingeniously verifies image sizes right in the browser tab where they appear, bypassing technical barriers in a lawful manner.\n\n Be cautious though, as using UTAKU may sometimes cause excessive traffic, potentially resulting in temporary loss of access to certain sites. Use it at your own risk and refrain from using images or videos with copyright issues.
-            You are free to use UTAKU, but we do not take any responsibility for using downloaded images or videos.\n\n In the future, you might notice ads in pop-ups or option windows. While nobody loves ads, your understanding would go a long way, especially for an older developer just trying to make ends meet. Every click helps, even if it's just enough for a coffee.\n\n Enjoy using UTAKU, and if you can afford to, your support—even just for a coffee—would mean a lot to the developer.`}
-        </OptionStyle.Introduction>
-        <div className="paypal">https://paypal.me/keisokoo</div>
-        https://www.buymeacoffee.com/keisokoo
-        <OptionStyle.Introduction>
-          {`UTAKU는 당신의 시간을 절약하기 위해 개발된 이미지/미디어 다운로더입니다.
-          원본 URL을 찾아 다운로드할 수 있고, 이는 모두 당신의 설정에 따라 커스터마이징할 수 있습니다.\n\n 팝업을 활성화한 동안, 브라우저를 열거나 새로고침해야 UTAKU가 네트워크 리소스를 읽고 모을 수 있습니다.
-          이 팝업은 활성 상태를 유지하였을 때, 새로운 이미지가 다운로드될 때마다 자동으로 업데이트됩니다. UTAKU는 브라우저의 각 탭에서 직접 이미지 크기를 확인해,
-          몇몇 이미지가 표시되지 않는 문제를 합법적으로 해결합니다.\n\n 하지만 조심하세요. UTAKU 사용으로 인해 과도한 트래픽이 발생할 수 있으며, 이로 인해 일시적으로 몇몇 사이트에 접근하지 못할 수도 있습니다. 본인의 책임 하에 사용해주세요, 그리고 저작권이 있는 이미지나 동영상은 함부로 사용하지 마세요.
-          UTAKU를 사용하는 것은 자유이지만, 다운받은 이미지나 영상을 사용함에 있어서, 어떠한 책임도 지지 않습니다.\n\n 앞으로 팝업이나 설정 창에 광고가 나타날 수 있습니다. 광고는 아무도 좋아하지 않지만, 한 잔의 커피 가격으로도 큰 도움이 되니 이해해 주세요. 특히나 어려운 환경에서 버티고 있는 연장자 개발자에게는 더욱 그렇습니다.\n\n UTAKU를 즐겁게 사용하시고, 여유가 되신다면 개발자에게 커피 한 잔 값의 지원을 해주세요. 그것만으로도 큰 의미가 있습니다.`}
-        </OptionStyle.Introduction>
-        <h1>Introductions</h1>
-        <OptionStyle.Responsive>
-          <OptionStyle.Iframe
-            src="https://www.youtube.com/embed/skKaxFyFuEo"
-            title="UTAKU Remap Tutorial"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
-            allowFullScreen
-          ></OptionStyle.Iframe>
-        </OptionStyle.Responsive>
-        <OptionStyle.Responsive>
-          <OptionStyle.Iframe
-            src="https://www.youtube.com/embed/yAkgqnzNFyM"
-            title="UTAKU url 변경 사용법"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
-            allowFullScreen
-          ></OptionStyle.Iframe>
-        </OptionStyle.Responsive>
-        <div id="options" className="options">
-          {`사용법은 간단합니다. UTAKU 아이콘을 클릭해서 팝업을 열고, 원하는 사이트를 방문 하면 됩니다.
-          팝업이 활성화되면, UTAKU는 자동으로 이미지를 수집하고, 다운로드할 수 있습니다.
-          활성화 이전에 사이트를 방문했다면, 새로고침 해주세요.
-          `}
-          {`그밖에 URL 재구성을 위해 몇 가지 고급 사용자를 위한 설명이 필요할 것 같습니다.
-          우선 URL 재구성은 적용이 된 후에만 작동합니다. 적용 후에 기존 이미지에 적용 하려면 새로고침 해주세요.
-
-          재구성 버튼을 누르면, 등록된 재구성 목록이 뜹니다.
-          원하는 항목에 체크 한 후 적용을 누르면 됩니다.
-
-          다음으로는 재구성 항목을 추가하는 창을 설명해 보면 크게 어려울것이 없겠네요.
-          재구성 버튼을 클릭 후, 추가를 클릭합니다.
-          url의 처리 과정은 해당 화면에서 1~3번까지 순차적으로 진행됩니다.
-
-          1. URL 패턴을 통하여 해당 주소가 포함된 항목을 고치도록 준비합니다.
-          2. 쿼리를 편집합니다. 값이 비어 있다면, 해당 키값을 제거합니다.
-          3. 1~2번 이후에 실행 됩니다. from에서 입력한 값을 to로 대체 합니다.
-          from이 없고 to만 있다면, url의 마지막에 해당 텍스트를 추가힙니다.
-
-
-          `}
-        </div>
-      </OptionStyle.Body>
-    </OptionStyle.Wrap>
+      </O.Nav>
+      <O.Body>
+        <O.Columns>
+          <O.Box id="tutorial">
+            <h1>{`Tutorials`}</h1>
+            <O.Title>{lang('basic_usage')}</O.Title>
+            <O.VideoBox>
+              <O.VideoTitle>{lang('basic_usage')}</O.VideoTitle>
+              <O.Responsive>
+                <O.Iframe
+                  src="https://www.youtube.com/embed/_BRwT2XNxck"
+                  title="UTAKU Remap Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+                  allowFullScreen
+                />
+              </O.Responsive>
+              <O.VideoDescription>
+                <p>{lang('basic_usage_description')}</p>
+              </O.VideoDescription>
+            </O.VideoBox>
+            <O.Title>
+              {lang('remap_usage')}
+              <FaRegEdit />
+            </O.Title>
+            <O.Description>
+              <p>{lang('remap_usage_description')}</p>
+            </O.Description>
+            <O.VideoBox>
+              <O.VideoTitle>{lang('remap_by_query_edit')}</O.VideoTitle>
+              <O.Responsive>
+                <O.Iframe
+                  src="https://www.youtube.com/embed/_8ZyoktO-bA"
+                  title="UTAKU Remap Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+                  allowFullScreen
+                />
+              </O.Responsive>
+              <O.VideoDescription>
+                <p>{lang('remap_by_query_edit_description')}</p>
+              </O.VideoDescription>
+            </O.VideoBox>
+            <O.VideoBox>
+              <O.VideoTitle>{lang('remap_by_path_edit')}</O.VideoTitle>
+              <O.Responsive>
+                <O.Iframe
+                  src="https://www.youtube.com/embed/B38ajCZYxOY"
+                  title="UTAKU Remap Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+                  allowFullScreen
+                />
+              </O.Responsive>
+              <O.VideoDescription>
+                <p>{lang('remap_by_path_edit_description')}</p>
+              </O.VideoDescription>
+            </O.VideoBox>
+            <O.VideoBox>
+              <O.VideoTitle>{lang('remap_by_replace_edit')}</O.VideoTitle>
+              <O.Responsive>
+                <O.Iframe
+                  src="https://www.youtube.com/embed/FMM-EfudSig"
+                  title="UTAKU Remap Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+                  allowFullScreen
+                />
+              </O.Responsive>
+              <O.VideoDescription>
+                <p>{lang('remap_by_replace_edit_description')}</p>
+              </O.VideoDescription>
+            </O.VideoBox>
+          </O.Box>
+          <O.Box className="center">
+            <O.CenterLogo>
+              <LogoBoxW />
+            </O.CenterLogo>
+            <O.Description>{lang('utaku_about')}</O.Description>
+          </O.Box>
+          <O.Box id="faq">
+            <O.Title>FAQ</O.Title>
+            {language === 'ko' ? (
+              <O.Description>
+                <O.Columns>
+                  <div>
+                    <O.Q>
+                      Q: 사용방법이 변한것 같다. 왜 이렇게 업데이트 한것인가?
+                    </O.Q>
+                    <O.A>
+                      A: 여러가지 이유가 있다.
+                      <br />
+                      기존 UTAKU는 자동으로 원본이미지 URL을 찾아 주도록
+                      설계했다.
+                      <br />
+                      <br />
+                      하지만 시간이 지나면서, 사이트가 변경 될때마다 그에
+                      대응하기가 곤란해졌다.
+                      <br />
+                      <br />
+                      원본 이미지를 찾는 로직을 사용자가 직접 입력하도록
+                      변경했다.
+                      <br />
+                      그리고 CORS 문제로 인해, 사이즈 정보나 미리보기 기능이
+                      제한되었다.
+                      <br />
+                      더이상 팝업창에 모든 이미지를 띄우는게 불가능 해졌다.
+                      <br />
+                      <br />
+                      이전 버전에서는 페이지 내의 img 태그를 모두 찾아서
+                      이미지를 추출 했다.
+                      <br />
+                      하지만 웹페이지의 작성방식이 다양해지면서, 이 방식이
+                      더이상 유효하지 않게 되었다.
+                      <br />
+                      <br />
+                      그래서 네트워크 리소스를 추출하는 방식으로 변경했다.
+                      <br />
+                      이제는 동적으로 받아오는 이미지도 추출할 수 있다.
+                      <br />
+                    </O.A>
+                  </div>
+                  <div>
+                    <O.Q>Q: 이름이 UTAKU인 이유가 뭔가?</O.Q>
+                    <O.A>
+                      A: 이 프로그램을 사용하는 사람들은 다양한 목적이 있겠지만,
+                      <br />
+                      그중 대부분은 굳이 원본 이미지를 찾아서 저장을 해야만
+                      속시원해지는 그런 사람일거다.
+                      <br />
+                      수집병을 앓고 있는 사람들일 것이라고 생각했다.
+                      <br />
+                      무언가에 몰두하는 사람을 오타쿠라 하지 않는가?
+                      <br />
+                      나도 그러한 목적으로 만들었으니
+                      <br />
+                      이걸 사용하는 너도 그렇지 않느냐? 하는 느낌으로 UTAKU라는
+                      이름을 지었다.
+                    </O.A>
+                  </div>
+                </O.Columns>
+              </O.Description>
+            ) : (
+              <O.Description>
+                <O.Columns>
+                  <div>
+                    <O.Q>
+                      Q: It seems that the usage has changed. Why did you update
+                      it like this?
+                    </O.Q>
+                    <O.A>
+                      A: There are several reasons.
+                      <br />
+                      The original UTAKU was designed to automatically find the
+                      original image URL.
+                      <br />
+                      <br />
+                      However, as time went by, it became difficult to adapt
+                      whenever sites changed.
+                      <br />
+                      <br />
+                      We changed it so that users could manually enter the logic
+                      to find the original image.
+                      <br />
+                      And due to CORS issues, size information and preview
+                      functions have become limited.
+                      <br />
+                      It has become impossible to display all images in a popup
+                      window anymore.
+                      <br />
+                      <br />
+                      The previous version found all img tags on a page and
+                      extracted the images.
+                      <br />
+                      But as web page creation methods diversified, this method
+                      is no longer valid.
+                      <br />
+                      <br />
+                      So, we changed it to extract network resources.
+                      <br />
+                      Now you can also extract images fetched dynamically.
+                      <br />
+                    </O.A>
+                  </div>
+                  <div>
+                    <O.Q>Q: Why is the name UTAKU?</O.Q>
+                    <O.A>
+                      A: People who use this program will have various purposes,
+                      <br />
+                      but most of them will be those who can only feel satisfied
+                      when they find and save the original image.
+                      <br />
+                      {`We thought they'd be people suffering from a collection syndrome.`}
+                      <br />
+                      {`Don't we call someone absorbed in something an Otaku?`}
+                      <br />
+                      I also created it for such a purpose,
+                      <br />
+                      {`So, in the sense of "Aren't you the same if you are using this?", we named it UTAKU.`}
+                    </O.A>
+                  </div>
+                </O.Columns>
+              </O.Description>
+            )}
+          </O.Box>
+          <O.Box id="support">
+            <O.Title>Support</O.Title>
+            <O.Description>
+              <div>
+                <table border={0} cellPadding={10} cellSpacing={0} align="left">
+                  <tr>
+                    <td align="left"></td>
+                  </tr>
+                  <tr>
+                    <td align="left">
+                      <a
+                        href="https://paypal.me/keisokoo"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        <img
+                          src="https://www.paypalobjects.com/digitalassets/c/website/marketing/apac/C2/logos-buttons/optimize/44_Grey_PayPal_Pill_Button.png"
+                          alt="PayPal"
+                        />
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+              </div>
+              <br />
+              <a
+                href="https://www.buymeacoffee.com/keisokoo"
+                target="_blank"
+                rel="noreferrer"
+              >
+                <img
+                  src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png"
+                  alt="Buy Me A Coffee"
+                  style={{ height: '60px', width: '217px' }}
+                />
+              </a>
+            </O.Description>
+          </O.Box>
+          <O.Box id="contact">
+            <O.Title>Contact</O.Title>
+            <O.Description>
+              <a href="mailto:keisokoo@gmail.com">keisokoo@gmail.com</a>
+            </O.Description>
+          </O.Box>
+        </O.Columns>
+      </O.Body>
+    </O.Wrap>
   )
 }
 
