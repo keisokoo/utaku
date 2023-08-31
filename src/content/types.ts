@@ -6,9 +6,7 @@ export type DataType = { [key in string]: WebResponseItem }
 export type ImageInfo = {
   width: number
   height: number
-  thumbnail?: string
   active?: boolean
-  replaced?: string
   hide?: boolean
   download?: boolean
 }

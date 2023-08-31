@@ -218,35 +218,24 @@ const Main = (): JSX.Element => {
     value: chrome.webRequest.WebResponseHeadersDetails
   ) => {
     try {
-      const video = e.currentTarget
-      const canvas = document.createElement('canvas')
-      canvas.width = video.videoWidth
-      canvas.height = video.videoHeight
-      const context = canvas.getContext('2d')
-      if (context) context.drawImage(video, 0, 0, canvas.width, canvas.height)
-      const thumbnail = canvas.toDataURL('image/png')
       const videoTarget = e.currentTarget
       const { videoWidth, videoHeight } = videoTarget
+      const imageInfoData = {
+        width: videoWidth,
+        height: videoHeight,
+      }
       set_itemList((prev) => {
         const clone: WebResponseItem & {
           imageInfo: ImageInfo
         } = {
           ...value,
-          imageInfo: {
-            thumbnail,
-            width: videoWidth,
-            height: videoHeight,
-          },
+          imageInfo: imageInfoData,
         }
         return uniqBy([...prev, clone], (item) => item.url)
       })
       handleRemove({
         ...value,
-        imageInfo: {
-          thumbnail,
-          width: videoWidth,
-          height: videoHeight,
-        },
+        imageInfo: imageInfoData,
       })
     } catch (error) {
       handleRemove(value, true)
@@ -259,26 +248,25 @@ const Main = (): JSX.Element => {
     try {
       const imageTarget = e.currentTarget
       const { naturalWidth, naturalHeight } = imageTarget
+      const imageInfoData = {
+        width: naturalWidth,
+        height: naturalHeight,
+      }
       set_itemList((prev) => {
         const clone: WebResponseItem & {
           imageInfo: ImageInfo
         } = {
           ...value,
-          imageInfo: {
-            width: naturalWidth,
-            height: naturalHeight,
-          },
+          imageInfo: imageInfoData,
         }
         return uniqBy([...prev, clone], (item) => item.url)
       })
       handleRemove({
         ...value,
-        imageInfo: {
-          width: naturalWidth,
-          height: naturalHeight,
-        },
+        imageInfo: imageInfoData,
       })
     } catch (error) {
+      console.log('error', error)
       handleRemove(value, true)
     }
   }

@@ -2,7 +2,7 @@ import { atom } from 'recoil'
 
 export const itemTypes = ['all', 'image', 'media'] as const
 export const sizeTypes = ['small', 'medium', 'large'] as const
-export const containerTypes = ['tiny', 'normal', 'tile', 'expand'] as const
+export const containerTypes = ['hide', 'normal', 'flexbox', 'tile'] as const
 
 export type UrlRemap = {
   reference_url?: string
@@ -49,8 +49,8 @@ export const settings = atom<SettingsType>({
     sizeType: 'small',
     itemType: 'image',
     sizeLimit: {
-      width: 500,
-      height: 500,
+      width: 200,
+      height: 200,
     },
     folderName: 'utaku',
     folderNameList: [],

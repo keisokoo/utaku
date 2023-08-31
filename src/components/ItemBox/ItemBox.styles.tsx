@@ -10,7 +10,7 @@ const syncRotateKeyframes = keyframes`
   }
 `
 const mediaCss = css`
-  &:not([data-wrapper-size='expand']) {
+  &:not([data-wrapper-size='tile']) {
     height: 120px;
     min-width: 100px;
     width: auto;
@@ -25,7 +25,7 @@ const mediaCss = css`
   object-fit: contain;
   break-inside: avoid;
   box-sizing: border-box;
-  &[data-wrapper-size='expand'] {
+  &[data-wrapper-size='tile'] {
     height: auto;
     width: 100%;
   }
@@ -144,7 +144,7 @@ const ItemBoxStyles = {
     padding: 6px;
     color: ${colors['White/White 70%']};
 
-    &[data-wrapper-size='expand'] {
+    &[data-wrapper-size='tile'] {
       width: 100%;
       break-inside: avoid;
       margin-bottom: 16px;

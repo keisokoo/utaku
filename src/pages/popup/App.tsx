@@ -1,7 +1,13 @@
 import classNames from 'classnames'
 import { produce } from 'immer'
 import React, { Fragment, useEffect, useMemo, useState } from 'react'
-import { FaDownload, FaQuestion, FaRegEdit, FaShare } from 'react-icons/fa'
+import {
+  FaDownload,
+  FaList,
+  FaQuestion,
+  FaRegEdit,
+  FaShare,
+} from 'react-icons/fa'
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { UtakuW } from '../../assets'
 import {
@@ -50,6 +56,7 @@ const App = () => {
     </RecoilRoot>
   )
 }
+const targetType = ['disposed', 'queue', 'error', 'removed'] as const
 const Main = (): JSX.Element => {
   const [active, set_active] = useState(true)
   const [onProgress, set_onProgress] = useState<string[]>([])
@@ -58,11 +65,15 @@ const Main = (): JSX.Element => {
       set_onProgress((prev) => prev.filter((curr) => curr !== item.url))
     }
   )
-  const [openTabList, set_openTabList] = useState<number[]>([])
   const [settingState, set_settingState] = useRecoilState(settings)
   const [modalOpen, set_modalOpen] = useState<'remaps' | UrlRemapItem | null>(
     null
   )
+  const [currentListTarget, set_currentListTarget] = useState<{
+    tabId: number
+    target: (typeof targetType)[number]
+  } | null>(null)
+
   const appliedRemapList = useMemo(() => {
     return settingState.remapList.filter((item) =>
       settingState.applyRemapList.includes(item.id)
@@ -273,6 +284,21 @@ const Main = (): JSX.Element => {
       }
     })
   }
+  const currentList = useMemo(() => {
+    if (!currentListTarget) return []
+    const { tabId, target } = currentListTarget
+    if (target === 'disposed') {
+      return disposedGroup[tabId] ?? []
+    } else if (target === 'queue') {
+      return queueGroup[tabId] ?? []
+    } else if (target === 'error') {
+      return errorGroup[tabId] ?? []
+    } else if (target === 'removed') {
+      return removedGroup[tabId] ?? []
+    }
+    return []
+  }, [currentListTarget, disposedGroup, errorGroup, queueGroup, removedGroup])
+
   return (
     <>
       <Modal
@@ -333,6 +359,13 @@ const Main = (): JSX.Element => {
           {tabList.length > 0 && (
             <PopupStyle.Wrap>
               {tabList.map((tabItem, index) => {
+                const isActive = (
+                  currentTarget: (typeof targetType)[number]
+                ) => {
+                  if (!currentListTarget) return false
+                  const { tabId, target } = currentListTarget
+                  return tabId === tabItem.id && target === currentTarget
+                }
                 const tabId = tabItem.id as keyof typeof queueGroup | undefined
                 const queueList =
                   tabId && queueGroup ? queueGroup[tabId] ?? [] : []
@@ -397,17 +430,100 @@ const Main = (): JSX.Element => {
                       >
                         <PopupStyle.Info>
                           <span className="length">
-                            ({lang('disposed_item')}:{' '}
-                            {disposedList?.length ?? 0})
+                            <PopupStyle.ListButton
+                              _mini
+                              className={classNames({
+                                active: isActive('disposed'),
+                              })}
+                              disabled={disposedList.length < 1}
+                              onClick={() => {
+                                if (!tabItem.id) return
+                                set_currentListTarget(() =>
+                                  isActive('disposed')
+                                    ? null
+                                    : {
+                                        tabId: tabItem.id as number,
+                                        target: 'disposed',
+                                      }
+                                )
+                              }}
+                            >
+                              <FaList />
+                              <span>{lang('disposed_item')}</span>
+                              <span>{disposedList?.length ?? 0}</span>
+                            </PopupStyle.ListButton>
                           </span>
                           <span className="length">
-                            ({lang('queue')}: {queueList?.length ?? 0})
+                            <PopupStyle.ListButton
+                              _mini
+                              className={classNames({
+                                active: isActive('queue'),
+                              })}
+                              disabled={queueList.length < 1}
+                              onClick={() => {
+                                if (!tabItem.id) return
+                                set_currentListTarget(() =>
+                                  isActive('queue')
+                                    ? null
+                                    : {
+                                        tabId: tabItem.id as number,
+                                        target: 'queue',
+                                      }
+                                )
+                              }}
+                            >
+                              <FaList />
+                              <span>{lang('queue')}</span>{' '}
+                              <span>{queueList?.length ?? 0}</span>
+                            </PopupStyle.ListButton>
                           </span>
                           <span className="length">
-                            ({lang('error')}: {errorList?.length ?? 0})
+                            <PopupStyle.ListButton
+                              _mini
+                              className={classNames({
+                                active: isActive('error'),
+                              })}
+                              disabled={errorList.length < 1}
+                              onClick={() => {
+                                if (!tabItem.id) return
+                                set_currentListTarget(() =>
+                                  isActive('error')
+                                    ? null
+                                    : {
+                                        tabId: tabItem.id as number,
+                                        target: 'error',
+                                      }
+                                )
+                              }}
+                            >
+                              <FaList />
+                              <span>{lang('error')}</span>{' '}
+                              <span>{errorList?.length ?? 0}</span>
+                            </PopupStyle.ListButton>
                           </span>
                           <span className="length">
-                            ({lang('remove')}: {removedList?.length ?? 0})
+                            <PopupStyle.ListButton
+                              _mini
+                              className={classNames({
+                                active: isActive('removed'),
+                              })}
+                              disabled={removedList.length < 1}
+                              onClick={() => {
+                                if (!tabItem.id) return
+                                set_currentListTarget(() =>
+                                  isActive('removed')
+                                    ? null
+                                    : {
+                                        tabId: tabItem.id as number,
+                                        target: 'removed',
+                                      }
+                                )
+                              }}
+                            >
+                              <FaList />
+                              <span>{lang('remove')}</span>{' '}
+                              <span>{removedList?.length ?? 0}</span>
+                            </PopupStyle.ListButton>
                           </span>
                         </PopupStyle.Info>
                         <PopupStyle.Row>
@@ -420,22 +536,6 @@ const Main = (): JSX.Element => {
                               {lang('return_removed')}
                             </WhiteFill>
                           )}
-                          <GrayScaleFill
-                            _mini
-                            disabled={disposedList.length < 1}
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              if (!tabItem?.id) return
-                              set_openTabList((prev) => {
-                                if (typeof tabId !== 'number') return prev
-                                if (!prev.includes(tabId))
-                                  return [...prev, tabId]
-                                return prev.filter((curr) => curr !== tabId)
-                              })
-                            }}
-                          >
-                            {lang('list')}
-                          </GrayScaleFill>
                           <PrimaryButton
                             _mini
                             onClick={(e) => {
@@ -448,73 +548,72 @@ const Main = (): JSX.Element => {
                         </PopupStyle.Row>
                       </PopupStyle.InfoWrap>
                     </PopupStyle.ColumnWrap>
-                    {typeof tabId === 'number' &&
-                      openTabList.includes(tabId) && (
-                        <PopupStyle.List>
-                          <PopupStyle.ColumnList>
-                            {disposedList.map((item, index) => {
-                              const { url, requestId, imageInfo } = item
-                              return (
-                                <PopupStyle.InnerRow
-                                  key={url + index + requestId + tabId}
-                                  className="description"
-                                >
-                                  {imageInfo && (
-                                    <PopupStyle.SpanRow>
-                                      ({imageInfo.width}
-                                      <span>×</span>
-                                      {imageInfo.height})
-                                    </PopupStyle.SpanRow>
-                                  )}
-                                  <div className="url-details">{url}</div>
-                                  <PopupStyle.Row>
-                                    <WhiteFill
-                                      _mini
-                                      onClick={() => {
-                                        try {
-                                          const currentUrl = new URL(url)
-                                          set_modalOpen({
-                                            ...initialUrlRemapItem,
-                                            item: {
-                                              ...initialUrlRemapItem.item,
-                                              reference_url: url,
-                                              host: currentUrl.host,
-                                              params: Object.fromEntries(
-                                                currentUrl.searchParams
-                                              ),
-                                            },
-                                          })
-                                        } catch (error) {
-                                          console.log('err')
-                                        }
-                                      }}
-                                    >
-                                      <FaRegEdit />
-                                    </WhiteFill>
-                                    <GrayScaleFill
-                                      _mini
-                                      onClick={() => {
-                                        window.open(url, '_blank')
-                                      }}
-                                    >
-                                      <FaShare />
-                                    </GrayScaleFill>
-                                    <PrimaryButton
-                                      _mini
-                                      onClick={() => {
-                                        chrome.downloads.download({ url })
-                                        set_onProgress((prev) => [...prev, url])
-                                      }}
-                                    >
-                                      <FaDownload />
-                                    </PrimaryButton>
-                                  </PopupStyle.Row>
-                                </PopupStyle.InnerRow>
-                              )
-                            })}
-                          </PopupStyle.ColumnList>
-                        </PopupStyle.List>
-                      )}
+                    {typeof tabId === 'number' && currentList.length > 0 && (
+                      <PopupStyle.List>
+                        <PopupStyle.ColumnList>
+                          {currentList.map((item, index) => {
+                            const { url, requestId, imageInfo } = item
+                            return (
+                              <PopupStyle.InnerRow
+                                key={url + index + requestId + tabId}
+                                className="description"
+                              >
+                                {imageInfo && (
+                                  <PopupStyle.SpanRow>
+                                    ({imageInfo.width}
+                                    <span>×</span>
+                                    {imageInfo.height})
+                                  </PopupStyle.SpanRow>
+                                )}
+                                <div className="url-details">{url}</div>
+                                <PopupStyle.Row>
+                                  <WhiteFill
+                                    _mini
+                                    onClick={() => {
+                                      try {
+                                        const currentUrl = new URL(url)
+                                        set_modalOpen({
+                                          ...initialUrlRemapItem,
+                                          item: {
+                                            ...initialUrlRemapItem.item,
+                                            reference_url: url,
+                                            host: currentUrl.host,
+                                            params: Object.fromEntries(
+                                              currentUrl.searchParams
+                                            ),
+                                          },
+                                        })
+                                      } catch (error) {
+                                        console.log('err')
+                                      }
+                                    }}
+                                  >
+                                    <FaRegEdit />
+                                  </WhiteFill>
+                                  <GrayScaleFill
+                                    _mini
+                                    onClick={() => {
+                                      window.open(url, '_blank')
+                                    }}
+                                  >
+                                    <FaShare />
+                                  </GrayScaleFill>
+                                  <PrimaryButton
+                                    _mini
+                                    onClick={() => {
+                                      chrome.downloads.download({ url })
+                                      set_onProgress((prev) => [...prev, url])
+                                    }}
+                                  >
+                                    <FaDownload />
+                                  </PrimaryButton>
+                                </PopupStyle.Row>
+                              </PopupStyle.InnerRow>
+                            )
+                          })}
+                        </PopupStyle.ColumnList>
+                      </PopupStyle.List>
+                    )}
                   </Fragment>
                 )
               })}

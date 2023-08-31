@@ -1,5 +1,6 @@
 import { css, keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
+import { WhiteFill } from '../../components/Buttons'
 import { colors } from '../../themes'
 const Ellipsis = css`
   overflow: hidden;
@@ -126,11 +127,21 @@ const PopupStyle = {
       user-select: none;
     }
   `,
+  ListButton: styled(WhiteFill)`
+    &.active {
+      color: ${colors['Primary/Default']};
+    }
+  `,
   Info: styled.div`
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 4px 16px;
+    .length {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
   `,
   List: styled.div`
     padding: 8px 16px;

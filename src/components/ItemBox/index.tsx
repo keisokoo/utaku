@@ -105,7 +105,6 @@ const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
           <span>{item.imageInfo.width}px</span>
           <span>×</span>
           <span>{item.imageInfo.height}px</span>
-          {item.imageInfo.replaced && <span>(Replaced)</span>}
         </S.ImageSize>
         <S.Icons className="image-icons" data-item-size={settingState.sizeType}>
           <S.IconWrap

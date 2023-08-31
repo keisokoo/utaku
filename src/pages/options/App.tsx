@@ -115,6 +115,8 @@ const Main = (): JSX.Element => {
             The pop-up stays active, dynamically updating as new images are downloaded. To make sure all images are displayed correctly, UTAKU ingeniously verifies image sizes right in the browser tab where they appear, bypassing technical barriers in a lawful manner.\n\n Be cautious though, as using UTAKU may sometimes cause excessive traffic, potentially resulting in temporary loss of access to certain sites. Use it at your own risk and refrain from using images or videos with copyright issues.
             You are free to use UTAKU, but we do not take any responsibility for using downloaded images or videos.\n\n In the future, you might notice ads in pop-ups or option windows. While nobody loves ads, your understanding would go a long way, especially for an older developer just trying to make ends meet. Every click helps, even if it's just enough for a coffee.\n\n Enjoy using UTAKU, and if you can afford to, your support—even just for a coffee—would mean a lot to the developer.`}
         </OptionStyle.Introduction>
+        <div className="paypal">https://paypal.me/keisokoo</div>
+        https://www.buymeacoffee.com/keisokoo
         <OptionStyle.Introduction>
           {`UTAKU는 당신의 시간을 절약하기 위해 개발된 이미지/미디어 다운로더입니다.
           원본 URL을 찾아 다운로드할 수 있고, 이는 모두 당신의 설정에 따라 커스터마이징할 수 있습니다.\n\n 팝업을 활성화한 동안, 브라우저를 열거나 새로고침해야 UTAKU가 네트워크 리소스를 읽고 모을 수 있습니다.

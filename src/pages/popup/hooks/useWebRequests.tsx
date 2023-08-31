@@ -16,9 +16,7 @@ const useWebRequests = (
   const [removedList, set_removedList] = useState<WebResponseItem[]>([])
   const [queueList, set_queueList] = useState<WebResponseItem[]>([])
   const [disposedList, set_disposedList] = useState<WebResponseItem[]>([])
-  const [errorList, set_errorList] = useState<
-    chrome.webRequest.WebResponseHeadersDetails[]
-  >([])
+  const [errorList, set_errorList] = useState<WebResponseItem[]>([])
   const [tabIdList, set_tabIdList] = useState<number[]>([])
   const [tabList, set_tabList] = useState<TAB_LIST_TYPE[]>([])
 
@@ -51,6 +49,7 @@ const useWebRequests = (
     ) => {
       if (!tabId) return
       if (!tab) return
+      if (!tab?.url?.startsWith('http')) return
       set_tabList((prev) =>
         prev.some((tabItem) => tabItem.id === tab.id)
           ? prev.map((tabItem) => (tabItem.id === tab.id ? tab : tabItem))
@@ -63,25 +62,35 @@ const useWebRequests = (
     }
     const activeTab = async (activeInfo: chrome.tabs.TabActiveInfo) => {
       if (!activeInfo) return
-      set_tabList((prev) =>
-        prev.map((tabItem) =>
-          tabItem.id === activeInfo.tabId
-            ? { ...tabItem, active: true }
-            : { ...tabItem, active: false }
+      chrome.tabs.get(activeInfo.tabId, function (tab) {
+        if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
+        if (!tab?.url?.startsWith('http')) return
+        set_tabList((prev) =>
+          prev.some((tabItem) => tabItem.id === activeInfo.tabId)
+            ? prev.map((tabItem) =>
+                tabItem.id === activeInfo.tabId
+                  ? { ...tabItem, active: true }
+                  : { ...tabItem, active: false }
+              )
+            : [...prev, tab]
         )
-      )
+      })
     }
     const focusWindow = (windowId: number) => {
       if (windowId > 0) {
         chrome.tabs.query({ active: true, windowId }, (result) => {
+          if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
           if (result[0] && result[0].id)
-            set_tabList((prev) =>
-              prev.map((tabItem) =>
-                tabItem.id === result[0].id
-                  ? { ...tabItem, active: true }
-                  : { ...tabItem, active: false }
-              )
-            )
+            if (!result[0].url?.startsWith('http')) return
+          set_tabList((prev) =>
+            prev.some((tabItem) => tabItem.id === result[0].id)
+              ? prev.map((tabItem) =>
+                  tabItem.id === result[0].id
+                    ? { ...tabItem, active: true }
+                    : { ...tabItem, active: false }
+                )
+              : [...prev, { ...result[0], active: true }]
+          )
         })
       }
     }
@@ -174,17 +183,21 @@ const useWebRequests = (
   useEffect(() => {
     function getCurrentResponse(req: WebResponseItem) {
       if (req.type === 'image' || req.type === 'media') {
+        if (errorList.map((item) => item.url).includes(req.url)) return
         req = parseItemWithUrlRemaps(appliedRemapList, req)
         set_originalList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         set_queueList((prev) => uniqBy([...prev, req], (curr) => curr.url))
-        if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
-          chrome.tabs.get(req.tabId).then((tab) => {
-            if (chrome.runtime.lastError) {
-              console.log(chrome.runtime.lastError.message)
-              return
-            }
-            set_tabList((prev) => uniqBy([...prev, tab], (curr) => curr.id))
-          })
+        // if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
+        //   chrome.tabs.get(req.tabId).then((tab) => {
+        //     if (chrome.runtime.lastError) {
+        //       console.log(chrome.runtime.lastError.message)
+        //       return
+        //     }
+        //     set_tabList((prev) => {
+        //       if (prev.some((item) => item.id === tab.id)) return prev
+        //       return uniqBy([...prev, tab], (curr) => curr.id)
+        //     })
+        //   })
       }
     }
     const hasListener = chrome.webRequest.onHeadersReceived.hasListeners()
@@ -202,7 +215,7 @@ const useWebRequests = (
     return () => {
       chrome.webRequest.onHeadersReceived.removeListener(getCurrentResponse)
     }
-  }, [active, appliedRemapList])
+  }, [active, appliedRemapList, errorList])
 
   return {
     removedGroup,

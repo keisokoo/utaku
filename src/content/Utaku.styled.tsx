@@ -93,36 +93,36 @@ const ItemContainer = styled.div`
   overflow: auto hidden;
   overscroll-behavior: contain;
   width: 100%;
-  &:not([data-wrapper-size='tiny']) {
+  &:not([data-wrapper-size='hide']) {
     flex: 1;
   }
   padding: 16px;
   backdrop-filter: blur(6px);
   background-color: rgba(0, 0, 0, 0.5);
-  &[data-wrapper-size='expand'],
-  &[data-wrapper-size='tile'] {
+  &[data-wrapper-size='tile'],
+  &[data-wrapper-size='flexbox'] {
     overflow: hidden auto;
   }
-  &[data-wrapper-size='tiny'] {
+  &[data-wrapper-size='hide'] {
     height: 1px;
     overflow: hidden;
     padding: 0;
   }
 `
 const Grid = styled.div`
-  &:not([data-wrapper-size='expand']) {
+  &:not([data-wrapper-size='tile']) {
     flex-direction: row-reverse;
     justify-content: flex-end;
     column-count: initial;
     display: flex;
     gap: 8px;
   }
-  &[data-wrapper-size='tile'] {
+  &[data-wrapper-size='flexbox'] {
     flex-direction: row;
     justify-content: flex-start;
     flex-wrap: wrap;
   }
-  &[data-wrapper-size='expand'] {
+  &[data-wrapper-size='tile'] {
     gap: 8px;
     column-count: 8;
     column-gap: 16px;
@@ -245,6 +245,7 @@ const pulseCss = css`
 `
 const UtakuStyle = {
   IconWrap: styled.i`
+    color: #b9feff;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -257,12 +258,12 @@ const UtakuStyle = {
     width: 100%;
     display: flex;
     flex-direction: column;
-    &[data-wrapper-size='expand'],
-    &[data-wrapper-size='tile'] {
+    &[data-wrapper-size='tile'],
+    &[data-wrapper-size='flexbox'] {
       width: 100%;
       height: calc(100vh - 32px);
     }
-    &[data-wrapper-size='tiny'] {
+    &[data-wrapper-size='hide'] {
       height: auto;
     }
   `,
