@@ -12,7 +12,7 @@
     "message": "Please input remap name."
   },
   "edit_url_match": {
-    "message": "URL Remap Settings"
+    "message": "Edit Match URL"
   },
   "input_url_match": {
     "message": "Please enter a matching URL pattern."
@@ -117,10 +117,10 @@
     "message": "Requeue"
   },
   "collect_description": {
-    "message": "t collects the URL of the page you're viewing.\nPlease refresh or access a new page."
+    "message": "It collects the URL of the page you're viewing.\nPlease refresh or access a new page."
   },
   "url_reference": {
-    "message": "URL Reference"
+    "message": "Reference URL"
   },
   "reference_url_description": {
     "message": "(Optional) Please enter the URL to be used as an example. You can check the result through a preview."
@@ -133,5 +133,20 @@
         "example": "0"
       }
     }
+  },
+  "path_changer": {
+    "message": "Edit Paths"
+  },
+  "path_index": {
+    "message": "Path Index"
+  },
+  "no_valid_reference_url": {
+    "message": "No valid reference URL"
+  },
+  "changed_result": {
+    "message": "Changed Result"
+  },
+  "no_folder": {
+    "message": "Not found folder name ist"
   }
 }

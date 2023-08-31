@@ -10,7 +10,8 @@ export const sampleList: UrlRemapItem[] = [
         "type": ""
       },
       "reference_url": "https://post-phinf.pstatic.net/MjAxODA4MjBfMTcx/MDAxNTM0Njk2MDM1NzU5.y8tytsxu4s_ffyRrYeFJM2punRVxU3nxLbYA9indZ8og.IPRS8apkqizg3Y8TiHh7oaDcNzXFiESRuobieJaWuwQg.JPEG/10_0%EC%9D%B8%ED%8A%B8%EB%A1%9C.jpg?type=w1200",
-      "to": ""
+      "to": "",
+      path_change: []
     },
     "name": "Naver"
   },
@@ -23,7 +24,8 @@ export const sampleList: UrlRemapItem[] = [
         "name": "large"
       },
       "reference_url": "https://pbs.twimg.com/media/F4rNgMyWoAA-xyY?format=webp&name=small",
-      "to": ""
+      "to": "",
+      path_change: []
     },
     "name": "Twitter"
   },
@@ -37,7 +39,8 @@ export const sampleList: UrlRemapItem[] = [
         "w": ""
       },
       "reference_url": "https://images.unsplash.com/photo-1692712820688-0fe85b8cf3c9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxlZGl0b3JpYWwtZmVlZHwxNHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=500&q=60",
-      "to": ""
+      "to": "",
+      path_change: []
     },
     "name": "Unsplash"
   }

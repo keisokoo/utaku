@@ -69,6 +69,7 @@
     "postcss-preset-env": "^9.1.1",
     "prettier": "^3.0.1",
     "react-refresh": "^0.14.0",
+    "react-virtuoso": "^4.5.0",
     "rimraf": "^5.0.1",
     "rollup": "^3.28.0",
     "rollup-plugin-chrome-extension": "^3.6.12",

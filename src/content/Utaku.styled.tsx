@@ -39,7 +39,9 @@ const Editor = styled(Controller)`
   background-color: rgb(7 121 255 / 50%);
 `
 const inputCss = css`
-  width: 80px;
+  min-width: 80px;
+  flex: 1;
+  width: 100%;
   border-radius: 4px;
   backdrop-filter: blur(6px);
   background-color: #fff;

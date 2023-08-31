@@ -49,6 +49,13 @@ const ControlComp = ({
         {modalOpen === 'folder' && (
           <ModalBody title="folder">
             <ModalList.NameList>
+              {folderNameList.length === 0 && (
+                <ModalList.Row>
+                  <div>
+                    <span>{lang('no_folder')}</span>
+                  </div>
+                </ModalList.Row>
+              )}
               {folderNameList.map((name) => (
                 <ModalList.Row
                   key={name}

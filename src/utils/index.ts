@@ -66,7 +66,7 @@ export function urlToRemapItem(url: string): UrlRemapItem {
 }
 export function parseUrlRemap(value: UrlRemap, url: string) {
   try {
-    const { from, to, params, host } = value
+    const { from, to, params, host, path_change } = value
     if (host && !url.includes(host)) return url
     if (Object.keys(params).length) {
       URL
@@ -78,6 +78,18 @@ export function parseUrlRemap(value: UrlRemap, url: string) {
           urlObj.searchParams.delete(key)
         }
       })
+      url = urlObj.toString()
+    }
+    if (path_change) {
+      const urlObj = new URL(url)
+      const refererPath = urlObj.pathname.split('/').filter(ii => !!ii).map((dt, idx) => {
+        const changed = path_change?.find(
+          (ii) => ii.index === idx
+        )
+        return changed ? changed.to : dt
+      }
+      ).join('/');
+      urlObj.pathname = '/' + refererPath
       url = urlObj.toString()
     }
     if (from && url.includes(from)) {

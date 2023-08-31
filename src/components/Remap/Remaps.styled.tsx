@@ -6,8 +6,8 @@ const urlBoxCss = css`
   color: #464646;
   background-color: #dcdcdc;
   padding: 8px 12px;
-  max-width: 400px;
   word-break: break-all;
+  width: 600px;
   border-radius: 8px;
   font-size: 12px;
   span.highlight {
@@ -79,6 +79,7 @@ export const RemapStyle = {
   `,
   CurrentUrl: styled.textarea`
     ${urlBoxCss}
+    min-height: 90px;
     border: none;
     outline: none;
   `,
@@ -87,6 +88,13 @@ export const RemapStyle = {
     background-color: #d6f7d5;
     span.highlight {
       color: ${colors['Secondary/Dark']};
+    }
+  `,
+  PathName: styled.div`
+    ${urlBoxCss}
+    background-color: #d5f6f7;
+    span.highlight {
+      color: ${colors['Secondary/Default']};
     }
   `,
   PartLabel: styled.div`
@@ -99,7 +107,8 @@ export const RemapStyle = {
   `,
   EditorList: styled.div`
     display: flex;
-    min-width: 400px;
+    min-width: 500px;
+    max-width: 600px;
     flex-direction: column;
     gap: 24px;
     color: ${colors['Grayscale/Gray Dark']};
@@ -127,6 +136,9 @@ export const RemapStyle = {
     font-size: 12px;
     cursor: pointer;
     user-select: none;
+    &[data-active='true'] {
+      background-color: #79c1ff;
+    }
   `,
   Row: styled.div`
     label {
@@ -181,5 +193,11 @@ export const RemapStyle = {
     align-items: center;
     gap: 8px;
     justify-content: flex-end;
+  `,
+  Chips: styled.div`
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
   `,
 }

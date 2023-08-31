@@ -50,4 +50,35 @@ const highlight = (
   const terms = termsMatchSplit(term, itemTarget, className)
   return <>{terms}</>
 }
+
+export const multiHighlight = (
+  str: string | null,
+  extractStr?: string[] | null
+) => {
+  if (!str) return []
+  if (!extractStr) return [{ in: false, value: str }]
+  if (extractStr.length < 1) return [{ in: false, value: str }]
+
+  const regex = new RegExp(extractStr.map((s) => `(${s})`).join('|'), 'g')
+  const result: { in: boolean; value: string }[] = []
+  let lastIndex = 0
+
+  str.replace(regex, (match, ...args) => {
+    const index = args[args.length - 2]
+
+    if (index > lastIndex) {
+      result.push({ in: false, value: str.slice(lastIndex, index) })
+    }
+
+    result.push({ in: true, value: match })
+    lastIndex = index + match.length
+
+    return match // 여기서 match를 반환
+  })
+
+  if (lastIndex < str.length) {
+    result.push({ in: false, value: str.slice(lastIndex) })
+  }
+  return result
+}
 export default highlight

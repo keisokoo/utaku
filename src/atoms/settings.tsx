@@ -4,6 +4,11 @@ export const itemTypes = ['all', 'image', 'media'] as const
 export const sizeTypes = ['small', 'medium', 'large'] as const
 export const containerTypes = ['hide', 'normal', 'flexbox', 'tile'] as const
 
+export type PathChangeType = {
+  index: number
+  to: string
+}
+
 export type UrlRemap = {
   reference_url?: string
   host: string
@@ -12,6 +17,7 @@ export type UrlRemap = {
   }
   from: string
   to: string
+  path_change: PathChangeType[]
 }
 export type UrlRemapItem = {
   id: string
@@ -27,6 +33,7 @@ export const initialUrlRemapItem: UrlRemapItem = {
     params: {},
     from: '',
     to: '',
+    path_change: [],
   },
 }
 export interface SettingsType {

@@ -33,6 +33,8 @@ import useWebRequests from './hooks/useWebRequests'
 import './index.scss'
 import { sampleApply, sampleList } from './sources'
 
+import { Virtuoso } from 'react-virtuoso'
+
 function focusPopup() {
   chrome.tabs.query(
     {
@@ -548,72 +550,82 @@ const Main = (): JSX.Element => {
                         </PopupStyle.Row>
                       </PopupStyle.InfoWrap>
                     </PopupStyle.ColumnWrap>
-                    {typeof tabId === 'number' && currentList.length > 0 && (
-                      <PopupStyle.List>
-                        <PopupStyle.ColumnList>
-                          {currentList.map((item, index) => {
-                            const { url, requestId, imageInfo } = item
-                            return (
-                              <PopupStyle.InnerRow
-                                key={url + index + requestId + tabId}
-                                className="description"
-                              >
-                                {imageInfo && (
-                                  <PopupStyle.SpanRow>
-                                    ({imageInfo.width}
-                                    <span>×</span>
-                                    {imageInfo.height})
-                                  </PopupStyle.SpanRow>
-                                )}
-                                <div className="url-details">{url}</div>
-                                <PopupStyle.Row>
-                                  <WhiteFill
-                                    _mini
-                                    onClick={() => {
-                                      try {
-                                        const currentUrl = new URL(url)
-                                        set_modalOpen({
-                                          ...initialUrlRemapItem,
-                                          item: {
-                                            ...initialUrlRemapItem.item,
-                                            reference_url: url,
-                                            host: currentUrl.host,
-                                            params: Object.fromEntries(
-                                              currentUrl.searchParams
-                                            ),
-                                          },
-                                        })
-                                      } catch (error) {
-                                        console.log('err')
-                                      }
-                                    }}
+                    {typeof tabId === 'number' &&
+                      tabId === currentListTarget?.tabId &&
+                      currentList.length > 0 && (
+                        <PopupStyle.List>
+                          <PopupStyle.ColumnList>
+                            <Virtuoso
+                              style={{ height: '100%' }}
+                              totalCount={currentList.length}
+                              itemContent={(index) => {
+                                const item = currentList[index]
+                                const { url, requestId, imageInfo } = item
+                                return (
+                                  <PopupStyle.InnerRow
+                                    key={url + index + requestId + tabId}
+                                    className="description"
                                   >
-                                    <FaRegEdit />
-                                  </WhiteFill>
-                                  <GrayScaleFill
-                                    _mini
-                                    onClick={() => {
-                                      window.open(url, '_blank')
-                                    }}
-                                  >
-                                    <FaShare />
-                                  </GrayScaleFill>
-                                  <PrimaryButton
-                                    _mini
-                                    onClick={() => {
-                                      chrome.downloads.download({ url })
-                                      set_onProgress((prev) => [...prev, url])
-                                    }}
-                                  >
-                                    <FaDownload />
-                                  </PrimaryButton>
-                                </PopupStyle.Row>
-                              </PopupStyle.InnerRow>
-                            )
-                          })}
-                        </PopupStyle.ColumnList>
-                      </PopupStyle.List>
-                    )}
+                                    {imageInfo && (
+                                      <PopupStyle.SpanRow>
+                                        ({imageInfo.width}
+                                        <span>×</span>
+                                        {imageInfo.height})
+                                      </PopupStyle.SpanRow>
+                                    )}
+                                    <div className="url-details">{url}</div>
+                                    <PopupStyle.Row>
+                                      <WhiteFill
+                                        _mini
+                                        onClick={() => {
+                                          try {
+                                            const currentUrl = new URL(url)
+                                            set_modalOpen({
+                                              ...initialUrlRemapItem,
+                                              item: {
+                                                ...initialUrlRemapItem.item,
+                                                reference_url: url,
+                                                host: currentUrl.host,
+                                                params: Object.fromEntries(
+                                                  currentUrl.searchParams
+                                                ),
+                                              },
+                                            })
+                                          } catch (error) {
+                                            console.log('err')
+                                          }
+                                        }}
+                                      >
+                                        <FaRegEdit />
+                                      </WhiteFill>
+                                      <GrayScaleFill
+                                        _mini
+                                        onClick={() => {
+                                          window.open(url, '_blank')
+                                        }}
+                                      >
+                                        <FaShare />
+                                      </GrayScaleFill>
+                                      <PrimaryButton
+                                        _mini
+                                        onClick={() => {
+                                          chrome.downloads.download({ url })
+                                          set_onProgress((prev) => [
+                                            ...prev,
+                                            url,
+                                          ])
+                                        }}
+                                      >
+                                        <FaDownload />
+                                      </PrimaryButton>
+                                    </PopupStyle.Row>
+                                  </PopupStyle.InnerRow>
+                                )
+                              }}
+                            />
+                          </PopupStyle.ColumnList>
+                        </PopupStyle.List>
+                      )}
                   </Fragment>
                 )
               })}
@@ -637,7 +649,6 @@ const Main = (): JSX.Element => {
             <GrayScaleFill
               _icon
               _mini
-              style={{ backgroundColor: 'transparent' }}
               onClick={() => {
                 chrome.runtime.openOptionsPage()
               }}

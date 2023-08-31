@@ -167,11 +167,7 @@ const PopupStyle = {
   `,
   ColumnList: styled.div`
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    max-height: 500px;
-    overflow-y: auto;
+    height: 400px;
   `,
   Row: styled.div`
     display: flex;
