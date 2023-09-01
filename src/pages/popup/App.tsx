@@ -122,7 +122,25 @@ const Main = (): JSX.Element => {
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
             if (items.sizeType) draft.sizeType = items.sizeType
             if (items.itemType) draft.itemType = items.itemType
-            if (items.remapList) draft.remapList = items.remapList
+            if (items.remapList) {
+              // migrate
+              draft.remapList = items.remapList.map((curr: UrlRemapItem) => {
+                const oldCurrItem = curr.item as typeof curr.item & {
+                  from: string
+                  to: string
+                }
+                if (!!oldCurrItem.from || !!oldCurrItem.to) {
+                  oldCurrItem.replace = oldCurrItem.replace
+                    ? [
+                        ...oldCurrItem.replace,
+                        { from: oldCurrItem.from, to: oldCurrItem.to },
+                      ]
+                    : [{ from: oldCurrItem.from, to: oldCurrItem.to }]
+                }
+                curr.item = oldCurrItem
+                return curr
+              })
+            }
             if (items.applyRemapList)
               draft.applyRemapList = items.applyRemapList
             if (!items.remapList && !items.applyRemapList) {

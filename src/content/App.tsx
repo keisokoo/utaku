@@ -58,7 +58,6 @@ const Main = (): JSX.Element => {
         'sizeLimit',
         'sizeType',
         'itemType',
-        'remapList',
         'containerSize',
       ],
       (items) => {
@@ -70,7 +69,6 @@ const Main = (): JSX.Element => {
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
             if (items.sizeType) draft.sizeType = items.sizeType
             if (items.itemType) draft.itemType = items.itemType
-            if (items.remapList) draft.remapList = items.remapList
             if (items.containerSize) draft.containerSize = items.containerSize
           })
         )

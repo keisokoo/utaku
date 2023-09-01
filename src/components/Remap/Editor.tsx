@@ -10,7 +10,7 @@ import {
   settings,
 } from '../../atoms/settings'
 import { isValidUrl, lang, parseUrlRemap } from '../../utils'
-import { GrayScaleFill, SecondaryButton } from '../Buttons'
+import { GrayScaleFill, GrayScaleOutline, SecondaryButton } from '../Buttons'
 import { PopupInputStyle } from './PopupInput.styled'
 import { RemapStyle } from './Remaps.styled'
 
@@ -296,41 +296,64 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
         </S.Column>
         <S.Column>
           <S.PartLabel>4. {lang('change_add_text')}</S.PartLabel>
-          <S.InputWrap className="utaku-flex-center">
-            <S.InputBox>
-              <label>{lang('replace_url')}</label>
-              <div>
-                <P.UnderlineInput
-                  type="text"
-                  style={{ width: '100%' }}
-                  value={remap.from}
-                  onChange={(e) =>
-                    set_currentRemap(
-                      produce((draft) => {
-                        draft.item.from = e.target.value
-                      })
-                    )
-                  }
-                  placeholder="from"
-                />
-              </div>
-              <div>
-                <P.UnderlineInput
-                  type="text"
-                  style={{ width: '100%' }}
-                  value={remap.to}
-                  onChange={(e) =>
-                    set_currentRemap(
-                      produce((draft) => {
-                        draft.item.to = e.target.value
-                      })
-                    )
-                  }
-                  placeholder="to"
-                />
-              </div>
-            </S.InputBox>
-          </S.InputWrap>
+          <S.QueryBox>
+            <GrayScaleOutline
+              _mini
+              onClick={() => {
+                set_currentRemap(
+                  produce((draft) => {
+                    draft.item.replace.push({ from: '', to: '' })
+                  })
+                )
+              }}
+            >
+              {lang('add')}
+            </GrayScaleOutline>
+            {remap.replace.map((item, idx) => {
+              return (
+                <S.InputWrap
+                  key={'replace' + idx}
+                  className="utaku-flex-center"
+                >
+                  <S.InputBox>
+                    <label>
+                      {idx + 1}. {lang('replace_url')}
+                    </label>
+                    <div>
+                      <P.UnderlineInput
+                        type="text"
+                        style={{ width: '100%' }}
+                        value={item.from}
+                        onChange={(e) =>
+                          set_currentRemap(
+                            produce((draft) => {
+                              draft.item.replace[idx].from = e.target.value
+                            })
+                          )
+                        }
+                        placeholder="from"
+                      />
+                    </div>
+                    <div>
+                      <P.UnderlineInput
+                        type="text"
+                        style={{ width: '100%' }}
+                        value={item.to}
+                        onChange={(e) =>
+                          set_currentRemap(
+                            produce((draft) => {
+                              draft.item.replace[idx].to = e.target.value
+                            })
+                          )
+                        }
+                        placeholder="to"
+                      />
+                    </div>
+                  </S.InputBox>
+                </S.InputWrap>
+              )
+            })}
+          </S.QueryBox>
         </S.Column>
       </S.EditorList>
       <S.BottomList>
@@ -372,7 +395,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
             onClose && onClose()
           }}
         >
-          {mode === 'edit' ? lang('save') : lang('add')}
+          {mode === 'edit' ? lang('save') : lang('enter')}
         </SecondaryButton>
       </S.BottomList>
     </>

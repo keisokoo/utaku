@@ -79,6 +79,14 @@ const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
                 src={item.url}
                 draggable="false"
                 data-wrapper-size={settingState.containerSize}
+                muted
+                loop
+                onMouseEnter={(e) => {
+                  e.currentTarget.play()
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.pause()
+                }}
               />
             </>
           )}

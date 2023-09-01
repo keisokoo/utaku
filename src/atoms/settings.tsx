@@ -8,15 +8,17 @@ export type PathChangeType = {
   index: number
   to: string
 }
-
+export type ReplaceType = {
+  from: string
+  to: string
+}
 export type UrlRemap = {
   reference_url?: string
   host: string
   params: {
     [k: string]: string
   }
-  from: string
-  to: string
+  replace: ReplaceType[]
   path_change: PathChangeType[]
 }
 export type UrlRemapItem = {
@@ -31,8 +33,7 @@ export const initialUrlRemapItem: UrlRemapItem = {
     reference_url: '',
     host: '',
     params: {},
-    from: '',
-    to: '',
+    replace: [],
     path_change: [],
   },
 }
