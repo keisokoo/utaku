@@ -112,23 +112,33 @@ const DummyBox = styled.div`
   span {
     font-size: 16px;
   }
+  &[data-wrapper-size='flexbox'] {
+    width: 200px;
+  }
+  &[data-wrapper-size='tile'] {
+    height: 200px;
+    width: 100%;
+  }
 `
 const ItemBoxStyles = {
   ImageBox,
   DummyBox,
   LoadingWrap: styled.div`
+    min-width: 200px;
     break-inside: avoid;
     box-sizing: border-box;
     opacity: 0.8;
     cursor: pointer;
     transition: ease-out 0.15s;
     position: relative;
+    overflow: hidden;
     &:hover {
       opacity: 1;
     }
     display: flex;
     align-items: center;
     justify-content: center;
+    transition: 0.3s;
   `,
   Wrap: styled.div`
     user-select: none;

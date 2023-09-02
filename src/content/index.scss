@@ -1,5 +1,22 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css');
 
+#utaku-iframe {
+  position: fixed;
+  z-index: 9998;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: initial;
+  color: #000;
+  text-align: left;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: auto;
+  background: transparent;
+  border-radius: initial;
+  box-shadow: none;
+}
 .utaku-root {
   position: fixed;
   z-index: 9998;

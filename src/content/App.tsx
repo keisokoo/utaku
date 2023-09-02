@@ -38,6 +38,7 @@ const Main = (): JSX.Element => {
   const [downloadedItem, set_downloadedItem] = useState<string[]>([])
   const [settingState, set_settingState] = useRecoilState(settings)
   const [active, set_active] = useState<boolean>(true)
+  const [fireFirst, set_fireFirst] = useState<boolean>(false)
   const toggleActive = useCallback(() => {
     set_active((prev) => !prev)
   }, [])
@@ -72,6 +73,7 @@ const Main = (): JSX.Element => {
             if (items.containerSize) draft.containerSize = items.containerSize
           })
         )
+        set_fireFirst(true)
       }
     )
   }, [])
@@ -269,6 +271,7 @@ const Main = (): JSX.Element => {
     }
   }
   if (!itemList) return <></>
+  if (!fireFirst) return <></>
   return (
     <>
       <UtakuStyle.Wrap data-wrapper-size={settingState.containerSize}>

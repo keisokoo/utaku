@@ -37,7 +37,7 @@
   "host_permissions": ["<all_urls>"],
   "web_accessible_resources": [
     {
-      "resources": ["chunks/*.js", "content/index.js", "images/*.png"],
+      "resources": ["chunks/*.js", "content/index.js", "*.png"],
       "matches": ["https://*/*", "http://*/*"]
     }
   ]

@@ -2,15 +2,14 @@ import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
 import './index.scss'
+import { rootId } from './sources'
 
-const rootId = `b7414be4-15e6-4442-8ae4-ae6337e17e53`
 if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
 
 function onMessage(request: { message: string; data: object }) {
   if (request?.message === 'utaku-mount') {
     const container = document.getElementById('root-' + rootId) as HTMLElement
-    // if (!container.shadowRoot) container.attachShadow({ mode: 'open' })
     if (!root) {
       root = ReactDOM.createRoot(container)
 
@@ -157,4 +156,5 @@ function main() {
     }, 3000) // 3초 후에 fadeout 효과를 시작함
   })
 }
+
 main()
