@@ -237,23 +237,6 @@ const Main = (): JSX.Element => {
                       <br />
                     </O.A>
                   </div>
-                  <div>
-                    <O.Q>Q: Why is the name UTAKU?</O.Q>
-                    <O.A>
-                      A: People who use this program will have various purposes,
-                      <br />
-                      but most of them will be those who can only feel satisfied
-                      when they find and save the original image.
-                      <br />
-                      {`We thought they'd be people suffering from a collection syndrome.`}
-                      <br />
-                      {`Don't we call someone absorbed in something an Otaku?`}
-                      <br />
-                      I also created it for such a purpose,
-                      <br />
-                      {`So, in the sense of "Aren't you the same if you are using this?", we named it UTAKU.`}
-                    </O.A>
-                  </div>
                 </O.Columns>
               </O.Description>
             )}
