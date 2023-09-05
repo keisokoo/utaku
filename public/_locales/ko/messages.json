@@ -187,5 +187,8 @@
   },
   "no_images": {
     "message": "이미지가 없습니다."
+  },
+  "re_loading": {
+    "message": "재수집 중"
   }
 }

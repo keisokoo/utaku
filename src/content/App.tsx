@@ -58,6 +58,7 @@ const Main = (): JSX.Element => {
   const [downloadedItem, set_downloadedItem] = useState<string[]>([])
   const [settingState, set_settingState] = useRecoilState(settings)
   const [active, set_active] = useState<boolean>(true)
+  const [pending, set_pending] = useState<boolean>(false)
   const [fireFirst, set_fireFirst] = useState<boolean>(false)
   const disposedRef = useRef<ItemType[]>([])
   const toggleActive = useCallback(() => {
@@ -166,6 +167,7 @@ const Main = (): JSX.Element => {
   }, [itemList, settingState.sizeLimit, downloadedItem, settingState.itemType])
 
   const timeoutRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
+  const reloadRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
   const selectedDownload = (all?: boolean) => {
     const downloadList = all
       ? filteredImages.map((item) => item.url)
@@ -486,7 +488,13 @@ const Main = (): JSX.Element => {
               <WhiteFill
                 _mini
                 onClick={() => {
-                  scrapImages()
+                  if (reloadRef.current) clearTimeout(reloadRef.current)
+                  set_pending(true)
+                  set_itemList([])
+                  reloadRef.current = setTimeout(() => {
+                    set_pending(false)
+                    scrapImages()
+                  }, 1000)
                 }}
               >
                 <FaRedo />
@@ -646,8 +654,12 @@ const Main = (): JSX.Element => {
             }
           >
             {filteredImages?.length < 1 && (
-              <UtakuStyle.Empty>
-                <div>{lang('no_images')}</div>
+              <UtakuStyle.Empty
+                data-item-size={settingState.sizeType}
+                data-wrapper-size={settingState.containerSize}
+              >
+                {pending && <div>{lang('re_loading')}</div>}
+                {!pending && <div>{lang('no_images')}</div>}
               </UtakuStyle.Empty>
             )}
             {filteredImages &&

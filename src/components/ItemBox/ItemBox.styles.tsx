@@ -9,7 +9,7 @@ const syncRotateKeyframes = keyframes`
     transform: rotate(360deg);
   }
 `
-const mediaCss = css`
+export const mediaCss = css`
   &:not([data-wrapper-size='tile']) {
     height: 120px;
     min-width: 100px;

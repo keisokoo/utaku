@@ -87,10 +87,10 @@ const ItemBox = ({
                 <FaVideo />
               </S.MediaIcon>
               <VideoItem
-                data-item-size={settingState.sizeType}
                 key={item.url}
                 src={item.url}
                 draggable="false"
+                data-item-size={settingState.sizeType}
                 data-wrapper-size={settingState.containerSize}
                 muted
                 loop

@@ -112,6 +112,9 @@ const ItemContainer = styled.div`
   }
 `
 const Grid = styled.div`
+  & > div {
+    transition: 0.15s;
+  }
   &:not([data-wrapper-size='tile']) {
     flex-direction: row-reverse;
     justify-content: flex-end;
