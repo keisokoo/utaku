@@ -483,7 +483,7 @@ const Main = (): JSX.Element => {
                 }}
               >
                 <FaRegEdit />
-                {lang('remaps')}
+                {lang('remaps')}({appliedRemapList?.length ?? 0})
               </WhiteFill>
               <WhiteFill
                 _mini

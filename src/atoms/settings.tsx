@@ -63,7 +63,7 @@ export const settings = atom<SettingsType>({
     sizeType: 'small',
     itemType: 'image',
     modeType: defaultMode,
-    viewMode: ['container', 'size', 'item'],
+    viewMode: ['container'],
     sizeLimit: {
       width: 200,
       height: 200,

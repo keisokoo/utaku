@@ -66,7 +66,7 @@ const Main = (): JSX.Element => {
               <O.VideoTitle>{lang('simple_mode')}</O.VideoTitle>
               <O.Responsive>
                 <O.Iframe
-                  src="https://www.youtube.com/embed/_BRwT2XNxck"
+                  src="https://www.youtube.com/embed/uaViDuTAV1Q"
                   title="UTAKU Remap Tutorial"
                   frameBorder="0"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
