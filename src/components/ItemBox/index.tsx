@@ -22,8 +22,14 @@ interface ItemBoxProps
   > {
   item: ItemType
   setTooltip?: (tooltip: string) => void
+  handleRemaps?: (url: string) => void
 }
-const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
+const ItemBox = ({
+  item,
+  setTooltip,
+  handleRemaps,
+  ...props
+}: ItemBoxProps) => {
   const [settingState] = useRecoilState(settings)
   const { ImageItem, VideoItem } = S
   const copyToClipboard = (text: string) => {
@@ -33,6 +39,13 @@ const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
     }
   }
   const handleDown = (url: string) => {
+    if (settingState.modeType === 'simple') {
+      chrome.runtime.sendMessage({
+        message: 'simple-download',
+        data: [url],
+      })
+      return
+    }
     chrome.runtime.sendMessage({
       message: 'download',
       data: [url],
@@ -137,6 +150,10 @@ const ItemBox = ({ item, setTooltip, ...props }: ItemBoxProps) => {
             {...tooltipEventAttributes('Remap: ' + item.url)}
             onClick={(e) => {
               e.stopPropagation()
+              if (settingState.modeType === 'simple') {
+                handleRemaps && handleRemaps(item.url)
+                return
+              }
               chrome.runtime.sendMessage({
                 message: 'create-remap',
                 data: item.url,

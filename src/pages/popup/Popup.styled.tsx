@@ -1,7 +1,7 @@
 import { css, keyframes } from '@emotion/react'
 import styled from '@emotion/styled'
 import { WhiteFill } from '../../components/Buttons'
-import { colors } from '../../themes'
+import { colors, typography } from '../../themes'
 const Ellipsis = css`
   overflow: hidden;
   text-overflow: ellipsis;
@@ -17,6 +17,26 @@ const pulse = keyframes`
     box-shadow: 0 0 0 10px rgba(0, 174, 35, 0);
   }
 `
+const switchCss = css`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px;
+  border-radius: 24px;
+  background-color: ${colors['White/White 10%']};
+  & > div {
+    color: ${colors['White/White off']};
+    ${typography['Body/Small/Bold']}
+    border-radius: 24px;
+    padding: 4px 12px;
+    text-transform: capitalize;
+    cursor: pointer;
+    &.active {
+      color: ${colors['Primary/Default']};
+      background-color: ${colors['White/White 70%']};
+    }
+  }
+`
 const pulseCss = css`
   width: 12px;
   height: 12px;
@@ -28,6 +48,19 @@ const pulseCss = css`
   justify-content: center;
 `
 const PopupStyle = {
+  ModeController: styled.div`
+    ${switchCss}
+  `,
+  IconWrap: styled.i`
+    color: #b9feff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    padding: 0;
+    padding-left: 12px;
+    cursor: default;
+  `,
   Circle: styled.div`
     ${pulseCss}
   `,

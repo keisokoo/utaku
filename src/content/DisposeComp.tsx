@@ -15,7 +15,11 @@ interface DisposeImageProps {
   ) => void
   onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void
 }
-const DisposeVideo = ({ value, onError, disposeVideo }: DisposeVideoProps) => {
+export const DisposeVideo = ({
+  value,
+  onError,
+  disposeVideo,
+}: DisposeVideoProps) => {
   return (
     <video
       src={value.url}
@@ -23,6 +27,9 @@ const DisposeVideo = ({ value, onError, disposeVideo }: DisposeVideoProps) => {
       muted
       loop
       controls={false}
+      onCanPlay={(e) => {
+        disposeVideo(e, value)
+      }}
       onLoadedMetadata={(e) => {
         disposeVideo(e, value)
       }}
@@ -32,7 +39,11 @@ const DisposeVideo = ({ value, onError, disposeVideo }: DisposeVideoProps) => {
     />
   )
 }
-const DisposeImage = ({ value, onError, disposeImage }: DisposeImageProps) => {
+export const DisposeImage = ({
+  value,
+  onError,
+  disposeImage,
+}: DisposeImageProps) => {
   return (
     <img
       src={value.url}

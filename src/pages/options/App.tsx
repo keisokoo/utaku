@@ -43,7 +43,6 @@ const Main = (): JSX.Element => {
     if (chrome && chrome.i18n) {
       const uiLanguage = chrome.i18n.getUILanguage()
       setLanguage(uiLanguage)
-      console.log('uiLanguage', uiLanguage)
     }
   }, [])
   return (

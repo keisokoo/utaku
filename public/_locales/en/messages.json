@@ -181,5 +181,11 @@
   },
   "utaku_about": {
     "message": "UTAKU is an image/media downloader designed to save you time.\nIt can remap URLs to fetch original source URLs, which are all customizable to your settings.\n\n Upon activation of the pop-up, you may need to open or refresh your browser to enable UTAKU to read your network resource headers and collect resources.\nThe pop-up stays active, dynamically updating as new images are downloaded. To make sure all images are displayed correctly, UTAKU ingeniously verifies image sizes right in the browser tab where they appear, bypassing technical barriers in a lawful manner.\n\n Be cautious though, as using UTAKU may sometimes cause excessive traffic, potentially resulting in temporary loss of access to certain sites. Use it at your own risk and refrain from using images or videos with copyright issues.\nYou are free to use UTAKU, but we do not take any responsibility for using downloaded images or videos."
+  },
+  "reload": {
+    "message": "Reload"
+  },
+  "no_images": {
+    "message": "No images"
   }
 }

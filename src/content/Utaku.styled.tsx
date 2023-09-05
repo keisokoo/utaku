@@ -246,15 +246,43 @@ const pulseCss = css`
   justify-content: center;
 `
 const UtakuStyle = {
+  SettingsRow: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 22px;
+    backdrop-filter: blur(6px);
+    background-color: rgb(0 0 0 / 50%);
+    color: #fff;
+    font-size: 16px;
+    justify-content: space-between;
+    & > div {
+      display: flex;
+      align-items: center;
+      flex: 1;
+    }
+  `,
+  Row: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    &.justify-end {
+      justify-content: flex-end;
+    }
+  `,
   IconWrap: styled.i`
-    color: #b9feff;
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 18px;
-    padding: 0;
-    padding-left: 12px;
-    cursor: default;
+    cursor: pointer;
+    padding: 4px 12px;
+    &[data-active='true'] {
+      padding: 0;
+      padding-left: 12px;
+      color: #b9feff;
+    }
   `,
   Wrap: styled.div`
     width: 100%;
@@ -289,6 +317,15 @@ const UtakuStyle = {
     align-items: center;
     justify-content: center;
     min-width: 100px;
+  `,
+  Empty: styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 200px;
+    color: #fff;
+    font-size: 16px;
   `,
   Center,
   Input,

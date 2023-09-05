@@ -6,13 +6,16 @@ import {
   FaList,
   FaQuestion,
   FaRegEdit,
+  FaRocket,
   FaShare,
 } from 'react-icons/fa'
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { UtakuW } from '../../assets'
 import {
   UrlRemapItem,
+  defaultMode,
   initialUrlRemapItem,
+  modeType,
   settings,
 } from '../../atoms/settings'
 import {
@@ -62,12 +65,13 @@ const targetType = ['disposed', 'queue', 'error', 'removed'] as const
 const Main = (): JSX.Element => {
   const [active, set_active] = useState(true)
   const [onProgress, set_onProgress] = useState<string[]>([])
+  const [settingState, set_settingState] = useRecoilState(settings)
   const { folderName, downloadedItem, handleFolderName } = useFileDownload(
     (item) => {
       set_onProgress((prev) => prev.filter((curr) => curr !== item.url))
-    }
+    },
+    settingState.modeType !== 'enhanced'
   )
-  const [settingState, set_settingState] = useRecoilState(settings)
   const [modalOpen, set_modalOpen] = useState<'remaps' | UrlRemapItem | null>(
     null
   )
@@ -92,6 +96,7 @@ const Main = (): JSX.Element => {
     disposedGroup,
     errorGroup,
     clearListByTabId,
+    handleSourceList,
   } = results
   useEffect(() => {
     chrome.storage.local.get(
@@ -103,6 +108,7 @@ const Main = (): JSX.Element => {
         'itemType',
         'remapList',
         'applyRemapList',
+        'modeType',
       ],
       (items) => {
         if (!items.remapList && !items.applyRemapList) {
@@ -117,6 +123,11 @@ const Main = (): JSX.Element => {
               draft.folderName = items.folderName
               handleFolderName(items.folderName)
             }
+            if (items.modeType)
+              draft.modeType =
+                typeof items.modeType === 'string'
+                  ? (items.modeType as (typeof modeType)[number])
+                  : defaultMode
             if (items.folderNameList)
               draft.folderNameList = items.folderNameList
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
@@ -213,6 +224,14 @@ const Main = (): JSX.Element => {
           }
         removeQueueItem(disposedData)
       }
+      if (request.message === 'bulk-queue-images' && senderTabId) {
+        const appended = (request.data as WebResponseItem[]).map((item) => {
+          item.tabId = senderTabId
+          return item
+        })
+        handleSourceList(appended)
+        sendResponse({ data: { success: true } })
+      }
       if (request.message === 'delete-all-disposed') {
         clearListByTabId(senderTabId)
       }
@@ -270,6 +289,7 @@ const Main = (): JSX.Element => {
     queueGroup,
     removeDisposedItem,
     removeQueueItem,
+    handleSourceList,
     downloadedItem,
     folderName,
     settingState.folderNameList,
@@ -285,11 +305,22 @@ const Main = (): JSX.Element => {
         chrome.windows.update(tab.windowId, { focused: true }, () => {
           chrome.tabs.update(tabId, { active: true })
         })
-        chrome.tabs.sendMessage(tabId, { message: 'utaku-mount' }, () => {
-          if (chrome.runtime.lastError) {
-            console.log(chrome.runtime.lastError.message)
+        chrome.tabs.sendMessage(
+          tabId,
+          { message: 'utaku-current-active' },
+          (response) => {
+            if (chrome.runtime.lastError) {
+              chrome.tabs.reload(tabId)
+              return
+            }
+            if (response === 'ok' && tabId) {
+              chrome.tabs.sendMessage(tabId, { message: 'utaku-mount' })
+            }
+            if (response === 'mounted' && tabId) {
+              chrome.tabs.sendMessage(tabId, { message: 'utaku-quit' })
+            }
           }
-        })
+        )
       }
     })
   }
@@ -360,6 +391,34 @@ const Main = (): JSX.Element => {
             {onProgress.length > 0 && (
               <div>Downloading {onProgress.length} files ...</div>
             )}
+            <PopupStyle.Row>
+              <PopupStyle.ModeController>
+                <PopupStyle.IconWrap>
+                  <FaRocket />
+                </PopupStyle.IconWrap>
+                {modeType.map((type) => (
+                  <div
+                    key={type}
+                    className={type === settingState.modeType ? 'active' : ''}
+                    onClick={() => {
+                      if (type === 'enhanced') return
+                      set_settingState(
+                        produce((draft) => {
+                          draft.modeType = type
+                        })
+                      )
+                      chrome.runtime.sendMessage({
+                        message: 'mode-change',
+                        data: type,
+                      })
+                      window.close()
+                    }}
+                  >
+                    {type}
+                  </div>
+                ))}
+              </PopupStyle.ModeController>
+            </PopupStyle.Row>
             <div
               onClick={() => {
                 set_active((prev) => !prev)

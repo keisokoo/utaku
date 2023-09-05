@@ -2,7 +2,8 @@ import { uniq } from 'lodash-es'
 import { useCallback, useEffect, useState } from 'react'
 type CONFLICT_ACTION = 'overwrite' | 'uniquify'
 const useFileDownload = (
-  endCallback?: (item: chrome.downloads.DownloadItem) => void
+  endCallback?: (item: chrome.downloads.DownloadItem) => void,
+  disabled?: boolean
 ) => {
   const [conflictAction, set_conflictAction] =
     useState<CONFLICT_ACTION>('uniquify')
@@ -10,6 +11,13 @@ const useFileDownload = (
   const [folderName, set_folderName] = useState<string>('utaku')
   const handleFolderName = useCallback((name: string) => {
     set_folderName(name)
+    chrome.storage.local.set({ folderName: name })
+    chrome.runtime.sendMessage(
+      { message: 'set-folderName', data: name },
+      () => {
+        if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
+      }
+    )
   }, [])
   const handleConflictAction = useCallback((type: CONFLICT_ACTION) => {
     set_conflictAction(type)
@@ -35,15 +43,20 @@ const useFileDownload = (
         }
       })
     }
-    if (!chrome.downloads.onChanged.hasListener(handleDownloadChange)) {
+    if (
+      !chrome.downloads.onChanged.hasListener(handleDownloadChange) &&
+      !disabled
+    ) {
       chrome.downloads.onChanged.addListener(handleDownloadChange)
+    } else {
+      chrome.downloads.onChanged.removeListener(handleDownloadChange)
     }
     return () => {
       if (chrome.downloads.onChanged.hasListener(handleDownloadChange)) {
         chrome.downloads.onChanged.removeListener(handleDownloadChange)
       }
     }
-  }, [])
+  }, [disabled])
   useEffect(() => {
     function downloadFilenameSuggest(
       downloadItem: chrome.downloads.DownloadItem,
@@ -74,9 +87,14 @@ const useFileDownload = (
     if (
       !chrome.downloads.onDeterminingFilename.hasListener(
         downloadFilenameSuggest
-      )
+      ) &&
+      !disabled
     ) {
       chrome.downloads.onDeterminingFilename.addListener(
+        downloadFilenameSuggest
+      )
+    } else {
+      chrome.downloads.onDeterminingFilename.removeListener(
         downloadFilenameSuggest
       )
     }
@@ -91,7 +109,7 @@ const useFileDownload = (
         )
       }
     }
-  }, [conflictAction, folderName])
+  }, [conflictAction, folderName, disabled])
 
   return {
     conflictAction,

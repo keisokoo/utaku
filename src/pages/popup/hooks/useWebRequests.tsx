@@ -12,7 +12,6 @@ const useWebRequests = (
   active = true,
   appliedRemapList: UrlRemapItem[] = []
 ) => {
-  const [originalList, set_originalList] = useState<WebResponseItem[]>([])
   const [removedList, set_removedList] = useState<WebResponseItem[]>([])
   const [queueList, set_queueList] = useState<WebResponseItem[]>([])
   const [disposedList, set_disposedList] = useState<WebResponseItem[]>([])
@@ -21,6 +20,7 @@ const useWebRequests = (
   const [tabList, set_tabList] = useState<TAB_LIST_TYPE[]>([])
 
   const clearListByTabId = useCallback((tabId: number) => {
+    set_removedList((prev) => prev.filter((curr) => curr.tabId !== tabId))
     set_queueList((prev) => prev.filter((curr) => curr.tabId !== tabId))
     set_disposedList((prev) => prev.filter((curr) => curr.tabId !== tabId))
     set_errorList((prev) => prev.filter((curr) => curr.tabId !== tabId))
@@ -108,9 +108,6 @@ const useWebRequests = (
   const removedGroup = useMemo(() => {
     return groupBy(removedList, (curr) => curr.tabId)
   }, [removedList])
-  const originalGroup = useMemo(() => {
-    return groupBy(originalList, (curr) => curr.tabId)
-  }, [originalList])
   const disposedGroup = useMemo(() => {
     return groupBy(disposedList, (curr) => curr.tabId)
   }, [disposedList])
@@ -130,9 +127,13 @@ const useWebRequests = (
     set_queueList([])
   }, [])
 
-  const handleSourceList = useCallback((item: WebResponseItem[]) => {
-    set_queueList(uniqBy(item, (curr) => curr.url))
-  }, [])
+  const handleSourceList = useCallback(
+    (item: WebResponseItem[], cb?: () => void) => {
+      set_queueList(uniqBy(item, (curr) => curr.url))
+      cb && cb()
+    },
+    []
+  )
   const removeQueueItem = useCallback(
     (
       item: chrome.webRequest.WebResponseHeadersDetails & {
@@ -185,19 +186,7 @@ const useWebRequests = (
       if (req.type === 'image' || req.type === 'media') {
         if (errorList.map((item) => item.url).includes(req.url)) return
         req = parseItemWithUrlRemaps(appliedRemapList, req)
-        set_originalList((prev) => uniqBy([...prev, req], (curr) => curr.url))
         set_queueList((prev) => uniqBy([...prev, req], (curr) => curr.url))
-        // if (req && req.tabId && typeof req.tabId === 'number' && req.tabId > 0)
-        //   chrome.tabs.get(req.tabId).then((tab) => {
-        //     if (chrome.runtime.lastError) {
-        //       console.log(chrome.runtime.lastError.message)
-        //       return
-        //     }
-        //     set_tabList((prev) => {
-        //       if (prev.some((item) => item.id === tab.id)) return prev
-        //       return uniqBy([...prev, tab], (curr) => curr.id)
-        //     })
-        //   })
       }
     }
     const hasListener = chrome.webRequest.onHeadersReceived.hasListeners()
@@ -219,7 +208,6 @@ const useWebRequests = (
 
   return {
     removedGroup,
-    originalGroup,
     errorGroup,
     disposedGroup,
     disposedList,

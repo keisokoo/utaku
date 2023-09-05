@@ -124,21 +124,19 @@ const ItemBoxStyles = {
   ImageBox,
   DummyBox,
   LoadingWrap: styled.div`
-    min-width: 200px;
-    break-inside: avoid;
-    box-sizing: border-box;
-    opacity: 0.8;
-    cursor: pointer;
-    transition: ease-out 0.15s;
-    position: relative;
-    overflow: hidden;
-    &:hover {
-      opacity: 1;
-    }
     display: flex;
     align-items: center;
-    justify-content: center;
-    transition: 0.3s;
+    font-size: 16px;
+    gap: 12px;
+    color: #fff;
+    svg {
+      animation: ${syncRotateKeyframes} 1s linear infinite;
+    }
+    span {
+      font-size: 12px;
+      white-space: nowrap;
+      color: #fff;
+    }
   `,
   Wrap: styled.div`
     user-select: none;

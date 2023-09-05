@@ -3,8 +3,14 @@ import { produce } from 'immer'
 import React, { useState } from 'react'
 import { FaList, FaPhotoVideo, FaSlidersH, FaTh } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
-import { containerTypes, settings, sizeTypes } from '../atoms/settings'
+import {
+  containerTypes,
+  settings,
+  sizeTypes,
+  viewModeTypes,
+} from '../atoms/settings'
 import { PrimaryButton, WhiteFill } from '../components/Buttons'
+import LoadingImage from '../components/ItemBox/LoadingImage'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
 import Tooltip from '../components/Tooltip'
@@ -16,6 +22,7 @@ interface ControlCompProps {
   tooltip: string
   current: number
   total: number
+  queue: number
   toggleActive: () => void
   active: boolean
 }
@@ -23,6 +30,7 @@ const ControlComp = ({
   active,
   toggleActive,
   current,
+  queue,
   total,
   tooltip,
 }: ControlCompProps) => {
@@ -34,10 +42,22 @@ const ControlComp = ({
     sizeLimit,
     itemType,
     containerSize,
+    viewMode,
   } = settingState
 
   const [folderNameInput, set_folderNameInput] = useState<string>('')
   const [modalOpen, set_modalOpen] = useState<'folder' | null>(null)
+  const handleViewMode = (type: (typeof viewModeTypes)[number]) => {
+    const nextViewMode = viewMode.includes(type)
+      ? viewMode.filter((item) => item !== type)
+      : ([...viewMode, type] as (typeof viewModeTypes)[number][])
+    set_settingState(
+      produce((draft) => {
+        draft.viewMode = nextViewMode
+      })
+    )
+    chrome.storage.local.set({ viewMode: nextViewMode })
+  }
   return (
     <>
       <Modal
@@ -139,6 +159,13 @@ const ControlComp = ({
                       chrome.storage.local.set({
                         folderNameList: nextFolderNameList,
                       })
+                      chrome.runtime.sendMessage(
+                        { message: 'set-folderName', data: nextFolderNameList },
+                        () => {
+                          if (chrome.runtime.lastError)
+                            console.log(chrome.runtime.lastError)
+                        }
+                      )
                       set_folderNameInput('')
                     }}
                   >
@@ -162,13 +189,31 @@ const ControlComp = ({
                     draft.folderName = e.target.value
                   })
                 )
-                chrome.runtime.sendMessage(
-                  { message: 'setFolderName', data: e.target.value },
-                  () => {
-                    if (chrome.runtime.lastError)
-                      console.log(chrome.runtime.lastError)
-                  }
+                set_settingState(
+                  produce((draft) => {
+                    draft.folderName = e.target.value
+                  })
                 )
+                if (settingState.modeType === 'simple') {
+                  chrome.storage.local.set({
+                    folderName: e.target.value,
+                  })
+                  chrome.runtime.sendMessage(
+                    { message: 'set-folderName', data: e.target.value },
+                    () => {
+                      if (chrome.runtime.lastError)
+                        console.log(chrome.runtime.lastError)
+                    }
+                  )
+                } else {
+                  chrome.runtime.sendMessage(
+                    { message: 'setFolderName', data: e.target.value },
+                    () => {
+                      if (chrome.runtime.lastError)
+                        console.log(chrome.runtime.lastError)
+                    }
+                  )
+                }
               }}
             />
             <UtakuStyle.IconButton
@@ -219,68 +264,102 @@ const ControlComp = ({
           </UtakuStyle.InputWrap>
         </UtakuStyle.Left>
         <UtakuStyle.Right>
+          {queue > 0 && (
+            <LoadingImage
+              data-item-size={settingState.sizeType}
+              data-wrapper-size={settingState.containerSize}
+              length={queue}
+            />
+          )}
           <UtakuStyle.SizeController>
-            <UtakuStyle.IconWrap>
+            <UtakuStyle.IconWrap
+              data-active={viewMode.includes('container')}
+              onClick={() => {
+                handleViewMode('container')
+              }}
+            >
               <FaTh />
             </UtakuStyle.IconWrap>
-            {containerTypes.map((type) => (
-              <div
-                key={type}
-                className={type === containerSize ? 'active' : ''}
-                onClick={() => {
-                  set_settingState(
-                    produce((draft) => {
-                      draft.containerSize = type
-                    })
-                  )
-                  chrome.storage.local.set({ containerSize: type })
-                }}
-              >
-                {type}
-              </div>
-            ))}
+            {viewMode.includes('container') && (
+              <>
+                {containerTypes.map((type) => (
+                  <div
+                    key={type}
+                    className={type === containerSize ? 'active' : ''}
+                    onClick={() => {
+                      set_settingState(
+                        produce((draft) => {
+                          draft.containerSize = type
+                        })
+                      )
+                      chrome.storage.local.set({ containerSize: type })
+                    }}
+                  >
+                    {type}
+                  </div>
+                ))}
+              </>
+            )}
           </UtakuStyle.SizeController>
           <UtakuStyle.SizeController>
-            <UtakuStyle.IconWrap>
+            <UtakuStyle.IconWrap
+              data-active={viewMode.includes('size')}
+              onClick={() => {
+                handleViewMode('size')
+              }}
+            >
               <FaSlidersH />
             </UtakuStyle.IconWrap>
-            {sizeTypes.map((type) => (
-              <div
-                key={type}
-                className={type === sizeType ? 'active' : ''}
-                onClick={() => {
-                  set_settingState(
-                    produce((draft) => {
-                      draft.sizeType = type
-                    })
-                  )
-                  chrome.storage.local.set({ sizeType: type })
-                }}
-              >
-                {type}
-              </div>
-            ))}
+            {viewMode.includes('size') && (
+              <>
+                {sizeTypes.map((type) => (
+                  <div
+                    key={type}
+                    className={type === sizeType ? 'active' : ''}
+                    onClick={() => {
+                      set_settingState(
+                        produce((draft) => {
+                          draft.sizeType = type
+                        })
+                      )
+                      chrome.storage.local.set({ sizeType: type })
+                    }}
+                  >
+                    {type}
+                  </div>
+                ))}
+              </>
+            )}
           </UtakuStyle.SizeController>
           <UtakuStyle.QualityController>
-            <UtakuStyle.IconWrap>
+            <UtakuStyle.IconWrap
+              data-active={viewMode.includes('item')}
+              onClick={() => {
+                handleViewMode('item')
+              }}
+            >
               <FaPhotoVideo />
             </UtakuStyle.IconWrap>
-            {itemTypes.map((type) => (
-              <div
-                key={type}
-                className={type === itemType ? 'active' : ''}
-                onClick={() => {
-                  set_settingState(
-                    produce((draft) => {
-                      draft.itemType = type
-                    })
-                  )
-                  chrome.storage.local.set({ itemType: type })
-                }}
-              >
-                {type}
-              </div>
-            ))}
+            {viewMode.includes('item') && (
+              <>
+                {itemTypes.map((type) => (
+                  <div
+                    key={type}
+                    className={type === itemType ? 'active' : ''}
+                    onClick={() => {
+                      set_settingState(
+                        produce((draft) => {
+                          draft.itemType = type
+                        })
+                      )
+                      chrome.storage.local.set({ itemType: type })
+                    }}
+                  >
+                    {type}
+                  </div>
+                ))}
+              </>
+            )}
           </UtakuStyle.QualityController>
           <UtakuStyle.ItemLength>
             <div>

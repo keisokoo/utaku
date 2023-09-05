@@ -9,15 +9,35 @@ import React, {
 } from 'react'
 
 import { produce } from 'immer'
+import {
+  FaQuestion,
+  FaRedo,
+  FaRegEdit,
+  FaRocket,
+  FaTimes,
+} from 'react-icons/fa'
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { uniqBy } from 'remeda'
-import { settings } from '../atoms/settings'
+import {
+  UrlRemapItem,
+  defaultMode,
+  modeType,
+  settings,
+} from '../atoms/settings'
+import { GrayScaleFill, WhiteFill } from '../components/Buttons'
 import ItemBox from '../components/ItemBox'
-import LoadingImage from '../components/ItemBox/LoadingImage'
+import Modal from '../components/Modal'
+import ModalBody from '../components/Modal/ModalBody'
+import Editor from '../components/Remap/Editor'
+import Remaps from '../components/Remap/Remaps'
+import { sampleApply, sampleList } from '../pages/popup/sources'
+import { lang, parseItemWithUrlRemaps, urlToRemapItem } from '../utils'
 import ControlComp from './ControlComp'
 import Dispose from './DisposeComp'
 import DownloadComp from './DownloadComp'
 import UtakuStyle from './Utaku.styled'
+import { getAllImageUrls, getAllVideoUrls } from './hooks/getImages'
+import { toItemType } from './hooks/useGetImages'
 import './index.scss'
 import { ImageInfo, ItemType, WebResponseItem } from './types'
 
@@ -39,10 +59,10 @@ const Main = (): JSX.Element => {
   const [settingState, set_settingState] = useRecoilState(settings)
   const [active, set_active] = useState<boolean>(true)
   const [fireFirst, set_fireFirst] = useState<boolean>(false)
+  const disposedRef = useRef<ItemType[]>([])
   const toggleActive = useCallback(() => {
     set_active((prev) => !prev)
   }, [])
-
   useEffect(() => {
     const elements = document.querySelectorAll('[classname]')
     if (!elements) return
@@ -60,23 +80,69 @@ const Main = (): JSX.Element => {
         'sizeType',
         'itemType',
         'containerSize',
+        'modeType',
+        'remapList',
+        'applyRemapList',
+        'viewMode',
       ],
       (items) => {
         set_settingState(
           produce((draft) => {
+            if (!items.remapList && !items.applyRemapList) {
+              chrome.storage.local.set({
+                remapList: sampleList,
+                applyRemapList: sampleApply,
+              })
+            }
             if (items.folderName) draft.folderName = items.folderName
+            if (items.modeType)
+              draft.modeType =
+                typeof items.modeType === 'string'
+                  ? (items.modeType as (typeof modeType)[number])
+                  : defaultMode
             if (items.folderNameList)
               draft.folderNameList = items.folderNameList
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
             if (items.sizeType) draft.sizeType = items.sizeType
+            if (items.viewMode) draft.viewMode = items.viewMode
             if (items.itemType) draft.itemType = items.itemType
             if (items.containerSize) draft.containerSize = items.containerSize
+            if (items.remapList) {
+              // migrate
+              draft.remapList = items.remapList.map((curr: UrlRemapItem) => {
+                const oldCurrItem = curr.item as typeof curr.item & {
+                  from: string
+                  to: string
+                }
+                if (!!oldCurrItem.from || !!oldCurrItem.to) {
+                  oldCurrItem.replace = oldCurrItem.replace
+                    ? [
+                        ...oldCurrItem.replace,
+                        { from: oldCurrItem.from, to: oldCurrItem.to },
+                      ]
+                    : [{ from: oldCurrItem.from, to: oldCurrItem.to }]
+                }
+                curr.item = oldCurrItem
+                return curr
+              })
+            }
+            if (items.applyRemapList)
+              draft.applyRemapList = items.applyRemapList
+            if (!items.remapList && !items.applyRemapList) {
+              draft.remapList = sampleList
+              draft.applyRemapList = sampleApply
+            }
           })
         )
         set_fireFirst(true)
       }
     )
   }, [])
+  const appliedRemapList = useMemo(() => {
+    return settingState.remapList.filter((item) =>
+      settingState.applyRemapList.includes(item.id)
+    )
+  }, [settingState.applyRemapList, settingState.remapList])
   const filteredImages = useMemo(() => {
     if (!itemList) return []
     if (!itemList.length) return []
@@ -116,12 +182,49 @@ const Main = (): JSX.Element => {
         return item
       })
     })
-
+    if (settingState.modeType === 'simple') {
+      chrome.runtime.sendMessage({
+        message: 'simple-download',
+        data: downloadList,
+      })
+      return
+    }
     chrome.runtime.sendMessage({
       message: 'download',
       data: downloadList,
     })
   }
+  const getCurrentPageImages = useCallback(() => {
+    const localImages = getAllImageUrls('.utaku-root').map((item) =>
+      toItemType(item, 'image')
+    )
+    const localVideos = getAllVideoUrls('.utaku-root').map((item) =>
+      toItemType(item, 'media')
+    )
+    const scrappedImages = uniqBy(
+      localImages.map(
+        (curr) => parseItemWithUrlRemaps(appliedRemapList, curr) as ItemType
+      ),
+      (item) => item.url
+    )
+    const scrappedVideos = uniqBy(
+      localVideos.map(
+        (curr) => parseItemWithUrlRemaps(appliedRemapList, curr) as ItemType
+      ),
+      (item) => item.url
+    )
+    return [...scrappedImages, ...scrappedVideos]
+  }, [appliedRemapList])
+  const scrapImages = useCallback(() => {
+    try {
+      const scrapped = getCurrentPageImages()
+      set_queueList(() => {
+        return scrapped
+      })
+    } catch (error) {
+      console.log('error', error)
+    }
+  }, [getCurrentPageImages])
   useEffect(() => {
     function getData(): Promise<{
       data: ItemType[]
@@ -161,15 +264,13 @@ const Main = (): JSX.Element => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       timeoutRef.current = setTimeout(async () => {
         try {
+          if (settingState.modeType === 'simple') {
+            return
+          }
           const { data, downloaded, downloadAble } = await getData()
           set_itemList((prev) => {
             if (isEqual(sortItem(prev), sortItem(downloadAble))) return prev
             return downloadAble ?? []
-          })
-          set_queueList((prev) => {
-            if (!data) return []
-            if (isEqual(prev, data)) return prev
-            return data ?? []
           })
           set_queueList((prev) => {
             if (!data) return []
@@ -188,7 +289,14 @@ const Main = (): JSX.Element => {
       }, 1000)
     }
     if (active) {
-      runDataPool()
+      chrome.runtime.sendMessage(
+        { message: 'bulk-queue-images', data: getCurrentPageImages() },
+        (response) => {
+          if (response?.data?.success) {
+            runDataPool()
+          }
+        }
+      )
     } else {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
@@ -196,7 +304,20 @@ const Main = (): JSX.Element => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
       timeoutRef.current = null
     }
-  }, [active])
+  }, [active, settingState.modeType, getCurrentPageImages])
+
+  useEffect(() => {
+    if (!active) return
+    if (settingState.modeType !== 'simple') return
+    if (active) {
+      scrapImages()
+    } else {
+      set_queueList([])
+    }
+    return () => {
+      set_queueList([])
+    }
+  }, [settingState.modeType, active, scrapImages])
   const handleRemove = (
     item: chrome.webRequest.WebResponseHeadersDetails & {
       imageInfo?: ImageInfo
@@ -208,6 +329,13 @@ const Main = (): JSX.Element => {
         return draft.filter((value) => value.url !== item.url)
       })
     )
+    if (settingState.modeType === 'simple') {
+      disposedRef.current = uniqBy(
+        [...disposedRef.current, item as ItemType],
+        (item) => item.url
+      )
+      return
+    }
     chrome.runtime.sendMessage({
       message: 'delete-from-queue',
       data: { ...item, error: error ?? false },
@@ -266,15 +394,147 @@ const Main = (): JSX.Element => {
         imageInfo: imageInfoData,
       })
     } catch (error) {
-      console.log('error', error)
       handleRemove(value, true)
     }
   }
+  const [modalOpen, set_modalOpen] = useState<'remaps' | UrlRemapItem | null>(
+    null
+  )
+  const handleRemaps = useCallback((value: string) => {
+    set_modalOpen(urlToRemapItem(value))
+  }, [])
+  useEffect(() => {
+    function onMessage(
+      request: { message: string; data: unknown }
+      // sender?: unknown,
+      // sendResponse?: (response: string) => void
+    ) {
+      if (request.message === 'utaku-downloaded') {
+        const downloadedURL =
+          typeof request.data === 'string' ? request.data : ''
+        if (!downloadedURL) return false
+        set_itemList((prev) => {
+          return prev.filter((item) => item.url !== (request.data as string))
+        })
+      }
+      return false
+    }
+    chrome.runtime.onMessage.addListener(onMessage)
+    return () => {
+      chrome.runtime.onMessage.removeListener(onMessage)
+    }
+  }, [])
   if (!itemList) return <></>
   if (!fireFirst) return <></>
   return (
     <>
+      <Modal
+        open={modalOpen !== null}
+        onClose={() => {
+          set_modalOpen(null)
+        }}
+      >
+        {modalOpen === 'remaps' && (
+          <Remaps
+            applyRemapList={settingState.applyRemapList}
+            emitRemap={(value) => {
+              set_settingState(
+                produce((draft) => {
+                  draft.applyRemapList = value
+                })
+              )
+              chrome.storage.local.set({ applyRemapList: value })
+            }}
+          />
+        )}
+        {typeof modalOpen !== 'string' && modalOpen && (
+          <ModalBody title={lang('url_remap_list')} btn={<></>}>
+            <Editor
+              mode="add"
+              remapItem={modalOpen}
+              onClose={() => {
+                set_modalOpen(null)
+              }}
+            />
+          </ModalBody>
+        )}
+      </Modal>
       <UtakuStyle.Wrap data-wrapper-size={settingState.containerSize}>
+        {settingState.modeType === 'simple' && (
+          <UtakuStyle.SettingsRow>
+            <UtakuStyle.Row>
+              <WhiteFill
+                _mini
+                onClick={() => {
+                  chrome.runtime.sendMessage({
+                    message: 'utaku-call-unmount',
+                  })
+                }}
+              >
+                <FaTimes />
+                {lang('close')}
+              </WhiteFill>
+              <WhiteFill
+                _mini
+                onClick={() => {
+                  set_modalOpen('remaps')
+                }}
+              >
+                <FaRegEdit />
+                {lang('remaps')}
+              </WhiteFill>
+              <WhiteFill
+                _mini
+                onClick={() => {
+                  scrapImages()
+                }}
+              >
+                <FaRedo />
+                {lang('reload')}
+              </WhiteFill>
+            </UtakuStyle.Row>
+            <UtakuStyle.Center></UtakuStyle.Center>
+            <UtakuStyle.Right>
+              <UtakuStyle.QualityController>
+                <UtakuStyle.IconWrap>
+                  <FaRocket />
+                </UtakuStyle.IconWrap>
+                {modeType.map((type) => (
+                  <div
+                    key={type}
+                    className={type === settingState.modeType ? 'active' : ''}
+                    onClick={() => {
+                      if (type === 'simple') return
+                      set_settingState(
+                        produce((draft) => {
+                          draft.modeType = type
+                        })
+                      )
+                      chrome.runtime.sendMessage({
+                        message: 'mode-change',
+                        data: type,
+                      })
+                      window.location.reload()
+                    }}
+                  >
+                    {type}
+                  </div>
+                ))}
+              </UtakuStyle.QualityController>
+              <GrayScaleFill
+                _icon
+                _mini
+                onClick={() => {
+                  chrome.runtime.sendMessage({
+                    message: 'open-options',
+                  })
+                }}
+              >
+                <FaQuestion />
+              </GrayScaleFill>
+            </UtakuStyle.Right>
+          </UtakuStyle.SettingsRow>
+        )}
         <DownloadComp
           itemList={itemList}
           handleItemList={(arr) => {
@@ -303,6 +563,7 @@ const Main = (): JSX.Element => {
           current={
             filteredImages.filter((item) => item.imageInfo.active).length
           }
+          queue={queueList.length}
           total={filteredImages.length}
         />
         <UtakuStyle.ItemContainer
@@ -380,12 +641,20 @@ const Main = (): JSX.Element => {
           </UtakuStyle.DisposeContainer>
           <UtakuStyle.Grid
             data-item-size={settingState.sizeType}
-            data-wrapper-size={settingState.containerSize}
+            data-wrapper-size={
+              filteredImages?.length ? settingState.containerSize : 'normal'
+            }
           >
+            {filteredImages?.length < 1 && (
+              <UtakuStyle.Empty>
+                <div>{lang('no_images')}</div>
+              </UtakuStyle.Empty>
+            )}
             {filteredImages &&
               filteredImages.map((value) => {
                 return (
                   <ItemBox
+                    handleRemaps={handleRemaps}
                     data-wrapper-size={settingState.containerSize}
                     item={value}
                     key={'filteredImages' + value.url}
@@ -408,13 +677,6 @@ const Main = (): JSX.Element => {
                   />
                 )
               })}
-            {queueList.length > 0 && (
-              <LoadingImage
-                data-item-size={settingState.sizeType}
-                data-wrapper-size={settingState.containerSize}
-                length={queueList.length}
-              />
-            )}
           </UtakuStyle.Grid>
         </UtakuStyle.ItemContainer>
       </UtakuStyle.Wrap>

@@ -13,12 +13,8 @@ const LoadingImage = ({ length, ...props }: LoadingImageProps) => {
   return (
     <>
       <S.LoadingWrap {...props}>
-        <S.ImageBox>
-          <S.DummyBox>
-            <FaSpinner />
-            <span>Loading {length} files...</span>
-          </S.DummyBox>
-        </S.ImageBox>
+        <span>Loading {length} files...</span>
+        <FaSpinner />
       </S.LoadingWrap>
     </>
   )

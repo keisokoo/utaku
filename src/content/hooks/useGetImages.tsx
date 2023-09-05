@@ -1,8 +1,20 @@
 import { isEqual, sortBy, uniq } from 'lodash-es'
 import { useEffect, useState } from 'react'
+import { ItemType } from '../types'
 import { getAllImageUrls, getAllVideoUrls } from './getImages'
 
-export const useGetImages = (exceptSelector?: string) => {
+export const toItemType = (url: string, type: 'image' | 'media') => {
+  return {
+    url: url,
+    type: type,
+    imageInfo: {
+      width: 0,
+      height: 0,
+      active: false,
+    },
+  } as ItemType
+}
+export const useGetImages = (exceptSelector?: string, active?: boolean) => {
   const [imageList, setImageList] = useState<string[]>(
     getAllImageUrls(exceptSelector)
   )
@@ -49,10 +61,17 @@ export const useGetImages = (exceptSelector?: string) => {
       }
     }
     const observer = new MutationObserver(callback)
-    observer.observe(targetNode, config)
+    if (active) {
+      observer.observe(targetNode, config)
+    } else {
+      observer.disconnect()
+    }
     return () => {
       observer.disconnect()
     }
-  }, [])
-  return [imageList, videoList]
+  }, [active])
+  return [
+    imageList.map((item) => toItemType(item, 'image')),
+    videoList.map((item) => toItemType(item, 'media')),
+  ] as [ItemType[], ItemType[]]
 }

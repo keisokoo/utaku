@@ -7,16 +7,26 @@ import { rootId } from './sources'
 if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
 
-function onMessage(request: { message: string; data: object }) {
+function onMessage(
+  request: { message: string; data: object },
+  sender?: unknown,
+  sendResponse?: (response: string) => void
+) {
   if (request?.message === 'utaku-mount') {
     const container = document.getElementById('root-' + rootId) as HTMLElement
     if (!root) {
       root = ReactDOM.createRoot(container)
-
       root.render(<App />)
     } else {
       container.style.opacity = ''
       container.style.display = ''
+    }
+  }
+  if (request?.message === 'utaku-current-active') {
+    if (root) {
+      sendResponse && sendResponse('mounted')
+    } else {
+      sendResponse && sendResponse('ok')
     }
   }
   if (request?.message === 'utaku-active') {
@@ -41,23 +51,38 @@ chrome.runtime.onMessage.addListener(onMessage)
 const getAvailable = (el?: HTMLElement) => {
   try {
     if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
-    chrome.runtime.sendMessage(
-      {
-        message: 'available',
-      },
-      ({ data }: { data: chrome.tabs.Tab | null }) => {
-        if (chrome.runtime.lastError) {
-          return
-        }
-        const elementTarget = el ?? document.querySelector('.floating-button')
-        if (data) {
-          elementTarget?.classList.remove('hide')
+    chrome.storage.local.get(['modeType'], (results) => {
+      if (results.modeType === 'simple') {
+        if (root) {
+          chrome.runtime.sendMessage({
+            message: 'active-icon',
+          })
         } else {
-          elementTarget?.classList.add('hide')
+          chrome.runtime.sendMessage({
+            message: 'inactive-icon',
+          })
         }
-        return true
+      } else {
+        chrome.runtime.sendMessage(
+          {
+            message: 'available',
+          },
+          ({ data }: { data: chrome.tabs.Tab | null }) => {
+            if (chrome.runtime.lastError) {
+              return
+            }
+            const elementTarget =
+              el ?? document.querySelector('.floating-button')
+            if (data) {
+              elementTarget?.classList.remove('hide')
+            } else {
+              elementTarget?.classList.add('hide')
+            }
+            return true
+          }
+        )
       }
-    )
+    })
   } catch (error) {
     if (root) root.unmount()
     root = null
@@ -82,7 +107,6 @@ function toggleMount() {
             const container = document.getElementById(
               'root-' + rootId
             ) as HTMLElement
-            // if (!container.shadowRoot) container.attachShadow({ mode: 'open' })
             root = ReactDOM.createRoot(container)
             root.render(<App />)
           } else {

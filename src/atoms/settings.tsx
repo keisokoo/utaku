@@ -2,7 +2,11 @@ import { atom } from 'recoil'
 
 export const itemTypes = ['all', 'image', 'media'] as const
 export const sizeTypes = ['small', 'medium', 'large'] as const
+export const modeType = ['simple', 'enhanced'] as const
 export const containerTypes = ['hide', 'normal', 'flexbox', 'tile'] as const
+export const viewModeTypes = ['container', 'size', 'item'] as const
+
+export const defaultMode = 'simple'
 
 export type PathChangeType = {
   index: number
@@ -38,8 +42,11 @@ export const initialUrlRemapItem: UrlRemapItem = {
   },
 }
 export interface SettingsType {
+  containerSize: (typeof containerTypes)[number]
   sizeType: (typeof sizeTypes)[number]
   itemType: (typeof itemTypes)[number]
+  modeType: (typeof modeType)[number]
+  viewMode: (typeof viewModeTypes)[number][]
   sizeLimit: {
     width: number
     height: number
@@ -48,7 +55,6 @@ export interface SettingsType {
   folderNameList: string[]
   remapList: UrlRemapItem[]
   applyRemapList: string[]
-  containerSize: (typeof containerTypes)[number]
 }
 
 export const settings = atom<SettingsType>({
@@ -56,6 +62,8 @@ export const settings = atom<SettingsType>({
   default: {
     sizeType: 'small',
     itemType: 'image',
+    modeType: defaultMode,
+    viewMode: ['container', 'size', 'item'],
     sizeLimit: {
       width: 200,
       height: 200,

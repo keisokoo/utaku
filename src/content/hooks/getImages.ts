@@ -23,10 +23,12 @@ function extractImagesFromDocument(doc: Document, exceptSelector?: string): stri
   ) as NodeListOf<HTMLImageElement | HTMLSourceElement>;
 
   const imgSrcArray = Array.from(imageElements).map(el => {
+    const isSourceElement = el.tagName.toLowerCase() === 'source';
     const srcset = el.getAttribute('srcset');
     const xlinkHref = el.getAttribute('xlink:href');
 
     if (xlinkHref) return xlinkHref;
+    if (isSourceElement) return srcset ? getLargestSrc(srcset) : '';
     if (!srcset) return el.getAttribute('src') || '';
 
     return getLargestSrc(srcset);
@@ -47,17 +49,16 @@ function extractImagesFromDocument(doc: Document, exceptSelector?: string): stri
     });
   }).filter((url): url is string => url !== null && !url.startsWith('data:'));
 
-  const dataUrlArray = Array.from(doc.querySelectorAll('img[src^="data:"]')).map(el => el.getAttribute('src') || '');
-
-  return [...imgSrcArray, ...bgImageArray, ...dataUrlArray];
+  return [...imgSrcArray, ...bgImageArray];
 }
+
 
 export function getAllImageUrls(exceptSelector?: string): string[] {
   let allImageUrls = extractImagesFromDocument(document, exceptSelector);
 
-  const iframes = Array.from(document.querySelectorAll('iframe')) as HTMLIFrameElement[];
+  const iframeNodes = Array.from(document.querySelectorAll('iframe')) as HTMLIFrameElement[];
 
-  for (const iframe of iframes) {
+  for (const iframe of iframeNodes) {
     try {
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
@@ -72,40 +73,26 @@ export function getAllImageUrls(exceptSelector?: string): string[] {
   return allImageUrls;
 }
 function extractVideosFromDocument(doc: Document, exceptSelector?: string): string[] {
-  // Video elements
   const videoElements = doc.querySelectorAll(
     `video${exceptSelector ? `:not(${exceptSelector} video)` : ''}`
   );
-
   const videoSrcArray = Array.from(videoElements).map(el => {
     const src = el.getAttribute('src');
     if (src) {
       return src;
     }
-
     const sourceElement = el.querySelector('source');
     return sourceElement ? sourceElement.getAttribute('src') : null;
   }).filter((src): src is string => src !== null && !src.startsWith('blob:'));
-
-  // Iframe elements (e.g., YouTube, Vimeo)
-  const iframeElements = doc.querySelectorAll(
-    `iframe${exceptSelector ? `:not(${exceptSelector} iframe)` : ''}`
-  );
-
-  const iframeSrcArray = Array.from(iframeElements).map(el => {
-    const src = el.getAttribute('src');
-    return src && (src.includes('youtube.com') || src.includes('vimeo.com')) ? src : null;
-  }).filter((src): src is string => src !== null);
-
-  return [...videoSrcArray, ...iframeSrcArray];
+  return [...videoSrcArray];
 }
 
 export function getAllVideoUrls(exceptSelector?: string): string[] {
   let allVideoUrls = extractVideosFromDocument(document, exceptSelector);
 
-  const iframes = Array.from(document.querySelectorAll('iframe')) as HTMLIFrameElement[];
+  const iframeNodes = Array.from(document.querySelectorAll('iframe')) as HTMLIFrameElement[];
 
-  for (const iframe of iframes) {
+  for (const iframe of iframeNodes) {
     try {
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
