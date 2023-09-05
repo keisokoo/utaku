@@ -8,6 +8,7 @@ const urlBoxCss = css`
   padding: 8px 12px;
   word-break: break-all;
   width: 600px;
+  max-width: 100%;
   border-radius: 8px;
   font-size: 12px;
   span.highlight {
@@ -126,6 +127,7 @@ export const RemapStyle = {
   `,
   Chip: styled.button`
     display: inline-flex;
+    border: none;
     align-items: center;
     justify-content: center;
     padding: 4px 8px;

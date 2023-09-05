@@ -5,6 +5,8 @@ import {
   FaFileDownload,
   FaTrash,
 } from 'react-icons/fa'
+import { useRecoilState } from 'recoil'
+import { settings } from '../atoms/settings'
 import {
   GrayScaleFill,
   PrimaryButton,
@@ -32,6 +34,7 @@ const DownloadComp = ({
   disabledAllDeSelect,
   disabledAllSelect,
 }: DownloadCompProps) => {
+  const [settingState] = useRecoilState(settings)
   return (
     <>
       <UtakuStyle.Controller>
@@ -40,6 +43,10 @@ const DownloadComp = ({
             _mini
             onClick={(e) => {
               e.stopPropagation()
+              if (settingState.modeType === 'simple') {
+                handleItemList([])
+                return
+              }
               chrome.runtime.sendMessage({
                 message: 'delete-all-disposed',
               })
@@ -52,6 +59,17 @@ const DownloadComp = ({
             disabled={disabledTrashDeselected}
             onClick={(e) => {
               e.stopPropagation()
+              if (settingState.modeType === 'simple') {
+                handleItemList(
+                  itemList
+                    .filter((item) => item.imageInfo.active)
+                    .map((item) => {
+                      item.imageInfo.active = false
+                      return item
+                    })
+                )
+                return
+              }
               const onlyDeSelected = itemList.filter(
                 (item) => !item.imageInfo.active
               )
@@ -69,6 +87,17 @@ const DownloadComp = ({
             disabled={disabledTrashSelected}
             onClick={(e) => {
               e.stopPropagation()
+              if (settingState.modeType === 'simple') {
+                handleItemList(
+                  itemList
+                    .filter((item) => !item.imageInfo.active)
+                    .map((item) => {
+                      item.imageInfo.active = false
+                      return item
+                    })
+                )
+                return
+              }
               const onlySelected = itemList.filter(
                 (item) => item.imageInfo.active
               )

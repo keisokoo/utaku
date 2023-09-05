@@ -63,7 +63,22 @@ const Main = (): JSX.Element => {
             <h1>{`Tutorials`}</h1>
             <O.Title>{lang('basic_usage')}</O.Title>
             <O.VideoBox>
-              <O.VideoTitle>{lang('basic_usage')}</O.VideoTitle>
+              <O.VideoTitle>{lang('simple_mode')}</O.VideoTitle>
+              <O.Responsive>
+                <O.Iframe
+                  src="https://www.youtube.com/embed/_BRwT2XNxck"
+                  title="UTAKU Remap Tutorial"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture;"
+                  allowFullScreen
+                />
+              </O.Responsive>
+              <O.VideoDescription>
+                <p>{lang('simple_mode_description')}</p>
+              </O.VideoDescription>
+            </O.VideoBox>
+            <O.VideoBox>
+              <O.VideoTitle>{lang('enhanced_mode')}</O.VideoTitle>
               <O.Responsive>
                 <O.Iframe
                   src="https://www.youtube.com/embed/_BRwT2XNxck"

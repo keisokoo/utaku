@@ -155,6 +155,15 @@
   "basic_usage_description": {
     "message": "1. Click the UTAKU extension button to open the popup window.\n2. Visit the page you want to collect or refresh it.\n3. Images are collected dynamically. Explore the pages while keeping the popup window open, and images will be automatically collected for each tab.\n4. Click the activated utaku button at the bottom of the page, or click the confirm button in the popup window.\n5. Select the images and download them."
   },
+  "simple_mode": {
+    "message": "Simple Mode"
+  },
+  "simple_mode_description": {
+    "message": "1. Click on the UTAKU extension button.\n2. If it's not bound, a refresh will occur. Then, please click the icon again.\n3. Images are collected statically. If you reload or press 'Reload' the images will be gathered again.\n4. Select the image and click on 'Download' to download the image.\n** Note: Simple Mode may not work on some sites, or some images may be missing."
+  },
+  "enhanced_mode": {
+    "message": "Enhanced Mode"
+  },
   "remap_usage": {
     "message": "Remap Usage"
   },
