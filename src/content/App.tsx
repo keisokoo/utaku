@@ -78,6 +78,7 @@ const Main = (): JSX.Element => {
         'viewMode',
       ],
       (items) => {
+        console.log('items.modeType', items.modeType)
         set_settingState(
           produce((draft) => {
             if (!items.remapList && !items.applyRemapList) {
@@ -87,7 +88,10 @@ const Main = (): JSX.Element => {
               })
             }
             if (items.folderName) draft.folderName = items.folderName
-            if (items.modeType) draft.modeType = items.modeType || defaultMode
+            draft.modeType = items.modeType ?? defaultMode
+            if (!items.modeType) {
+              chrome.storage.local.set({ modeType: defaultMode })
+            }
             if (items.folderNameList)
               draft.folderNameList = items.folderNameList
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit

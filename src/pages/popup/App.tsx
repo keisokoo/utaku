@@ -123,7 +123,10 @@ const Main = (): JSX.Element => {
               draft.folderName = items.folderName
               handleFolderName(items.folderName)
             }
-            if (items.modeType) draft.modeType = items.modeType || defaultMode
+            draft.modeType = items.modeType ?? defaultMode
+            if (!items.modeType) {
+              chrome.storage.local.set({ modeType: defaultMode })
+            }
             if (items.folderNameList)
               draft.folderNameList = items.folderNameList
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
