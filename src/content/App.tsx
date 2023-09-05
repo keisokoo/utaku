@@ -64,14 +64,6 @@ const Main = (): JSX.Element => {
     set_active((prev) => !prev)
   }, [])
   useEffect(() => {
-    const elements = document.querySelectorAll('[classname]')
-    if (!elements) return
-    if (!elements.length) return
-    elements.forEach((el) => {
-      el.setAttribute('class', el.getAttribute('classname')!)
-    })
-  })
-  useEffect(() => {
     chrome.storage.local.get(
       [
         'folderName',
