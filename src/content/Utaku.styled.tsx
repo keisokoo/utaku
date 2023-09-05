@@ -329,6 +329,10 @@ const UtakuStyle = {
     height: 200px;
     color: #fff;
     font-size: 16px;
+    & > div {
+      font-size: 16px;
+      color: #fff;
+    }
   `,
   Center,
   Input,

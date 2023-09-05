@@ -60,7 +60,6 @@ const Main = (): JSX.Element => {
   const [active, set_active] = useState<boolean>(true)
   const [pending, set_pending] = useState<boolean>(false)
   const [fireFirst, set_fireFirst] = useState<boolean>(false)
-  const disposedRef = useRef<ItemType[]>([])
   const toggleActive = useCallback(() => {
     set_active((prev) => !prev)
   }, [])
@@ -352,10 +351,6 @@ const Main = (): JSX.Element => {
       })
     )
     if (settingState.modeType === 'simple') {
-      disposedRef.current = uniqBy(
-        [...disposedRef.current, item as ItemType],
-        (item) => item.url
-      )
       return
     }
     if (settingState.modeType === 'enhanced') {
@@ -514,9 +509,9 @@ const Main = (): JSX.Element => {
                   if (reloadRef.current) clearTimeout(reloadRef.current)
                   set_pending(true)
                   set_itemList([])
-                  reloadRef.current = setTimeout(() => {
+                  reloadRef.current = setTimeout(async () => {
+                    await scrapImages()
                     set_pending(false)
-                    scrapImages()
                   }, 1000)
                 }}
               >
@@ -682,7 +677,9 @@ const Main = (): JSX.Element => {
                 data-wrapper-size={settingState.containerSize}
               >
                 {pending && <div>{lang('re_loading')}</div>}
-                {!pending && <div>{lang('no_images')}</div>}
+                {!pending && queueList?.length < 1 && (
+                  <div>{lang('no_images')}</div>
+                )}
               </UtakuStyle.Empty>
             )}
             {filteredImages &&
