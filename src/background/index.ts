@@ -172,27 +172,33 @@ function onMessage(
   const senderId = _sender.tab?.id
   if (request.message === 'open-options') {
     chrome.runtime.openOptionsPage()
+    return false;
   }
   if (request.message === 'active-icon') {
     chrome.action.setIcon({ path: '/icon34-simple.png' })
+    return false;
   }
   if (request.message === 'inactive-icon') {
     chrome.action.setIcon({ path: '/icon34.png' })
+    return false;
   }
   if (request.message === 'set-folderName') {
     folderName = request.data as string
+    return false;
   }
   if (request.message === 'mode-change') {
     handleChangeMode(request.data as typeof modeType[number] || defaultMode)
     chrome.storage.local.set({ modeType: request.data }, () => {
       createWindow()
     })
+    return false;
   }
   if (request.message === 'simple-download') {
     const downloadList = request.data as string[]
     for (let i = 0; i < downloadList.length; i++) {
       chrome.downloads.download({ url: downloadList[i] })
     }
+    return false;
   }
   if (request.message === 'utaku-call-unmount' && senderId) {
     chrome.action.setIcon({ path: '/icon34.png' })
@@ -201,16 +207,19 @@ function onMessage(
         console.log('Error:', chrome.runtime.lastError);
       }
     });
+    return false;
   }
   if (request.message === 'available') {
     getPopupTab().then((popupTab) => {
       sendResponse({ data: popupTab })
     })
+    return true;
   }
   if (request.message === 'activeTabInfo') {
     sendResponse({ data: activeTabInfo })
+    return true;
   }
-  return true;
+  return false;
 }
 if (!chrome.runtime.onMessage.hasListener(onMessage)) {
   chrome.runtime.onMessage.addListener(onMessage)

@@ -205,7 +205,8 @@ const ControlComp = ({
                         console.log(chrome.runtime.lastError)
                     }
                   )
-                } else {
+                }
+                if (settingState.modeType === 'enhanced') {
                   chrome.runtime.sendMessage(
                     { message: 'setFolderName', data: e.target.value },
                     () => {

@@ -1,5 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
+import { defaultMode } from '../atoms/settings'
 import App from './App'
 import './index.scss'
 import { rootId } from './sources'
@@ -52,7 +53,8 @@ const getAvailable = (el?: HTMLElement) => {
   try {
     if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
     chrome.storage.local.get(['modeType'], (results) => {
-      if (results.modeType === 'simple') {
+      const currentMode = results.modeType || defaultMode
+      if (currentMode === 'simple') {
         if (root) {
           chrome.runtime.sendMessage({
             message: 'active-icon',
@@ -62,7 +64,8 @@ const getAvailable = (el?: HTMLElement) => {
             message: 'inactive-icon',
           })
         }
-      } else {
+      }
+      if (currentMode === 'enhanced') {
         chrome.runtime.sendMessage(
           {
             message: 'available',

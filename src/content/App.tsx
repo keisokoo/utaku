@@ -96,11 +96,7 @@ const Main = (): JSX.Element => {
               })
             }
             if (items.folderName) draft.folderName = items.folderName
-            if (items.modeType)
-              draft.modeType =
-                typeof items.modeType === 'string'
-                  ? (items.modeType as (typeof modeType)[number])
-                  : defaultMode
+            if (items.modeType) draft.modeType = items.modeType || defaultMode
             if (items.folderNameList)
               draft.folderNameList = items.folderNameList
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
@@ -191,11 +187,15 @@ const Main = (): JSX.Element => {
       })
       return
     }
-    chrome.runtime.sendMessage({
-      message: 'download',
-      data: downloadList,
-    })
+    if (settingState.modeType === 'enhanced') {
+      chrome.runtime.sendMessage({
+        message: 'download',
+        data: downloadList,
+      })
+      return
+    }
   }
+
   const getCurrentPageImages = useCallback(async () => {
     const results = await chrome.storage.local.get([
       'remapList',
@@ -227,6 +227,7 @@ const Main = (): JSX.Element => {
     )
     return [...scrappedImages, ...scrappedVideos]
   }, [])
+
   const scrapImages = useCallback(async () => {
     try {
       const scrapped = await getCurrentPageImages()
@@ -279,6 +280,9 @@ const Main = (): JSX.Element => {
           if (settingState.modeType === 'simple') {
             return
           }
+          if (settingState.modeType !== 'enhanced') {
+            return
+          }
           const { data, downloaded, downloadAble } = await getData()
           set_itemList((prev) => {
             if (isEqual(sortItem(prev), sortItem(downloadAble))) return prev
@@ -300,15 +304,22 @@ const Main = (): JSX.Element => {
         }
       }, 1000)
     }
-    if (active) {
+    async function callDataPool() {
+      const getScrapData = await getCurrentPageImages()
       chrome.runtime.sendMessage(
-        { message: 'bulk-queue-images', data: getCurrentPageImages() },
+        {
+          message: 'bulk-queue-images',
+          data: getScrapData ?? [],
+        },
         (response) => {
           if (response?.data?.success) {
             runDataPool()
           }
         }
       )
+    }
+    if (active) {
+      callDataPool()
     } else {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
@@ -321,13 +332,12 @@ const Main = (): JSX.Element => {
   useEffect(() => {
     if (!active) return
     if (settingState.modeType !== 'simple') return
-    if (active) {
+    if (active && settingState.modeType === 'simple') {
       scrapImages()
-    } else {
-      set_queueList([])
     }
     return () => {
       set_queueList([])
+      set_itemList([])
     }
   }, [settingState.modeType, active, scrapImages])
   const handleRemove = (
@@ -348,10 +358,13 @@ const Main = (): JSX.Element => {
       )
       return
     }
-    chrome.runtime.sendMessage({
-      message: 'delete-from-queue',
-      data: { ...item, error: error ?? false },
-    })
+    if (settingState.modeType === 'enhanced') {
+      chrome.runtime.sendMessage({
+        message: 'delete-from-queue',
+        data: { ...item, error: error ?? false },
+      })
+      return
+    }
   }
   const disposeVideo = (
     e: React.SyntheticEvent<HTMLVideoElement, Event>,

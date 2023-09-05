@@ -47,9 +47,12 @@ const DownloadComp = ({
                 handleItemList([])
                 return
               }
-              chrome.runtime.sendMessage({
-                message: 'delete-all-disposed',
-              })
+              if (settingState.modeType === 'enhanced') {
+                chrome.runtime.sendMessage({
+                  message: 'delete-all-disposed',
+                })
+                return
+              }
             }}
           >
             <FaTrash /> All
@@ -70,13 +73,16 @@ const DownloadComp = ({
                 )
                 return
               }
-              const onlyDeSelected = itemList.filter(
-                (item) => !item.imageInfo.active
-              )
-              chrome.runtime.sendMessage({
-                message: 'delete-from-disposed',
-                data: onlyDeSelected,
-              })
+              if (settingState.modeType === 'enhanced') {
+                const onlyDeSelected = itemList.filter(
+                  (item) => !item.imageInfo.active
+                )
+                chrome.runtime.sendMessage({
+                  message: 'delete-from-disposed',
+                  data: onlyDeSelected,
+                })
+                return
+              }
             }}
           >
             <FaTrash />
@@ -98,13 +104,16 @@ const DownloadComp = ({
                 )
                 return
               }
-              const onlySelected = itemList.filter(
-                (item) => item.imageInfo.active
-              )
-              chrome.runtime.sendMessage({
-                message: 'delete-from-disposed',
-                data: onlySelected,
-              })
+              if (settingState.modeType === 'enhanced') {
+                const onlySelected = itemList.filter(
+                  (item) => item.imageInfo.active
+                )
+                chrome.runtime.sendMessage({
+                  message: 'delete-from-disposed',
+                  data: onlySelected,
+                })
+                return
+              }
             }}
           >
             <FaTrash />

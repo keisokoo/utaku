@@ -2,7 +2,7 @@ import { atom } from 'recoil'
 
 export const itemTypes = ['all', 'image', 'media'] as const
 export const sizeTypes = ['small', 'medium', 'large'] as const
-export const modeType = ['simple', 'enhanced'] as const
+export const modeType = ['simple', 'enhanced', null] as const
 export const containerTypes = ['hide', 'normal', 'flexbox', 'tile'] as const
 export const viewModeTypes = ['container', 'size', 'item'] as const
 
@@ -62,7 +62,7 @@ export const settings = atom<SettingsType>({
   default: {
     sizeType: 'small',
     itemType: 'image',
-    modeType: defaultMode,
+    modeType: null,
     viewMode: ['container'],
     sizeLimit: {
       width: 200,

@@ -123,11 +123,7 @@ const Main = (): JSX.Element => {
               draft.folderName = items.folderName
               handleFolderName(items.folderName)
             }
-            if (items.modeType)
-              draft.modeType =
-                typeof items.modeType === 'string'
-                  ? (items.modeType as (typeof modeType)[number])
-                  : defaultMode
+            if (items.modeType) draft.modeType = items.modeType || defaultMode
             if (items.folderNameList)
               draft.folderNameList = items.folderNameList
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit

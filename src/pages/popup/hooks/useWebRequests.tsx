@@ -129,7 +129,7 @@ const useWebRequests = (
 
   const handleSourceList = useCallback(
     (item: WebResponseItem[], cb?: () => void) => {
-      set_queueList(uniqBy(item, (curr) => curr.url))
+      set_queueList((prev) => uniqBy([...prev, ...item], (curr) => curr.url))
       cb && cb()
     },
     []

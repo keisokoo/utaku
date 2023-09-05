@@ -46,10 +46,13 @@ const ItemBox = ({
       })
       return
     }
-    chrome.runtime.sendMessage({
-      message: 'download',
-      data: [url],
-    })
+    if (settingState.modeType === 'enhanced') {
+      chrome.runtime.sendMessage({
+        message: 'download',
+        data: [url],
+      })
+      return
+    }
   }
   const handleNewWindow = (url: string | URL) => {
     window.open(url, '_blank')
@@ -154,10 +157,13 @@ const ItemBox = ({
                 handleRemaps && handleRemaps(item.url)
                 return
               }
-              chrome.runtime.sendMessage({
-                message: 'create-remap',
-                data: item.url,
-              })
+              if (settingState.modeType === 'enhanced') {
+                chrome.runtime.sendMessage({
+                  message: 'create-remap',
+                  data: item.url,
+                })
+                return
+              }
             }}
           >
             <FaRegEdit />
