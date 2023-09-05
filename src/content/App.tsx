@@ -196,7 +196,17 @@ const Main = (): JSX.Element => {
       data: downloadList,
     })
   }
-  const getCurrentPageImages = useCallback(() => {
+  const getCurrentPageImages = useCallback(async () => {
+    const results = await chrome.storage.local.get([
+      'remapList',
+      'applyRemapList',
+    ])
+
+    if (!results.remapList || !results.applyRemapList) return []
+    const currentApplied = (results.remapList as UrlRemapItem[]).filter(
+      (item) => (results.applyRemapList as string[]).includes(item.id)
+    )
+
     const localImages = getAllImageUrls('.utaku-root').map((item) =>
       toItemType(item, 'image')
     )
@@ -205,23 +215,23 @@ const Main = (): JSX.Element => {
     )
     const scrappedImages = uniqBy(
       localImages.map(
-        (curr) => parseItemWithUrlRemaps(appliedRemapList, curr) as ItemType
+        (curr) => parseItemWithUrlRemaps(currentApplied, curr) as ItemType
       ),
       (item) => item.url
     )
     const scrappedVideos = uniqBy(
       localVideos.map(
-        (curr) => parseItemWithUrlRemaps(appliedRemapList, curr) as ItemType
+        (curr) => parseItemWithUrlRemaps(currentApplied, curr) as ItemType
       ),
       (item) => item.url
     )
     return [...scrappedImages, ...scrappedVideos]
-  }, [appliedRemapList])
-  const scrapImages = useCallback(() => {
+  }, [])
+  const scrapImages = useCallback(async () => {
     try {
-      const scrapped = getCurrentPageImages()
+      const scrapped = await getCurrentPageImages()
       set_queueList(() => {
-        return scrapped
+        return scrapped ?? []
       })
     } catch (error) {
       console.log('error', error)
