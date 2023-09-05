@@ -517,27 +517,29 @@ const Main = (): JSX.Element => {
                 <UtakuStyle.IconWrap>
                   <FaRocket />
                 </UtakuStyle.IconWrap>
-                {modeType.map((type) => (
-                  <div
-                    key={type}
-                    className={type === settingState.modeType ? 'active' : ''}
-                    onClick={() => {
-                      if (type === 'simple') return
-                      set_settingState(
-                        produce((draft) => {
-                          draft.modeType = type
+                {modeType
+                  .filter((ii) => !!ii)
+                  .map((type) => (
+                    <div
+                      key={type}
+                      className={type === settingState.modeType ? 'active' : ''}
+                      onClick={() => {
+                        if (type === 'simple') return
+                        set_settingState(
+                          produce((draft) => {
+                            draft.modeType = type
+                          })
+                        )
+                        chrome.runtime.sendMessage({
+                          message: 'mode-change',
+                          data: type,
                         })
-                      )
-                      chrome.runtime.sendMessage({
-                        message: 'mode-change',
-                        data: type,
-                      })
-                      window.location.reload()
-                    }}
-                  >
-                    {type}
-                  </div>
-                ))}
+                        window.location.reload()
+                      }}
+                    >
+                      {type}
+                    </div>
+                  ))}
               </UtakuStyle.QualityController>
               <GrayScaleFill
                 _icon

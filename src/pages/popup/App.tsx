@@ -392,27 +392,29 @@ const Main = (): JSX.Element => {
                 <PopupStyle.IconWrap>
                   <FaRocket />
                 </PopupStyle.IconWrap>
-                {modeType.map((type) => (
-                  <div
-                    key={type}
-                    className={type === settingState.modeType ? 'active' : ''}
-                    onClick={() => {
-                      if (type === 'enhanced') return
-                      set_settingState(
-                        produce((draft) => {
-                          draft.modeType = type
+                {modeType
+                  .filter((ii) => !!ii)
+                  .map((type) => (
+                    <div
+                      key={type}
+                      className={type === settingState.modeType ? 'active' : ''}
+                      onClick={() => {
+                        if (type === 'enhanced') return
+                        set_settingState(
+                          produce((draft) => {
+                            draft.modeType = type
+                          })
+                        )
+                        chrome.runtime.sendMessage({
+                          message: 'mode-change',
+                          data: type,
                         })
-                      )
-                      chrome.runtime.sendMessage({
-                        message: 'mode-change',
-                        data: type,
-                      })
-                      window.close()
-                    }}
-                  >
-                    {type}
-                  </div>
-                ))}
+                        window.close()
+                      }}
+                    >
+                      {type}
+                    </div>
+                  ))}
               </PopupStyle.ModeController>
             </PopupStyle.Row>
             <div
