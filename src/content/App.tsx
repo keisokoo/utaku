@@ -78,7 +78,6 @@ const Main = (): JSX.Element => {
         'viewMode',
       ],
       (items) => {
-        console.log('items.modeType', items.modeType)
         set_settingState(
           produce((draft) => {
             if (!items.remapList && !items.applyRemapList) {
