@@ -113,6 +113,9 @@
   "query_remove": {
     "message": "Query Remove"
   },
+  "query_append": {
+    "message": "Query Append"
+  },
   "requeue": {
     "message": "Requeue"
   },

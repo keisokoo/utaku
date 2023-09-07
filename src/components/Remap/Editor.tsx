@@ -9,7 +9,7 @@ import {
   initialUrlRemapItem,
   settings,
 } from '../../atoms/settings'
-import { isValidUrl, lang, parseUrlRemap } from '../../utils'
+import { isValidUrl, lang, parseUrlRemap, urlToRemapItem } from '../../utils'
 import { GrayScaleFill, GrayScaleOutline, SecondaryButton } from '../Buttons'
 import { PopupInputStyle } from './PopupInput.styled'
 import { RemapStyle } from './Remaps.styled'
@@ -38,6 +38,14 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
     if (!isValidUrl(currentRemap?.item?.reference_url)) return null
     return parseUrlRemap(currentRemap.item, currentRemap.item.reference_url)
   }, [currentRemap.item])
+  const referrerParams = useMemo(() => {
+    if (!referrer) return null
+    return urlToRemapItem(referrer.toString()).item.params
+  }, [referrer])
+  const pathnameArray = useMemo(() => {
+    if (!referrer) return []
+    return referrer.pathname.split('/').filter((ii) => !!ii)
+  }, [referrer])
   return (
     <>
       <S.EditorList>
@@ -128,14 +136,20 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                 <S.InputWrap key={key} className="utaku-flex-center">
                   <S.InputBox className="utaku-flex-center">
                     <S.QueryStatus>
-                      <label>{key}</label>
                       <div>
-                        {remap.params[key]
-                          ? lang('query_change')
-                          : lang('query_remove')}
+                        {referrerParams?.[key] !== undefined ? (
+                          <>
+                            {remap.params[key]
+                              ? lang('query_change')
+                              : lang('query_remove')}
+                          </>
+                        ) : (
+                          <div>{lang('query_append')}</div>
+                        )}
                       </div>
                     </S.QueryStatus>
                     <S.SpaceBetween>
+                      <S.QueryKey>{key} </S.QueryKey>
                       <P.FilledInput
                         type="text"
                         style={{ flex: 1 }}
@@ -161,6 +175,51 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                         {lang('delete')}
                       </S.Chip>
                     </S.SpaceBetween>
+                    <S.QueryResult>
+                      {referrer &&
+                      currentRemap.item.params[key] !==
+                        referrerParams?.[key] ? (
+                        <>
+                          {referrerParams?.[key] !== undefined ? (
+                            <>
+                              <div>
+                                <label>Before</label>
+                                <div>
+                                  <>
+                                    {key}={referrerParams?.[key]}
+                                  </>
+                                </div>
+                              </div>
+                              <div className="after">
+                                <label>After</label>
+                                <div>
+                                  {currentRemap.item.params[key] ? (
+                                    <>
+                                      {key}={currentRemap.item.params[key]}
+                                    </>
+                                  ) : (
+                                    'Deleted.'
+                                  )}
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <>
+                              <div className="after">
+                                <label>Append</label>
+                                {currentRemap.item.params[key] && (
+                                  <div>
+                                    {key}={currentRemap.item.params[key]}
+                                  </div>
+                                )}
+                              </div>
+                            </>
+                          )}
+                        </>
+                      ) : (
+                        <div>Not changed.</div>
+                      )}
+                    </S.QueryResult>
                   </S.InputBox>
                 </S.InputWrap>
               ))}
@@ -174,69 +233,63 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
             {referrer?.pathname && (
               <>
                 <S.PathName>
-                  {referrer.pathname
-                    .split('/')
-                    .filter((ii) => !!ii)
-                    .map((dt, idx) => {
-                      const changed = currentRemap.item.path_change?.find(
-                        (ii) => ii.index === idx
-                      )
-                      return (
-                        <Fragment key={dt}>
-                          <span>/</span>
-                          <span
-                            className={classNames({
-                              highlight: changed,
-                            })}
-                          >
-                            {changed?.to ? changed?.to : dt}
-                          </span>
-                        </Fragment>
-                      )
-                    })}
+                  {pathnameArray.map((dt, idx) => {
+                    const changed = currentRemap.item.path_change?.find(
+                      (ii) => ii.index === idx
+                    )
+                    return (
+                      <Fragment key={dt}>
+                        <span>/</span>
+                        <span
+                          className={classNames({
+                            highlight: changed,
+                          })}
+                        >
+                          {changed?.to ? changed?.to : dt}
+                        </span>
+                      </Fragment>
+                    )
+                  })}
                 </S.PathName>
                 <S.Chips>
                   {referrer?.pathname &&
-                    referrer.pathname
-                      .split('/')
-                      .filter((ii) => !!ii)
-                      .map((path, idx) => (
-                        <S.Chip
-                          key={idx}
-                          data-active={
-                            currentRemap.item.path_change?.find(
-                              (ii) => ii.index === idx
-                            )
-                              ? 'true'
-                              : 'false'
-                          }
-                          onClick={() => {
-                            set_currentRemap(
-                              produce((draft) => {
-                                if (!draft.item.path_change)
-                                  draft.item.path_change = []
-                                if (
-                                  draft.item.path_change.find(
-                                    (ii) => ii.index === idx
+                    pathnameArray.map((path, idx) => (
+                      <S.Chip
+                        key={idx}
+                        data-active={
+                          currentRemap.item.path_change?.find(
+                            (ii) => ii.index === idx
+                          )
+                            ? 'true'
+                            : 'false'
+                        }
+                        onClick={() => {
+                          set_currentRemap(
+                            produce((draft) => {
+                              if (!draft.item.path_change)
+                                draft.item.path_change = []
+                              if (
+                                draft.item.path_change.find(
+                                  (ii) => ii.index === idx
+                                )
+                              ) {
+                                draft.item.path_change =
+                                  draft.item.path_change.filter(
+                                    (ii) => ii.index !== idx
                                   )
-                                ) {
-                                  draft.item.path_change =
-                                    draft.item.path_change.filter(
-                                      (ii) => ii.index !== idx
-                                    )
-                                  return
-                                }
-                                draft.item.path_change.push({
-                                  index: idx,
-                                  to: path ?? '',
-                                })
+                                return
+                              }
+                              draft.item.path_change.push({
+                                index: idx,
+                                to: path ?? '',
                               })
-                            )
-                          }}
-                        >
-                          <span>{path}</span>
-                        </S.Chip>
-                      ))}
+                            })
+                          )
+                        }}
+                      >
+                        <span>{path}</span>
+                      </S.Chip>
+                    ))}
                 </S.Chips>
                 <S.Divider />
               </>

@@ -15,6 +15,47 @@ const urlBoxCss = css`
     color: ${colors['Secondary/Dark']};
   }
 `
+const QueryResult = styled.div`
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  position: absolute;
+  width: 100%;
+  top: 0;
+  transform: translateY(calc(-100% - 16px));
+  background: #fff;
+  padding: 8px;
+  border-radius: 8px;
+  box-shadow: 0px 2px 8px 1px #afafaf;
+  & > div {
+    font-size: 14px;
+    color: #333;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    & > label,
+    & > div {
+      padding: 8px;
+    }
+    & > label {
+      padding: 8px;
+      width: 80px;
+      flex-shrink: 0;
+    }
+    & > div {
+      background-color: #d5f6f7;
+      color: #0147a4;
+      border-radius: 4px;
+      flex: 1;
+    }
+    &.after {
+      & > div {
+        background-color: #d6f8d6;
+        color: #006b05;
+      }
+    }
+  }
+`
 export const RemapStyle = {
   Divider: styled.div`
     width: 100%;
@@ -30,6 +71,11 @@ export const RemapStyle = {
     border-radius: 8px;
     &.utaku-flex-center {
       align-items: center;
+    }
+    &:hover {
+      ${QueryResult} {
+        display: flex;
+      }
     }
   `,
   QueryBox: styled.div`
@@ -64,6 +110,7 @@ export const RemapStyle = {
       color: #333;
     }
   `,
+  QueryResult,
   InputBox: styled.div`
     position: relative;
     flex: 1;
@@ -105,6 +152,13 @@ export const RemapStyle = {
     font-size: 18px;
     text-align: left;
     margin-bottom: 4px;
+  `,
+  QueryKey: styled.div`
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #333;
   `,
   EditorList: styled.div`
     display: flex;

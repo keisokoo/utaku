@@ -113,6 +113,9 @@
   "query_remove": {
     "message": "쿼리 제거"
   },
+  "query_append": {
+    "message": "쿼리 추가"
+  },
   "requeue": {
     "message": "재시도"
   },
