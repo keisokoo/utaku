@@ -55,20 +55,13 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: [
-          {
-            loader: require.resolve('babel-loader'),
-            options: {
-              plugins: [
-                require.resolve('react-refresh/babel'),
-                '@emotion',
-                'babel-plugin-macros',
-              ].filter(Boolean),
-            },
-          },
-        ],
+        use: ['babel-loader'],
       },
-      { test: /\.ts|.tsx$/, exclude: /node_modules/, use: ['ts-loader'] },
+      {
+        test: /\.ts|.tsx$/,
+        exclude: /node_modules/,
+        use: ['ts-loader'],
+      },
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader', postcssConfig],

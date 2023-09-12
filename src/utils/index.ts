@@ -55,6 +55,8 @@ export function urlToRemapItem(url: string): UrlRemapItem {
         ...initialUrlRemapItem.item,
         reference_url: url,
         host: currentUrl.host,
+        domain: extractDomain(url) ?? '',
+        sub_domain: extractSubDomain(url) ?? '',
         params: Object.fromEntries(
           currentUrl.searchParams
         ),
@@ -64,10 +66,36 @@ export function urlToRemapItem(url: string): UrlRemapItem {
     return initialUrlRemapItem
   }
 }
+export function extractDomain(url: string): string | null {
+  if (!isValidUrl(url)) return null
+  const parsedUrl = new URL(url);
+  const hostname = parsedUrl.hostname;
+  const match = hostname.match(/([^.]+\.)?([^.]+\..+)$/);
+
+  return match ? match[2] : null;
+}
+export function extractSubDomain(url: string) {
+  if (!isValidUrl(url)) return null
+  const parsedUrl = new URL(url);
+  const hostname = parsedUrl.hostname;
+  const match = hostname.match(/([^.]+\.)?([^.]+\..+)$/);
+  const subDomain = match ? match[1] : null;
+  return subDomain ? subDomain.replace(/\.$/, '') : null;
+}
 export function parseUrlRemap(value: UrlRemap, url: string) {
   try {
-    const { params, host, path_change, replace } = value
+    const { params, host, path_change, replace, sub_domain } = value
     if (host && !url.includes(host)) return url
+    const current_domain = extractDomain(url)
+    const current_sub_domain = extractSubDomain(url)
+    if (current_domain && current_sub_domain !== sub_domain) {
+      if (current_sub_domain) url = url.replace(current_sub_domain, sub_domain)
+      if (!current_sub_domain) {
+        const urlObj = new URL(url)
+        urlObj.hostname = sub_domain + '.' + current_domain
+        url = urlObj.toString()
+      }
+    }
     if (Object.keys(params).length) {
       URL
       const urlObj = new URL(url)
@@ -122,4 +150,33 @@ export function parseItemWithUrlRemaps(urlRemaps: UrlRemapItem[], item: WebRespo
 }
 export function parseItemListWithUrlRemaps(urlRemaps: UrlRemapItem[], items: WebResponseItem[]) {
   return items.map((item) => parseItemWithUrlRemaps(urlRemaps, item))
+}
+
+export function migrationRemapList(remapList: UrlRemapItem[]) {
+  return remapList.map((curr: UrlRemapItem) => {
+    const oldCurrItem = curr.item as typeof curr.item & {
+      from: string
+      to: string
+    }
+    if (!!oldCurrItem.from || !!oldCurrItem.to) {
+      oldCurrItem.replace = oldCurrItem.replace
+        ? [
+          ...oldCurrItem.replace,
+          { from: oldCurrItem.from, to: oldCurrItem.to },
+        ]
+        : [{ from: oldCurrItem.from, to: oldCurrItem.to }]
+    }
+    if (
+      oldCurrItem.reference_url &&
+      extractSubDomain(oldCurrItem.reference_url) &&
+      oldCurrItem.sub_domain === undefined
+    ) {
+      oldCurrItem.sub_domain =
+        extractSubDomain(oldCurrItem.reference_url) ?? ''
+      oldCurrItem.domain =
+        extractSubDomain(oldCurrItem.reference_url) ?? ''
+    }
+    curr.item = oldCurrItem
+    return curr
+  })
 }

@@ -26,11 +26,20 @@
   "remaps": {
     "message": "재구성"
   },
+  "remaps_only": {
+    "message": "재구성만"
+  },
   "change_add_text": {
     "message": "텍스트 변경/추가"
   },
   "edit_remap_name": {
     "message": "재구성 이름"
+  },
+  "edit_sub_domain": {
+    "message": "서브 도메인 변경"
+  },
+  "input_sub_domain": {
+    "message": "서브 도메인을 입력하세요."
   },
   "replace_url": {
     "message": "URL 변경"
@@ -64,6 +73,9 @@
   },
   "prev": {
     "message": "이전"
+  },
+  "next": {
+    "message": "다음"
   },
   "input_content": {
     "message": "내용을 입력하세요."
@@ -202,5 +214,29 @@
   },
   "re_loading": {
     "message": "재수집 중"
+  },
+  "reference_url_guidance": {
+    "message": "(필수) 예시가 될 URL을 입력해 주세요.\n 참조 URL을 입력하면, 패스 변경이 가능해지며, URL 재구성 결과를 확인할 수 있습니다."
+  },
+  "name_guidance": {
+    "message": "(필수) 이름을 입력하세요. 이 이름은 URL 재구성 목록에 표시됩니다."
+  },
+  "host_guidance": {
+    "message": "(필수) 수집하는 이미지 URL에서 이 값이 일치하는 경우에만 URL 재구성이 적용됩니다. 기본값은 호스트(도메인 기본주소)입니다."
+  },
+  "sub_domain_guidance": {
+    "message": "(선택) 서브도메인을 변경하고자 한다면 입력해주세요.\n 서브도메인의 예를 들면, post.example.com에서 post가 A레코드입니다.\n 특정 주소 값을 변경하고자 한다면 마지막 Replace를 사용하세요.\n\n 서브도메인이 있었을 경우 수정하면, 변경하게 되고, 없었을 경우엔 추가합니다."
+  },
+  "params_guidance": {
+    "message": "(선택) URL의 쿼리를 변경하고자 한다면 입력해주세요.\n 쿼리의 예를 들면, post.example.com?q=1234에서 q=1234가 쿼리이며 q가 키이며, 1234가 값입니다. \n 변경을 원하는 키를 추가하고, 원하는 값으로 변경하면 됩니다. \n 키만 추가한 상태로 값을 비워두면 해당 쿼리는 삭제됩니다."
+  },
+  "path_change_guidance": {
+    "message": "(선택) URL의 패스네임을 변경하고자 한다면 입력해주세요.\n 패스네임의 예를 들면, post.example.com/post/1234에서 post/1234가 패스네임입니다. \n 참조 URL에서 추출한 패스네임으로 해당 자리를 변경할 수 있습니다. \n 해당하는 자리를 클릭 한 후 원하는 값으로 변경하면 됩니다."
+  },
+  "replace_guidance": {
+    "message": "(선택) URL의 특정 값을 원하는 값으로 변경하고자 한다면 입력해주세요.\n 변경의 예를 들면, post.example.com/post/1234에서 post를 post2로 변경하고자 한다면, \n from에 post를, to에 post2를 입력합니다. \n 이 작업은 이전 작업의 변경 과정이 모두 끝난 후에 적용됩니다."
+  },
+  "view_result": {
+    "message": "결과 보기"
   }
 }

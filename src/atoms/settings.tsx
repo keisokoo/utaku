@@ -19,11 +19,26 @@ export type ReplaceType = {
 export type UrlRemap = {
   reference_url?: string
   host: string
+  domain: string
+  sub_domain: string
   params: {
     [k: string]: string
   }
-  replace: ReplaceType[]
   path_change: PathChangeType[]
+  replace: ReplaceType[]
+}
+export type LimitBySelectorType = {
+  host: string
+  selector: {
+    image: string
+    video: string
+    parent: string
+  }
+}
+export type FilterType = {
+  onlyRemapped: boolean
+  searchName: string
+  limitBySelector: LimitBySelectorType[]
 }
 export type UrlRemapItem = {
   id: string
@@ -36,6 +51,8 @@ export const initialUrlRemapItem: UrlRemapItem = {
   item: {
     reference_url: '',
     host: '',
+    domain: '',
+    sub_domain: '',
     params: {},
     replace: [],
     path_change: [],
@@ -55,6 +72,7 @@ export interface SettingsType {
   folderNameList: string[]
   remapList: UrlRemapItem[]
   applyRemapList: string[]
+  remapFilter: FilterType
 }
 
 export const settings = atom<SettingsType>({
@@ -62,7 +80,7 @@ export const settings = atom<SettingsType>({
   default: {
     sizeType: 'small',
     itemType: 'image',
-    modeType: null,
+    modeType: 'simple',
     viewMode: ['container'],
     sizeLimit: {
       width: 200,
@@ -73,5 +91,20 @@ export const settings = atom<SettingsType>({
     remapList: [],
     applyRemapList: [],
     containerSize: 'normal',
+    remapFilter: {
+      onlyRemapped: false,
+      searchName: '',
+      limitBySelector: [],
+    },
   },
 })
+
+// const sampleSelector =
+// {
+//   host: 'blog.naver.com',
+//   selector: {
+//     image: '.se_mediaImage',
+//     video: '',
+//     parent: '.se_viewArea',
+//   },
+// }

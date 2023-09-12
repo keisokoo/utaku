@@ -1,4 +1,5 @@
 import styled from '@emotion/styled'
+import classNames from 'classnames'
 import React from 'react'
 import { lang } from '../../utils'
 import { GrayScaleOutline } from '../Buttons'
@@ -28,6 +29,9 @@ const ModalBodyWrap = styled.div`
     max-height: calc(100vh - 64px - 60px);
     overflow-y: auto;
     overflow-x: hidden;
+    &.fixed {
+      height: calc(100vh - 64px - 60px);
+    }
   }
   max-height: 100vh;
   border-radius: 8px;
@@ -40,11 +44,13 @@ interface ModalBodyProps
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
   > {
+  fixed?: boolean
   title?: string
   btn?: React.ReactNode
   onClose?: () => void
 }
 const ModalBody = ({
+  fixed,
   btn,
   onClose,
   children,
@@ -63,7 +69,7 @@ const ModalBody = ({
             </GrayScaleOutline>
           </div>
         </div>
-        <div className="modal-body">{children}</div>
+        <div className={classNames({ fixed }, 'modal-body')}>{children}</div>
       </ModalBodyWrap>
     </>
   )

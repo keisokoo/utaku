@@ -25,11 +25,10 @@ import {
 } from '../../components/Buttons'
 import Modal from '../../components/Modal/Modal'
 import ModalBody from '../../components/Modal/ModalBody'
-import Editor from '../../components/Remap/Editor'
 import Remaps from '../../components/Remap/Remaps'
 import Tooltip from '../../components/Tooltip'
 import { WebResponseItem } from '../../content/types'
-import { lang, urlToRemapItem } from '../../utils'
+import { lang, migrationRemapList, urlToRemapItem } from '../../utils'
 import PopupStyle from './Popup.styled'
 import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
@@ -37,6 +36,7 @@ import './index.scss'
 import { sampleApply, sampleList } from './sources'
 
 import { Virtuoso } from 'react-virtuoso'
+import StepEditor from '../../components/Remap/StepEditor'
 
 function focusPopup() {
   chrome.tabs.query(
@@ -134,22 +134,7 @@ const Main = (): JSX.Element => {
             if (items.itemType) draft.itemType = items.itemType
             if (items.remapList) {
               // migrate
-              draft.remapList = items.remapList.map((curr: UrlRemapItem) => {
-                const oldCurrItem = curr.item as typeof curr.item & {
-                  from: string
-                  to: string
-                }
-                if (!!oldCurrItem.from || !!oldCurrItem.to) {
-                  oldCurrItem.replace = oldCurrItem.replace
-                    ? [
-                        ...oldCurrItem.replace,
-                        { from: oldCurrItem.from, to: oldCurrItem.to },
-                      ]
-                    : [{ from: oldCurrItem.from, to: oldCurrItem.to }]
-                }
-                curr.item = oldCurrItem
-                return curr
-              })
+              draft.remapList = migrationRemapList(items.remapList)
             }
             if (items.applyRemapList)
               draft.applyRemapList = items.applyRemapList
@@ -373,7 +358,7 @@ const Main = (): JSX.Element => {
         )}
         {typeof modalOpen !== 'string' && modalOpen && (
           <ModalBody title={lang('url_remap_list')} btn={<></>}>
-            <Editor
+            <StepEditor
               mode="add"
               remapItem={modalOpen}
               onClose={() => {
@@ -719,6 +704,13 @@ const Main = (): JSX.Element => {
             >
               {lang('remaps')}
             </WhiteFill>
+            {/* <WhiteFill _mini
+              onClick={() => {
+
+              }}
+            >
+              {lang('remaps_only')}
+            </WhiteFill> */}
             <PopupStyle.BottomDescription>
               {lang('applied_remaps', String(appliedRemapList.length))}
             </PopupStyle.BottomDescription>

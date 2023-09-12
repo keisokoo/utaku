@@ -14,6 +14,12 @@
   "edit_url_match": {
     "message": "Edit Match URL"
   },
+  "edit_sub_domain": {
+    "message": "Edit Sub Domain"
+  },
+  "input_sub_domain": {
+    "message": "Input the subdomain to change. If left blank, it will be removed."
+  },
   "input_url_match": {
     "message": "Please enter a matching URL pattern."
   },
@@ -22,6 +28,9 @@
   },
   "remaps": {
     "message": "Remaps"
+  },
+  "remaps_only": {
+    "message": "Remaps Only"
   },
   "edit_query": {
     "message": "Edit Query"
@@ -61,6 +70,9 @@
   },
   "prev": {
     "message": "Prev"
+  },
+  "next": {
+    "message": "Next"
   },
   "input_content": {
     "message": "Please input content."
@@ -202,5 +214,29 @@
   },
   "re_loading": {
     "message": "Re Loading"
+  },
+  "reference_url_guidance": {
+    "message": "(Required) Please enter a sample URL. Entering a reference URL will enable path changes and allow you to verify the URL reconstruction results."
+  },
+  "name_guidance": {
+    "message": "(Required) Please enter a name. This name will be displayed on the URL reconstruction list."
+  },
+  "host_guidance": {
+    "message": "(Required) URL reconstruction is applied only when this value matches the image URL being collected. The default value is the host (domain root address)."
+  },
+  "sub_domain_guidance": {
+    "message": "(Optional) If you want to change the Sub Domain, please enter it. For example, in post.example.com, 'post' is the Sub Domain. Change it at the location corresponding to the Sub Domain, use the final 'Replace' if you want to change a specific address value."
+  },
+  "params_guidance": {
+    "message": "(Optional) If you want to change the query of the URL, please enter it. For example, in post.example.com?q=1234, 'q=1234' is the query and 'q' is the key and '1234' is the value. Add the key you want to change and change it to the desired value. If you only add the key and leave the value empty, the query will be removed."
+  },
+  "path_change_guidance": {
+    "message": "(Optional) If you want to change the pathname of the URL, please enter it. For example, in post.example.com/post/1234, 'post/1234' is the pathname. You can replace this with the pathname extracted from the reference URL. Click the corresponding location and change it to the desired value."
+  },
+  "replace_guidance": {
+    "message": "(Optional) If you want to change a specific value in the URL to a desired value, please enter it. For example, if you want to change 'post' to 'post2' in post.example.com/post/1234, enter 'post' in 'from' and 'post2' in 'to'. This operation is applied after all previous operations are complete."
+  },
+  "view_result": {
+    "message": "View Result"
   }
 }

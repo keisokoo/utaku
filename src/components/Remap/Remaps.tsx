@@ -4,9 +4,9 @@ import { settings } from '../../atoms/settings'
 import { lang } from '../../utils'
 import { GrayScaleFill, PrimaryButton } from '../Buttons'
 import ModalBody from '../Modal/ModalBody'
-import Editor from './Editor'
 import RemapList from './RemapList'
 import { RemapBodyMode } from './Remaps.type'
+import StepEditor from './StepEditor'
 
 interface RemapsProps
   extends React.DetailedHTMLProps<
@@ -30,6 +30,7 @@ const Remaps = ({ applyRemapList, emitRemap, ...props }: RemapsProps) => {
     <>
       <ModalBody
         title={lang('url_remap_list')}
+        fixed={!!currentRemap}
         btn={
           <>
             {mode !== null && (
@@ -72,7 +73,7 @@ const Remaps = ({ applyRemapList, emitRemap, ...props }: RemapsProps) => {
           />
         )}
         {mode !== null && (
-          <Editor
+          <StepEditor
             mode={currentRemap ? 'edit' : 'add'}
             remapItem={currentRemap}
             onClose={() => {

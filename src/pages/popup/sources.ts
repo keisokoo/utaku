@@ -5,6 +5,8 @@ export const sampleList: UrlRemapItem[] = [
     "id": "c7e5e31f-a2cc-4966-8ba5-8a81d5d24e13",
     "item": {
       "host": "pstatic.net",
+      "domain": "pstatic.net",
+      "sub_domain": "",
       "params": {
         "type": ""
       },
@@ -18,6 +20,8 @@ export const sampleList: UrlRemapItem[] = [
     "id": "4926c86d-26f6-4837-bac6-d254d1b41f68",
     "item": {
       "host": "pbs.twimg.com",
+      "domain": "twimg.com",
+      "sub_domain": "pbs",
       "params": {
         "name": "large"
       },
@@ -31,6 +35,8 @@ export const sampleList: UrlRemapItem[] = [
     "id": "1c44c17d-fe6b-4328-b1fc-c8938f26bc97",
     "item": {
       "host": "images.unsplash.com",
+      "domain": "unsplash.com",
+      "sub_domain": "images",
       "params": {
         "q": "100",
         "w": ""

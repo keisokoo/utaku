@@ -1,3 +1,5 @@
+import { LimitBySelectorType } from "../../atoms/settings";
+
 interface SrcSetImage {
   url: string;
   size: number;
@@ -16,10 +18,24 @@ function getLargestSrc(srcset: string): string {
       return largest;
     }, { url: '', size: 0 }).url;
 }
-
-function extractImagesFromDocument(doc: Document, exceptSelector?: string): string[] {
+export function getLimitBySelector(limitBySelectorList: LimitBySelectorType[]) {
+  if (!limitBySelectorList) return;
+  if (limitBySelectorList.length < 1) return;
+  return limitBySelectorList.find((limitBySelector) => window.location.host.includes(limitBySelector.host));
+}
+function extractImagesFromDocument(doc: Document, exceptSelector?: string, limitBySelector?: LimitBySelectorType): string[] {
+  let selectorQuery = '';
+  let parentSelectorQuery = '';
+  const exceptQuery = (val: string) => exceptSelector ? `:not(${exceptSelector} ${val})` : '';
+  if (limitBySelector) {
+    if (window.location.host.includes(limitBySelector.host)) {
+      if (limitBySelector.selector.image) selectorQuery = limitBySelector.selector.image;
+      if (limitBySelector.selector.parent) parentSelectorQuery = limitBySelector.selector.parent;
+    }
+  }
+  const imageQuery = `${parentSelectorQuery} img${selectorQuery}${exceptQuery('img')}, ${parentSelectorQuery} source${selectorQuery}${exceptQuery('source')}`;
   const imageElements = doc.querySelectorAll(
-    `img${exceptSelector ? `:not(${exceptSelector} img)` : ''}, source${exceptSelector ? `:not(${exceptSelector} source)` : ''}`
+    imageQuery
   ) as NodeListOf<HTMLImageElement | HTMLSourceElement>;
 
   const imgSrcArray = Array.from(imageElements).map(el => {
@@ -53,8 +69,8 @@ function extractImagesFromDocument(doc: Document, exceptSelector?: string): stri
 }
 
 
-export function getAllImageUrls(exceptSelector?: string): string[] {
-  let allImageUrls = extractImagesFromDocument(document, exceptSelector);
+export function getAllImageUrls(exceptSelector?: string, limitBySelector?: LimitBySelectorType): string[] {
+  let allImageUrls = extractImagesFromDocument(document, exceptSelector, limitBySelector);
 
   const iframeNodes = Array.from(document.querySelectorAll('iframe')) as HTMLIFrameElement[];
 
@@ -62,7 +78,7 @@ export function getAllImageUrls(exceptSelector?: string): string[] {
     try {
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
-        const iframeImageUrls = extractImagesFromDocument(iframeDoc, exceptSelector);
+        const iframeImageUrls = extractImagesFromDocument(iframeDoc, exceptSelector, limitBySelector);
         allImageUrls = [...allImageUrls, ...iframeImageUrls];
       }
     } catch (e) {
@@ -72,9 +88,19 @@ export function getAllImageUrls(exceptSelector?: string): string[] {
 
   return allImageUrls;
 }
-function extractVideosFromDocument(doc: Document, exceptSelector?: string): string[] {
+function extractVideosFromDocument(doc: Document, exceptSelector?: string, limitBySelector?: LimitBySelectorType): string[] {
+  let selectorQuery = '';
+  let parentSelectorQuery = '';
+  const exceptQuery = (val: string) => exceptSelector ? `:not(${exceptSelector} ${val})` : '';
+  if (limitBySelector) {
+    if (window.location.host.includes(limitBySelector.host)) {
+      if (limitBySelector.selector.video) selectorQuery = limitBySelector.selector.video;
+      if (limitBySelector.selector.parent) parentSelectorQuery = limitBySelector.selector.parent;
+    }
+  }
+  const videoQuery = `${parentSelectorQuery} video${selectorQuery}${exceptQuery('video')}`;
   const videoElements = doc.querySelectorAll(
-    `video${exceptSelector ? `:not(${exceptSelector} video)` : ''}`
+    videoQuery
   );
   const videoSrcArray = Array.from(videoElements).map(el => {
     const src = el.getAttribute('src');
@@ -87,8 +113,8 @@ function extractVideosFromDocument(doc: Document, exceptSelector?: string): stri
   return [...videoSrcArray];
 }
 
-export function getAllVideoUrls(exceptSelector?: string): string[] {
-  let allVideoUrls = extractVideosFromDocument(document, exceptSelector);
+export function getAllVideoUrls(exceptSelector?: string, limitBySelector?: LimitBySelectorType): string[] {
+  let allVideoUrls = extractVideosFromDocument(document, exceptSelector, limitBySelector);
 
   const iframeNodes = Array.from(document.querySelectorAll('iframe')) as HTMLIFrameElement[];
 
@@ -96,7 +122,7 @@ export function getAllVideoUrls(exceptSelector?: string): string[] {
     try {
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
-        const iframeVideoUrls = extractVideosFromDocument(iframeDoc, exceptSelector);
+        const iframeVideoUrls = extractVideosFromDocument(iframeDoc, exceptSelector, limitBySelector);
         allVideoUrls = [...allVideoUrls, ...iframeVideoUrls];
       }
     } catch (e) {
@@ -106,3 +132,4 @@ export function getAllVideoUrls(exceptSelector?: string): string[] {
 
   return allVideoUrls;
 }
+

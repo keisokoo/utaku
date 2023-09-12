@@ -28,15 +28,24 @@ import { GrayScaleFill, WhiteFill } from '../components/Buttons'
 import ItemBox from '../components/ItemBox'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
-import Editor from '../components/Remap/Editor'
 import Remaps from '../components/Remap/Remaps'
+import StepEditor from '../components/Remap/StepEditor'
 import { sampleApply, sampleList } from '../pages/popup/sources'
-import { lang, parseItemWithUrlRemaps, urlToRemapItem } from '../utils'
+import {
+  lang,
+  migrationRemapList,
+  parseItemWithUrlRemaps,
+  urlToRemapItem,
+} from '../utils'
 import ControlComp from './ControlComp'
 import Dispose from './DisposeComp'
 import DownloadComp from './DownloadComp'
 import UtakuStyle from './Utaku.styled'
-import { getAllImageUrls, getAllVideoUrls } from './hooks/getImages'
+import {
+  getAllImageUrls,
+  getAllVideoUrls,
+  getLimitBySelector,
+} from './hooks/getImages'
 import { toItemType } from './hooks/useGetImages'
 import './index.scss'
 import { ImageInfo, ItemType, WebResponseItem } from './types'
@@ -76,6 +85,7 @@ const Main = (): JSX.Element => {
         'remapList',
         'applyRemapList',
         'viewMode',
+        'remapFilter',
       ],
       (items) => {
         set_settingState(
@@ -95,27 +105,13 @@ const Main = (): JSX.Element => {
               draft.folderNameList = items.folderNameList
             if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
             if (items.sizeType) draft.sizeType = items.sizeType
+            if (items.remapFilter) draft.remapFilter = items.remapFilter
             if (items.viewMode) draft.viewMode = items.viewMode
             if (items.itemType) draft.itemType = items.itemType
             if (items.containerSize) draft.containerSize = items.containerSize
             if (items.remapList) {
               // migrate
-              draft.remapList = items.remapList.map((curr: UrlRemapItem) => {
-                const oldCurrItem = curr.item as typeof curr.item & {
-                  from: string
-                  to: string
-                }
-                if (!!oldCurrItem.from || !!oldCurrItem.to) {
-                  oldCurrItem.replace = oldCurrItem.replace
-                    ? [
-                        ...oldCurrItem.replace,
-                        { from: oldCurrItem.from, to: oldCurrItem.to },
-                      ]
-                    : [{ from: oldCurrItem.from, to: oldCurrItem.to }]
-                }
-                curr.item = oldCurrItem
-                return curr
-              })
+              draft.remapList = migrationRemapList(items.remapList)
             }
             if (items.applyRemapList)
               draft.applyRemapList = items.applyRemapList
@@ -129,11 +125,17 @@ const Main = (): JSX.Element => {
       }
     )
   }, [])
+  const limitBySelector = useMemo(() => {
+    return getLimitBySelector(settingState.remapFilter.limitBySelector)
+  }, [settingState.remapFilter.limitBySelector])
   const appliedRemapList = useMemo(() => {
     return settingState.remapList.filter((item) =>
       settingState.applyRemapList.includes(item.id)
     )
   }, [settingState.applyRemapList, settingState.remapList])
+  const remapHostList = useMemo(() => {
+    return appliedRemapList.map((item) => item.item.host)
+  }, [appliedRemapList])
   const filteredImages = useMemo(() => {
     if (!itemList) return []
     if (!itemList.length) return []
@@ -147,14 +149,38 @@ const Main = (): JSX.Element => {
       let widthResult = true
       let heightResult = true
       let notDownloaded = true
+      let includeUrlHost = true
+      let searchName = true
+      if (settingState.remapFilter.searchName) {
+        searchName = item.url
+          .toLowerCase()
+          .includes(settingState.remapFilter.searchName.trim().toLowerCase())
+      }
+      if (settingState.remapFilter.onlyRemapped) {
+        if (!remapHostList.includes(item.url)) includeUrlHost = false
+      }
       if (itemType && itemType !== 'all') checkItemType = item.type === itemType
       if (downloadedItem.includes(item.url)) notDownloaded = false
       if (sizeLimit.width) widthResult = width >= sizeLimit.width
       if (sizeLimit.height) heightResult = height >= sizeLimit.height
-      return widthResult && heightResult && notDownloaded && checkItemType
+      return (
+        widthResult &&
+        heightResult &&
+        notDownloaded &&
+        checkItemType &&
+        includeUrlHost &&
+        searchName
+      )
     })
     return uniqBy(filtered, (item) => item.url)
-  }, [itemList, settingState.sizeLimit, downloadedItem, settingState.itemType])
+  }, [
+    itemList,
+    settingState.sizeLimit,
+    downloadedItem,
+    settingState.itemType,
+    remapHostList,
+    settingState.remapFilter,
+  ])
 
   const timeoutRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
   const reloadRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
@@ -201,12 +227,13 @@ const Main = (): JSX.Element => {
       (item) => (results.applyRemapList as string[]).includes(item.id)
     )
 
-    const localImages = getAllImageUrls('.utaku-root').map((item) =>
-      toItemType(item, 'image')
+    const localImages = getAllImageUrls('.utaku-root', limitBySelector).map(
+      (item) => toItemType(item, 'image')
     )
-    const localVideos = getAllVideoUrls('.utaku-root').map((item) =>
-      toItemType(item, 'media')
+    const localVideos = getAllVideoUrls('.utaku-root', limitBySelector).map(
+      (item) => toItemType(item, 'media')
     )
+
     const scrappedImages = uniqBy(
       localImages.map(
         (curr) => parseItemWithUrlRemaps(currentApplied, curr) as ItemType
@@ -220,7 +247,7 @@ const Main = (): JSX.Element => {
       (item) => item.url
     )
     return [...scrappedImages, ...scrappedVideos]
-  }, [])
+  }, [limitBySelector])
 
   const scrapImages = useCallback(async () => {
     try {
@@ -464,7 +491,7 @@ const Main = (): JSX.Element => {
         )}
         {typeof modalOpen !== 'string' && modalOpen && (
           <ModalBody title={lang('url_remap_list')} btn={<></>}>
-            <Editor
+            <StepEditor
               mode="add"
               remapItem={modalOpen}
               onClose={() => {
@@ -498,6 +525,11 @@ const Main = (): JSX.Element => {
                 <FaRegEdit />
                 {lang('remaps')}({appliedRemapList?.length ?? 0})
               </WhiteFill>
+              {/* {appliedRemapList?.length > 0 && (
+                <WhiteFill _mini onClick={() => {}}>
+                  {lang('remaps_only')}
+                </WhiteFill>
+              )} */}
               <WhiteFill
                 _mini
                 onClick={() => {

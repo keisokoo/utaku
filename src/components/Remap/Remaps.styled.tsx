@@ -57,6 +57,40 @@ const QueryResult = styled.div`
   }
 `
 export const RemapStyle = {
+  EditorWrap: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    height: 100%;
+    & > div {
+      &:first-of-type {
+        flex: 1;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+      &:last-of-type {
+        flex-shrink: 0;
+      }
+    }
+  `,
+  Guidance: styled.div`
+    &.edit {
+      display: none;
+    }
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    div {
+      flex: 1;
+    }
+    white-space: pre-line;
+    font-size: 14px;
+    color: #4e4e4e;
+    padding: 8px;
+    border-radius: 8px;
+    background-color: #eeecec;
+    line-height: 1.4;
+  `,
   Divider: styled.div`
     width: 100%;
     height: 1px;
@@ -146,7 +180,9 @@ export const RemapStyle = {
     }
   `,
   PartLabel: styled.div`
-    display: block;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     color: #494949;
     font-weight: 400;
     font-size: 18px;
@@ -219,10 +255,16 @@ export const RemapStyle = {
     overscroll-behavior-y: contain;
   `,
   BottomList: styled.div`
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-top: 16px;
+  `,
+  ButtonList: styled.div`
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
   `,
   List: styled.div`
     display: flex;

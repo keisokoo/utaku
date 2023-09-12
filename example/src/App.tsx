@@ -5,7 +5,7 @@ import '../scss/style.scss'
 function App() {
   return (
     <RecoilRoot>
-      <div>
+      <div className="wrapper">
         <Modal target="#utaku-modal" open={true} onClose={() => {}}></Modal>
       </div>
     </RecoilRoot>
