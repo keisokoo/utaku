@@ -31,6 +31,7 @@ const ModalBodyWrap = styled.div`
     overflow-x: hidden;
     &.fixed {
       height: calc(100vh - 64px - 60px);
+      max-height: 800px;
     }
   }
   max-height: 100vh;

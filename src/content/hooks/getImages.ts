@@ -34,6 +34,8 @@ function extractImagesFromDocument(doc: Document, exceptSelector?: string, limit
     }
   }
   const imageQuery = `${parentSelectorQuery} img${selectorQuery}${exceptQuery('img')}, ${parentSelectorQuery} source${selectorQuery}${exceptQuery('source')}`;
+  const backgroundQuery = `${parentSelectorQuery}${selectorQuery}${exceptQuery('*')}`;
+
   const imageElements = doc.querySelectorAll(
     imageQuery
   ) as NodeListOf<HTMLImageElement | HTMLSourceElement>;
@@ -51,7 +53,7 @@ function extractImagesFromDocument(doc: Document, exceptSelector?: string, limit
   });
 
   const elements = doc.querySelectorAll(
-    `*${exceptSelector ? `:not(${exceptSelector} *)` : ''}`
+    backgroundQuery
   );
 
   const bgImageArray = Array.from(elements).flatMap(el => {

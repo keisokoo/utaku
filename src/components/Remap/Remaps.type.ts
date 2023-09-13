@@ -1,8 +1,8 @@
 export type RemapBodyMode = 'add' | { id: string } | null
 
 export const stepList = [
-  'reference_url',
   'name',
+  'reference_url',
   'host',
   'sub_domain',
   'params',

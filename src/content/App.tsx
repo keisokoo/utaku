@@ -26,6 +26,7 @@ import {
 } from '../atoms/settings'
 import { GrayScaleFill, WhiteFill } from '../components/Buttons'
 import ItemBox from '../components/ItemBox'
+import EditLimitArea from '../components/LimitArea/EditLimitArea'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
 import Remaps from '../components/Remap/Remaps'
@@ -530,6 +531,13 @@ const Main = (): JSX.Element => {
                   {lang('remaps_only')}
                 </WhiteFill>
               )} */}
+              <EditLimitArea
+                emitItemList={(value) => {
+                  console.log('value', value)
+                  set_itemList([])
+                  set_queueList(value)
+                }}
+              />
               <WhiteFill
                 _mini
                 onClick={() => {

@@ -138,7 +138,7 @@
     "message": "Reference URL"
   },
   "reference_url_description": {
-    "message": "(Optional) Please enter the URL to be used as an example. You can check the result through a preview."
+    "message": "Please enter the URL to be used as an example. You can check the result through a preview."
   },
   "applied_remaps": {
     "message": "Applying $count$ remaps",
@@ -216,7 +216,7 @@
     "message": "Re Loading"
   },
   "reference_url_guidance": {
-    "message": "(Required) Please enter a sample URL. Entering a reference URL will enable path changes and allow you to verify the URL reconstruction results."
+    "message": "(Required) Please enter a sample URL. (include http(s))\n\n ex) https://pbs.twimg.com/media/F5wQfOjWYAAQ5zi?format=webp&name=small"
   },
   "name_guidance": {
     "message": "(Required) Please enter a name. This name will be displayed on the URL reconstruction list."

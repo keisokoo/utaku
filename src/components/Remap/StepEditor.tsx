@@ -78,15 +78,6 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
     <S.EditorWrap>
       <div>
         <S.EditorList>
-          {(stepList[steps] === 'reference_url' || mode === 'edit') && (
-            <URLReference
-              mode={mode}
-              remapItem={currentRemap}
-              emitValue={(value) => {
-                set_currentRemap(value)
-              }}
-            />
-          )}
           {(stepList[steps] === 'name' || mode === 'edit') && (
             <RemapName
               name={currentRemap.name}
@@ -96,6 +87,15 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                     draft.name = value
                   })
                 )
+              }}
+            />
+          )}
+          {(stepList[steps] === 'reference_url' || mode === 'edit') && (
+            <URLReference
+              mode={mode}
+              remapItem={currentRemap}
+              emitValue={(value) => {
+                set_currentRemap(value)
               }}
             />
           )}
@@ -200,21 +200,19 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
               >
                 {lang('prev')}
               </PrimaryButton>
-              {steps !== stepList.length - 1 && (
-                <SecondaryButton
-                  _mini
-                  onClick={() => {
-                    set_steps(
-                      steps + 1 > stepList.length - 1
-                        ? stepList.length - 1
-                        : steps + 1
-                    )
-                  }}
-                  disabled={nextDisabled}
-                >
-                  {lang('next')}
-                </SecondaryButton>
-              )}
+              <SecondaryButton
+                _mini
+                onClick={() => {
+                  set_steps(
+                    steps + 1 > stepList.length - 1
+                      ? stepList.length - 1
+                      : steps + 1
+                  )
+                }}
+                disabled={nextDisabled || steps >= stepList.length - 1}
+              >
+                {lang('next')}
+              </SecondaryButton>
               {steps >= stepList.length - 1 && mode === 'add' && (
                 <SecondaryButton
                   _mini

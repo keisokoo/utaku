@@ -40,8 +40,8 @@ export function lang(value: string, ...content: string[]) {
 export function isValidUrl(url?: string | null) {
   try {
     if (!url) return false
-    new URL(url)
-    return true
+    const currentUrl = new URL(url)
+    return currentUrl?.hostname ? true : false
   } catch (error) {
     return false
   }

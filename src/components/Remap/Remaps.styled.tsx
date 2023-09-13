@@ -7,7 +7,7 @@ const urlBoxCss = css`
   background-color: #dcdcdc;
   padding: 8px 12px;
   word-break: break-all;
-  width: 600px;
+  width: 100%;
   max-width: 100%;
   border-radius: 8px;
   font-size: 12px;
@@ -62,6 +62,8 @@ export const RemapStyle = {
     flex-direction: column;
     gap: 0;
     height: 100%;
+    width: 800px;
+    max-width: calc(100vw - 120px);
     & > div {
       &:first-of-type {
         flex: 1;
@@ -179,6 +181,10 @@ export const RemapStyle = {
       color: ${colors['Secondary/Default']};
     }
   `,
+  ErrorText: styled.div`
+    color: #a90b0b;
+    font-size: 12px;
+  `,
   PartLabel: styled.div`
     display: flex;
     align-items: center;
@@ -198,8 +204,6 @@ export const RemapStyle = {
   `,
   EditorList: styled.div`
     display: flex;
-    min-width: 500px;
-    max-width: 600px;
     flex-direction: column;
     gap: 24px;
     color: ${colors['Grayscale/Gray Dark']};

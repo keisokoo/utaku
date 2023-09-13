@@ -52,6 +52,7 @@ export const ButtonStyle = styled.button(
     user-select: none;
     display: flex;
     align-items: center;
+    white-space: nowrap;
     justify-content: center;
     gap: 4px;
     ${props._css && props._css}

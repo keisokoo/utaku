@@ -41,7 +41,7 @@ const Remaps = ({ applyRemapList, emitRemap, ...props }: RemapsProps) => {
                     set_mode(null)
                   }}
                 >
-                  {lang('prev')}
+                  {lang('list')}
                 </GrayScaleFill>
               </>
             )}
