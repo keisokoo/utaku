@@ -1,100 +1,137 @@
 import React from 'react'
 
+import { produce } from 'immer'
 import { useRecoilState } from 'recoil'
 import { settings } from '../../atoms/settings'
 import { lang } from '../../utils'
-import { GrayScaleFill, SecondaryButton, WhiteFill } from '../Buttons'
-import Checkbox from '../Checkbox/Checkbox'
+import { GrayScaleFill, WhiteFill } from '../Buttons'
+import { ListTableStyle } from '../PopupStyles/ListTableStyle'
+import { LiveStyles } from '../PopupStyles/LiveStyles'
+import Toggle from '../Toggle/Toggle'
 import { RemapStyle } from './Remaps.styled'
 import { RemapBodyMode } from './Remaps.type'
 const F = RemapStyle
+const L = ListTableStyle
+const Live = LiveStyles
 interface RemapListProps {
-  selected: string[]
-  setSelected: (selected: string[]) => void
   setRemapMode: (mode: RemapBodyMode) => void
-  handleApply: () => void
 }
-const RemapList = ({
-  selected,
-  setRemapMode,
-  setSelected,
-  handleApply,
-}: RemapListProps) => {
+const RemapList = ({ setRemapMode }: RemapListProps) => {
   const [settingState, set_settingState] = useRecoilState(settings)
   return (
-    <>
-      <F.NameList>
+    <L.Wrap>
+      <L.Grid>
+        <L.Column className="a">
+          <L.Label>{lang('enable')}</L.Label>
+        </L.Column>
+        <L.Column className="b">
+          <L.Label>{lang('name')}</L.Label>
+        </L.Column>
+        <L.Column className="c">
+          <L.Label>{lang('setting')}</L.Label>
+        </L.Column>
+      </L.Grid>
+      <L.List>
         {settingState.remapList.length === 0 && (
-          <F.ItemRow>
-            <F.Name>{lang('empty_remap')}</F.Name>
-          </F.ItemRow>
+          <L.NotFound>{lang('empty_remap')}</L.NotFound>
         )}
         {settingState.remapList.map((item) => {
           return (
-            <F.ItemRow key={item.id}>
-              <F.Row>
-                <Checkbox
-                  active={selected.includes(item.id)}
-                  onClick={() => {
-                    if (selected.includes(item.id)) {
-                      setSelected(selected.filter((curr) => curr !== item.id))
-                    } else {
-                      setSelected([...selected, item.id])
-                    }
-                  }}
-                />
-                <F.Name>{item.name}</F.Name>
-              </F.Row>
-              <F.Buttons>
-                <GrayScaleFill
-                  _mini
-                  onClick={() => {
-                    setRemapMode({ id: item.id })
-                  }}
-                >
-                  {lang('edit')}
-                </GrayScaleFill>
-                <WhiteFill
-                  _mini
-                  onClick={() => {
-                    set_settingState({
-                      ...settingState,
-                      remapList: settingState.remapList.filter(
-                        (curr) => curr.id !== item.id
-                      ),
-                      applyRemapList: settingState.applyRemapList.filter(
-                        (curr) => curr !== item.id
-                      ),
-                    })
-                    if (chrome?.storage)
-                      chrome.storage.local.set({
+            <L.Row key={item.id} data-disabled={!item.active}>
+              <L.Column className="a">
+                <L.StatusBox>
+                  <Toggle
+                    active={item.active}
+                    onClick={() => {
+                      const clone = produce(settingState, (draft) => {
+                        draft.remapList = draft.remapList.map((curr) => {
+                          if (curr.id === item.id) {
+                            curr.active = !curr.active
+                          }
+                          return curr
+                        })
+                      })
+                      set_settingState(clone)
+                      chrome.storage.sync.set({
+                        remapList: clone.remapList,
+                      })
+                    }}
+                  />
+                </L.StatusBox>
+              </L.Column>
+              <L.Column className="b">
+                <L.SummaryBox>
+                  <L.SummaryContent>{item.name}</L.SummaryContent>
+                </L.SummaryBox>
+              </L.Column>
+              <L.Column className="c">
+                <L.Buttons>
+                  <GrayScaleFill
+                    _mini
+                    onClick={() => {
+                      setRemapMode({ id: item.id })
+                    }}
+                  >
+                    {lang('edit')}
+                  </GrayScaleFill>
+                  <WhiteFill
+                    _mini
+                    onClick={() => {
+                      set_settingState({
+                        ...settingState,
                         remapList: settingState.remapList.filter(
                           (curr) => curr.id !== item.id
                         ),
-                        applyRemapList: settingState.applyRemapList.filter(
-                          (curr) => curr !== item.id
-                        ),
                       })
-                  }}
-                >
-                  {lang('delete')}
-                </WhiteFill>
-              </F.Buttons>
-            </F.ItemRow>
+                      if (chrome?.storage)
+                        chrome.storage.sync.set({
+                          remapList: settingState.remapList.filter(
+                            (curr) => curr.id !== item.id
+                          ),
+                        })
+                    }}
+                  >
+                    {lang('delete')}
+                  </WhiteFill>
+                </L.Buttons>
+              </L.Column>
+            </L.Row>
           )
         })}
-      </F.NameList>
+      </L.List>
       <F.BottomList>
-        <SecondaryButton
-          _mini
-          onClick={() => {
-            handleApply()
-          }}
-        >
-          {lang('apply')}
-        </SecondaryButton>
+        <F.ButtonList>
+          <div></div>
+          <div>
+            <Live.Status
+              data-active={settingState.live.remap}
+              onClick={() => {
+                const clone = produce(settingState, (draft) => {
+                  draft.live.remap = !draft.live.remap
+                })
+                set_settingState(clone)
+                chrome.storage.sync.set({
+                  live: clone.live,
+                })
+              }}
+            >
+              Live mode{' '}
+              {settingState.live.remap ? (
+                <>
+                  on
+                  <Live.CircleActive />
+                </>
+              ) : (
+                <>
+                  off
+                  <Live.Circle />
+                </>
+              )}
+            </Live.Status>
+          </div>
+        </F.ButtonList>
       </F.BottomList>
-    </>
+    </L.Wrap>
   )
 }
 export default RemapList

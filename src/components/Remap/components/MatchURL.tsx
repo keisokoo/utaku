@@ -1,6 +1,6 @@
 import React from 'react'
 import { lang } from '../../../utils'
-import { PopupInputStyle } from '../PopupInput.styled'
+import { PopupInputStyle } from '../../PopupInput.styled'
 import { RemapStyle } from '../Remaps.styled'
 import { getIndexByStepName } from '../Remaps.type'
 

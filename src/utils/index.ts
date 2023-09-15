@@ -1,6 +1,8 @@
-import { cloneDeep } from "lodash-es"
-import { UrlRemap, UrlRemapItem, initialUrlRemapItem } from "../atoms/settings"
+import { cloneDeep, isArray } from "lodash-es"
+import { v4 } from "uuid"
+import { LimitBySelectorType, SettingsType, UrlRemap, UrlRemapItem, defaultMode, initialUrlRemapItem } from "../atoms/settings"
 import { WebResponseItem } from "../content/types"
+import { sampleList } from "../pages/popup/sources"
 
 export function getTransformXY(el: HTMLElement) {
   const transform = window.getComputedStyle(el).transform
@@ -32,7 +34,6 @@ export function adjustPositionOnResize(el: HTMLButtonElement) {
 
   el.style.transform = `translate(${nextX}px, ${nextY}px)`
 }
-
 export function lang(value: string, ...content: string[]) {
   if (!chrome?.i18n) return value
   return chrome.i18n.getMessage(value, content)
@@ -85,7 +86,10 @@ export function extractSubDomain(url: string) {
 export function parseUrlRemap(value: UrlRemap, url: string) {
   try {
     const { params, host, path_change, replace, sub_domain } = value
-    if (host && !url.includes(host)) return url
+    if (host && !url.includes(host)) {
+      return url
+    }
+
     const current_domain = extractDomain(url)
     const current_sub_domain = extractSubDomain(url)
     if (current_domain && current_sub_domain !== sub_domain) {
@@ -137,19 +141,27 @@ export function parseUrlRemap(value: UrlRemap, url: string) {
 }
 export function parseItemWithUrlRemap(value: UrlRemap, item: WebResponseItem) {
   const nextItem = cloneDeep(item)
-  if (value.host && !nextItem.url.includes(value.host)) return nextItem
+  if (value.host && !nextItem.url.includes(value.host)) {
+    return nextItem
+  }
   nextItem.url = parseUrlRemap(value, nextItem.url)
   return nextItem
 }
-export function parseItemWithUrlRemaps(urlRemaps: UrlRemapItem[], item: WebResponseItem) {
+export function parseItemWithUrlRemaps(urlRemaps: UrlRemapItem, item: WebResponseItem) {
   let nextItem = cloneDeep(item)
-  urlRemaps.forEach((value) => {
-    nextItem = parseItemWithUrlRemap(value.item, nextItem)
+  nextItem = parseItemWithUrlRemap(urlRemaps.item, nextItem)
+  return nextItem
+}
+export function parseItemWithUrlRemapItems(urlRemaps: UrlRemapItem[], item: WebResponseItem) {
+  let nextItem = cloneDeep(item)
+  urlRemaps.forEach((urlRemap) => {
+    nextItem = parseItemWithUrlRemap(urlRemap.item, nextItem)
   })
   return nextItem
 }
 export function parseItemListWithUrlRemaps(urlRemaps: UrlRemapItem[], items: WebResponseItem[]) {
-  return items.map((item) => parseItemWithUrlRemaps(urlRemaps, item))
+  if (urlRemaps.length < 1) return items
+  return items.map((item) => urlRemaps.map((urlRemap) => parseItemWithUrlRemaps(urlRemap, item))).flat()
 }
 
 export function migrationRemapList(remapList: UrlRemapItem[]) {
@@ -179,4 +191,135 @@ export function migrationRemapList(remapList: UrlRemapItem[]) {
     curr.item = oldCurrItem
     return curr
   })
+}
+export const isURLRemapItem = (value: unknown): value is UrlRemapItem => {
+  if (typeof value !== 'object' || value === null) return false
+  if (!('item' in value)) return false
+  if (!('id' in value)) return false
+  if (!('name' in value)) return false
+  if ('item' in value && 'id' in value && 'name' in value) return true
+  return false
+}
+export const isLimitBySelectorType = (value: unknown): value is LimitBySelectorType => {
+  if (typeof value !== 'object' || value === null) return false
+  if (!('host' in value)) return false
+  if (!('selector' in value)) return false
+  if ('host' in value && 'selector' in value) return true
+  return false
+}
+
+export const syncSettings = (prev: SettingsType, settings: SettingsType) => {
+  const result = { ...cloneDeep(prev), ...settings }
+  if (!settings.modeType) {
+    chrome.storage.sync.set({ modeType: defaultMode })
+  }
+  if (settings.remapList) {
+    // migrate
+    result.remapList = migrationRemapList(settings.remapList)
+  }
+  if (!settings.remapList) {
+    result.remapList = sampleList
+    chrome.storage.sync.set({
+      remapList: sampleList
+    })
+  }
+  return result
+}
+export const exportSettingsByJson = (settings: object) => {
+  const result = { ...cloneDeep(settings) }
+  const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `settings_${Date.now()}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+}
+export const importSettingsByJson = (json: string) => {
+  try {
+    const result = JSON.parse(json) as SettingsType
+    return result
+  } catch (error) {
+    return null
+  }
+}
+export const remapListRequireCheckAndParsing = (remapList: UrlRemapItem[]): {
+  errorCount: number
+  total: number
+  result: UrlRemapItem[]
+  errorResult: string[]
+} => {
+  const checkedItems = remapList.map((item, idx) => {
+    if (!item.item) return `${item.id ?? idx}_item is required`
+    if (!item.item.host) return `${item.id ?? idx}_host is required`
+    if (!item.item.reference_url) return `${item.id ?? idx}_reference_url is required`
+    if (typeof item.item.sub_domain !== 'string') return `${item.id ?? idx}_sub_domain must be string`
+    if (typeof item.item.params !== 'object') return `${item.id ?? idx}_params must be object - {key: value}`
+    if (!isArray(item.item.path_change)) return `${item.id ?? idx}_path_change must be object array - {index: number, to: string}[]`
+    if (!isArray(item.item.replace)) return `${item.id ?? idx}_replace must be object array - {from: string, to: string}[]`
+    if (Object.values(item.item.params).length > 0) {
+      if (typeof Object.values(item.item.params)[0] !== 'string') return `${item.id ?? idx}_params.value must be string`
+    }
+    if (item.item.path_change.length > 0) {
+      if (typeof item.item.path_change[0].index !== 'number') return `${item.id ?? idx}_path_change.index must be number`
+      if (typeof item.item.path_change[0].to !== 'string') return `${item.id ?? idx}_path_change.to must be string`
+    }
+    if (item.item.replace.length > 0) {
+      if (typeof item.item.replace[0].from !== 'string') return `${item.id ?? idx}_replace.from must be string`
+      if (typeof item.item.replace[0].to !== 'string') return `${item.id ?? idx}_replace.to must be string`
+    }
+    if (!item.id) item.id = v4()
+    if (!item.name) item.name = 'New_Remap_' + Date.now()
+    return item
+  })
+  const result = checkedItems.filter((item) => typeof item !== 'string') as UrlRemapItem[]
+  const errorResult = checkedItems.filter((item) => typeof item === 'string') as string[]
+  return {
+    errorCount: errorResult.length,
+    total: remapList.length,
+    result,
+    errorResult
+  }
+}
+export const limitBySelectorRequireCheckAndParsing = (limitBySelector: LimitBySelectorType[]): {
+  errorCount: number
+  total: number
+  result: LimitBySelectorType[]
+  errorResult: string[]
+} => {
+  const checkedItems = limitBySelector.map((item, idx) => {
+    if (!item.host) return `${item.id ?? idx}_host is required`
+    if (!item.selector) return `${item.id ?? idx}_selector is required`
+    if (!item.selector.parent) return `${item.id ?? idx}_selector.parent is required`
+    if (typeof item.selector.image !== 'string') return `${item.id ?? idx}_selector.image must be string`
+    if (typeof item.selector.video !== 'string') return `${item.id ?? idx}_selector.video must be string`
+    if (typeof item.selector.parent !== 'string') return `${item.id ?? idx}_selector.parent must be string`
+    if (!item.id) item.id = v4()
+    if (!item.name) item.name = 'New_Filter_' + Date.now()
+    return item
+  }
+  )
+  const result = checkedItems.filter((item) => typeof item !== 'string') as LimitBySelectorType[]
+  const errorResult = checkedItems.filter((item) => typeof item === 'string') as string[]
+  return {
+    errorCount: errorResult.length,
+    total: limitBySelector.length,
+    result,
+    errorResult
+  }
+}
+export function mergeByIds<T extends { id: string },>(arr1: T[], arr2: T[]): T[] {
+  const idToItemMap: { [id: string]: T } = {};
+  for (const item of arr1) {
+    idToItemMap[item.id] = { ...item };
+  }
+  for (const item of arr2) {
+    if (idToItemMap[item.id]) {
+      Object.assign(idToItemMap[item.id], item);
+    } else {
+      idToItemMap[item.id] = { ...item };
+    }
+  }
+  return Object.values(idToItemMap);
 }

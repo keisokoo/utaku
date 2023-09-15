@@ -48,6 +48,7 @@ module.exports = {
     },
     compress: true,
     hot: true,
+    port: 5001,
   },
   plugins: [new MiniCssExtractPlugin(), new ReactRefreshWebpackPlugin()],
   module: {
@@ -55,7 +56,18 @@ module.exports = {
       {
         test: /\.js$/,
         exclude: /node_modules/,
-        use: ['babel-loader'],
+        use: [
+          {
+            loader: require.resolve('babel-loader'),
+            options: {
+              plugins: [
+                require.resolve('react-refresh/babel'),
+                '@emotion',
+                'babel-plugin-macros',
+              ].filter(Boolean),
+            },
+          },
+        ],
       },
       {
         test: /\.ts|.tsx$/,

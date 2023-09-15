@@ -61,7 +61,6 @@ export const RemapStyle = {
     display: flex;
     flex-direction: column;
     gap: 0;
-    height: 100%;
     width: 800px;
     max-width: calc(100vw - 120px);
     & > div {
@@ -109,7 +108,7 @@ export const RemapStyle = {
       align-items: center;
     }
     &:hover {
-      ${QueryResult} {
+      .query-result {
         display: flex;
       }
     }
@@ -235,6 +234,18 @@ export const RemapStyle = {
     &[data-active='true'] {
       background-color: #79c1ff;
     }
+  `,
+  LiveStatus: styled.div`
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #333;
+    border-radius: 16px;
+    padding: 6px 12px;
+    background-color: #f1f1f1;
   `,
   Row: styled.div`
     label {

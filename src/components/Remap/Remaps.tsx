@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react'
+import { FaPlus } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
 import { settings } from '../../atoms/settings'
 import { lang } from '../../utils'
-import { GrayScaleFill, PrimaryButton } from '../Buttons'
+import { SecondaryButton } from '../Buttons'
 import ModalBody from '../Modal/ModalBody'
 import RemapList from './RemapList'
 import { RemapBodyMode } from './Remaps.type'
@@ -13,13 +14,10 @@ interface RemapsProps
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
   > {
-  applyRemapList: string[]
-  emitRemap: (selected: string[]) => void
   onClose?: () => void
 }
-const Remaps = ({ applyRemapList, emitRemap, ...props }: RemapsProps) => {
+const Remaps = ({ onClose, ...props }: RemapsProps) => {
   const [mode, set_mode] = useState<RemapBodyMode>(null)
-  const [selected, set_selected] = useState<string[]>(applyRemapList)
   const [settingState] = useRecoilState(settings)
   const currentRemap = useMemo(() => {
     if (!mode) return null
@@ -28,51 +26,43 @@ const Remaps = ({ applyRemapList, emitRemap, ...props }: RemapsProps) => {
   }, [settingState.remapList, mode])
   return (
     <>
-      <ModalBody
-        title={lang('url_remap_list')}
-        fixed={!!currentRemap}
-        btn={
-          <>
-            {mode !== null && (
-              <>
-                <GrayScaleFill
-                  _mini
-                  onClick={() => {
-                    set_mode(null)
-                  }}
-                >
-                  {lang('list')}
-                </GrayScaleFill>
-              </>
-            )}
-            {mode === null && (
-              <>
-                <PrimaryButton
-                  _mini
-                  onClick={() => {
-                    set_mode('add')
-                  }}
-                >
-                  {lang('add')}
-                </PrimaryButton>
-              </>
-            )}
-          </>
-        }
-        {...props}
-      >
-        {mode === null && (
-          <RemapList
-            selected={selected}
-            setSelected={(val) => set_selected(val)}
-            setRemapMode={(val) => set_mode(val)}
-            handleApply={() => {
-              emitRemap(selected)
-              if (props.onClose) props.onClose()
-            }}
-          />
-        )}
-        {mode !== null && (
+      {/* 목록 */}
+      {mode === null && (
+        <ModalBody
+          title={lang('url_remap_list')}
+          fixed={!!currentRemap}
+          style={{ width: '600px' }}
+          onClose={() => {
+            onClose && onClose()
+          }}
+          btn={
+            <>
+              <SecondaryButton
+                _mini
+                onClick={() => {
+                  set_mode('add')
+                }}
+              >
+                <FaPlus />
+                {lang('add')}
+              </SecondaryButton>
+            </>
+          }
+          {...props}
+        >
+          <RemapList setRemapMode={(val) => set_mode(val)} />
+        </ModalBody>
+      )}
+      {/* 추가, 편집 */}
+      {mode !== null && (
+        <ModalBody
+          title={lang('url_remap_list')}
+          fixed={!!currentRemap}
+          onClose={() => {
+            set_mode(null)
+          }}
+          {...props}
+        >
           <StepEditor
             mode={currentRemap ? 'edit' : 'add'}
             remapItem={currentRemap}
@@ -80,8 +70,8 @@ const Remaps = ({ applyRemapList, emitRemap, ...props }: RemapsProps) => {
               set_mode(null)
             }}
           />
-        )}
-      </ModalBody>
+        </ModalBody>
+      )}
     </>
   )
 }

@@ -3,7 +3,7 @@ import React from 'react'
 import { UrlRemapItem } from '../../../atoms/settings'
 import { lang } from '../../../utils'
 import { GrayScaleOutline } from '../../Buttons'
-import { PopupInputStyle } from '../PopupInput.styled'
+import { PopupInputStyle } from '../../PopupInput.styled'
 import { RemapStyle } from '../Remaps.styled'
 import { getIndexByStepName } from '../Remaps.type'
 

@@ -12,8 +12,9 @@ import {
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { UtakuW } from '../../assets'
 import {
+  SettingsType,
   UrlRemapItem,
-  defaultMode,
+  defaultSettings,
   initialUrlRemapItem,
   modeType,
   settings,
@@ -28,15 +29,17 @@ import ModalBody from '../../components/Modal/ModalBody'
 import Remaps from '../../components/Remap/Remaps'
 import Tooltip from '../../components/Tooltip'
 import { WebResponseItem } from '../../content/types'
-import { lang, migrationRemapList, urlToRemapItem } from '../../utils'
+import { lang, syncSettings, urlToRemapItem } from '../../utils'
 import PopupStyle from './Popup.styled'
 import useFileDownload from './hooks/useFileDownload'
 import useWebRequests from './hooks/useWebRequests'
 import './index.scss'
-import { sampleApply, sampleList } from './sources'
 
 import { Virtuoso } from 'react-virtuoso'
+import { LiveStyles } from '../../components/PopupStyles/LiveStyles'
 import StepEditor from '../../components/Remap/StepEditor'
+
+const Live = LiveStyles
 
 function focusPopup() {
   chrome.tabs.query(
@@ -81,10 +84,8 @@ const Main = (): JSX.Element => {
   } | null>(null)
 
   const appliedRemapList = useMemo(() => {
-    return settingState.remapList.filter((item) =>
-      settingState.applyRemapList.includes(item.id)
-    )
-  }, [settingState.applyRemapList, settingState.remapList])
+    return settingState.remapList.filter((item) => item.active)
+  }, [settingState.remapList])
   const results = useWebRequests(active, appliedRemapList)
   const {
     removedGroup,
@@ -99,53 +100,9 @@ const Main = (): JSX.Element => {
     handleSourceList,
   } = results
   useEffect(() => {
-    chrome.storage.local.get(
-      [
-        'folderName',
-        'folderNameList',
-        'sizeLimit',
-        'sizeType',
-        'itemType',
-        'remapList',
-        'applyRemapList',
-        'modeType',
-      ],
-      (items) => {
-        if (!items.remapList && !items.applyRemapList) {
-          chrome.storage.local.set({
-            remapList: sampleList,
-            applyRemapList: sampleApply,
-          })
-        }
-        set_settingState(
-          produce((draft) => {
-            if (items.folderName) {
-              draft.folderName = items.folderName
-              handleFolderName(items.folderName)
-            }
-            draft.modeType = items.modeType ?? defaultMode
-            if (!items.modeType) {
-              chrome.storage.local.set({ modeType: defaultMode })
-            }
-            if (items.folderNameList)
-              draft.folderNameList = items.folderNameList
-            if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
-            if (items.sizeType) draft.sizeType = items.sizeType
-            if (items.itemType) draft.itemType = items.itemType
-            if (items.remapList) {
-              // migrate
-              draft.remapList = migrationRemapList(items.remapList)
-            }
-            if (items.applyRemapList)
-              draft.applyRemapList = items.applyRemapList
-            if (!items.remapList && !items.applyRemapList) {
-              draft.remapList = sampleList
-              draft.applyRemapList = sampleApply
-            }
-          })
-        )
-      }
-    )
+    chrome.storage.sync.get(Object.keys(defaultSettings), (items) => {
+      set_settingState((prev) => syncSettings(prev, items as SettingsType))
+    })
   }, [])
   useEffect(() => {
     chrome.runtime.connect({ name: 'popup' })
@@ -257,7 +214,7 @@ const Main = (): JSX.Element => {
       if (request.message === 'setFolderName') {
         const folderName = request.data as string
         handleFolderName(folderName)
-        chrome.storage.local.set({ folderName })
+        chrome.storage.sync.set({ folderName })
       }
     }
     if (!chrome.runtime.onMessage.hasListener(onMessage)) {
@@ -343,19 +300,7 @@ const Main = (): JSX.Element => {
           set_modalOpen(null)
         }}
       >
-        {modalOpen === 'remaps' && (
-          <Remaps
-            applyRemapList={settingState.applyRemapList}
-            emitRemap={(value) => {
-              set_settingState(
-                produce((draft) => {
-                  draft.applyRemapList = value
-                })
-              )
-              chrome.storage.local.set({ applyRemapList: value })
-            }}
-          />
-        )}
+        {modalOpen === 'remaps' && <Remaps />}
         {typeof modalOpen !== 'string' && modalOpen && (
           <ModalBody title={lang('url_remap_list')} btn={<></>}>
             <StepEditor
@@ -410,8 +355,8 @@ const Main = (): JSX.Element => {
                 set_active((prev) => !prev)
               }}
             >
-              {active && <PopupStyle.CircleActive />}
-              {!active && <PopupStyle.Circle />}
+              {active && <Live.CircleActive />}
+              {!active && <Live.Circle />}
             </div>
           </PopupStyle.TopRight>
         </PopupStyle.Top>

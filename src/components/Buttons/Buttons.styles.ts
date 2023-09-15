@@ -4,7 +4,7 @@ import { colors, typography } from '../../themes'
 import { ButtonProps, ColorOption } from './Buttons.types'
 
 type AdditionalCss = SerializedStyles | string
-export const buttonAssets = (color: ColorOption, _css?: AdditionalCss) => css`
+export const buttonAssets = (color: ColorOption, $css?: AdditionalCss) => css`
   color: #ffffff;
   ${color._mini ? typography['Body/Small/Bold'] : typography['Body/Large/Bold']}
   ${color._mini ? `padding:  4px 12px;` : `padding:6px 18px;`}
@@ -42,7 +42,7 @@ ${color.hoverBorderColor
     box-shadow: none;
     cursor: default;
   }
-  ${_css ? _css : ''}
+  ${$css ? $css : ''}
 `
 
 export const ButtonStyle = styled.button(
@@ -55,7 +55,7 @@ export const ButtonStyle = styled.button(
     white-space: nowrap;
     justify-content: center;
     gap: 4px;
-    ${props._css && props._css}
+    ${props.$css && props.$css}
     ${props._icon && css`
       padding: 8px;
       border-radius: 50%;

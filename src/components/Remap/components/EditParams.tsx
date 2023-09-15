@@ -3,7 +3,7 @@ import React, { useMemo, useState } from 'react'
 import { UrlRemapItem } from '../../../atoms/settings'
 import { isValidUrl, lang, urlToRemapItem } from '../../../utils'
 import { GrayScaleFill } from '../../Buttons'
-import { PopupInputStyle } from '../PopupInput.styled'
+import { PopupInputStyle } from '../../PopupInput.styled'
 import { RemapStyle } from '../Remaps.styled'
 import { getIndexByStepName } from '../Remaps.type'
 
@@ -102,7 +102,7 @@ const EditParams = ({ remapItem, emitValue }: EditParamsProps) => {
                       {lang('delete')}
                     </S.Chip>
                   </S.SpaceBetween>
-                  <S.QueryResult>
+                  <S.QueryResult className="query-result">
                     {referrer &&
                     remapItem.item.params[key] !== referrerParams?.[key] ? (
                       <>

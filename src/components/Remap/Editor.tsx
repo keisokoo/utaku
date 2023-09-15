@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import { produce } from 'immer'
 import { sortBy } from 'lodash-es'
 import React, { Fragment, useMemo, useState } from 'react'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState } from 'recoil'
 import { v4 } from 'uuid'
 import {
   UrlRemapItem,
@@ -11,7 +11,7 @@ import {
 } from '../../atoms/settings'
 import { isValidUrl, lang, parseUrlRemap, urlToRemapItem } from '../../utils'
 import { GrayScaleFill, GrayScaleOutline, SecondaryButton } from '../Buttons'
-import { PopupInputStyle } from './PopupInput.styled'
+import { PopupInputStyle } from '../PopupInput.styled'
 import { RemapStyle } from './Remaps.styled'
 
 const P = PopupInputStyle
@@ -25,7 +25,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
   const [currentRemap, set_currentRemap] = useState<UrlRemapItem>(
     remapItem ?? initialUrlRemapItem
   )
-  const set_settingState = useSetRecoilState(settings)
+  const [settingState, set_settingState] = useRecoilState(settings)
   const [query, set_query] = React.useState<string>('')
   const remap = currentRemap.item
   const referrer = useMemo(() => {
@@ -175,7 +175,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                         {lang('delete')}
                       </S.Chip>
                     </S.SpaceBetween>
-                    <S.QueryResult>
+                    <S.QueryResult className="query-result">
                       {referrer &&
                       currentRemap.item.params[key] !==
                         referrerParams?.[key] ? (
@@ -414,21 +414,20 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
           _mini
           disabled={currentRemap.name === '' || currentRemap.item.host === ''}
           onClick={() => {
-            set_settingState(
-              produce((draft) => {
-                if (mode === 'edit' && remapItem) {
-                  draft.remapList = draft.remapList.map((curr) => {
-                    if (curr.id === remapItem.id) {
-                      return currentRemap
-                    }
-                    return curr
-                  })
-                } else {
-                  draft.remapList.push({ ...currentRemap, id: v4() })
-                }
-              })
-            )
-            chrome.storage.local.get('remapList', (result) => {
+            const clone = produce(settingState, (draft) => {
+              if (mode === 'edit' && remapItem) {
+                draft.remapList = draft.remapList.map((curr) => {
+                  if (curr.id === remapItem.id) {
+                    return currentRemap
+                  }
+                  return curr
+                })
+              } else {
+                draft.remapList.push({ ...currentRemap, id: v4() })
+              }
+            })
+            set_settingState(clone)
+            chrome.storage.sync.get('remapList', (result) => {
               if (result.remapList) {
                 if (mode === 'edit' && remapItem) {
                   const idx = result.remapList.findIndex(
@@ -438,9 +437,9 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                 } else {
                   result.remapList.push({ ...currentRemap, id: v4() })
                 }
-                chrome.storage.local.set({ remapList: [...result.remapList] })
+                chrome.storage.sync.set({ remapList: [...result.remapList] })
               } else {
-                chrome.storage.local.set({
+                chrome.storage.sync.set({
                   remapList: [{ ...currentRemap, id: v4() }],
                 })
               }

@@ -2,7 +2,10 @@ import { groupBy, isEqual, uniqBy } from 'lodash-es'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { UrlRemapItem } from '../../../atoms/settings'
 import { WebResponseItem } from '../../../content/types'
-import { parseItemWithUrlRemaps } from '../../../utils'
+import {
+  parseItemListWithUrlRemaps,
+  parseItemWithUrlRemapItems,
+} from '../../../utils'
 
 interface TAB_LIST_TYPE extends chrome.tabs.Tab {
   tooltip?: string
@@ -168,13 +171,14 @@ const useWebRequests = (
     (tabId?: number) => {
       if (tabId) {
         set_queueList((prev) =>
-          prev
-            .filter((curr) => curr.tabId === tabId)
-            .map((curr) => parseItemWithUrlRemaps(appliedRemapList, curr))
+          parseItemListWithUrlRemaps(
+            appliedRemapList,
+            prev.filter((curr) => curr.tabId === tabId)
+          )
         )
       } else {
         set_queueList((prev) =>
-          prev.map((curr) => parseItemWithUrlRemaps(appliedRemapList, curr))
+          parseItemListWithUrlRemaps(appliedRemapList, prev)
         )
       }
     },
@@ -185,7 +189,7 @@ const useWebRequests = (
     function getCurrentResponse(req: WebResponseItem) {
       if (req.type === 'image' || req.type === 'media') {
         if (errorList.map((item) => item.url).includes(req.url)) return
-        req = parseItemWithUrlRemaps(appliedRemapList, req)
+        req = parseItemWithUrlRemapItems(appliedRemapList, req)
         set_queueList((prev) => uniqBy([...prev, req], (curr) => curr.url))
       }
     }

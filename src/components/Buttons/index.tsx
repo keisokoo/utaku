@@ -4,13 +4,13 @@ import { buttonAssets, ButtonStyle } from './Buttons.styles'
 import { ButtonTemplateProps } from './Buttons.types'
 
 export const PrimaryButton = ({
-  _css,
+  $css,
   _mini,
   ...props
 }: ButtonTemplateProps) => {
   return (
     <ButtonStyle
-      _css={css`
+      $css={css`
         ${buttonAssets({
           _mini,
           disabledType: 'fill',
@@ -18,7 +18,7 @@ export const PrimaryButton = ({
           hoverBackgroundColor: 'Primary/Dark',
           textColor: 'White/White off',
         })}
-        ${_css && _css}
+        ${$css && $css}
       `}
       {...props}
     >
@@ -28,13 +28,13 @@ export const PrimaryButton = ({
 }
 
 export const SecondaryButton = ({
-  _css,
+  $css,
   _mini,
   ...props
 }: ButtonTemplateProps) => {
   return (
     <ButtonStyle
-      _css={css`
+      $css={css`
         ${buttonAssets({
           _mini,
           disabledType: 'fill',
@@ -43,7 +43,7 @@ export const SecondaryButton = ({
           textColor: 'White/White off',
         })}
 
-        ${_css && _css}
+        ${$css && $css}
       `}
       {...props}
     >
@@ -52,13 +52,13 @@ export const SecondaryButton = ({
   )
 }
 export const DangerButton = ({
-  _css,
+  $css,
   _mini,
   ...props
 }: ButtonTemplateProps) => {
   return (
     <ButtonStyle
-      _css={css`
+      $css={css`
         ${buttonAssets({
           _mini,
           disabledType: 'fill',
@@ -67,7 +67,7 @@ export const DangerButton = ({
           textColor: 'White/White off',
         })}
 
-        ${_css && _css}
+        ${$css && $css}
       `}
       {...props}
     >
@@ -75,10 +75,10 @@ export const DangerButton = ({
     </ButtonStyle>
   )
 }
-export const WhiteFill = ({ _css, _mini, ...props }: ButtonTemplateProps) => {
+export const WhiteFill = ({ $css, _mini, ...props }: ButtonTemplateProps) => {
   return (
     <ButtonStyle
-      _css={css`
+      $css={css`
         ${buttonAssets({
           _mini,
           disabledType: 'fill',
@@ -87,7 +87,7 @@ export const WhiteFill = ({ _css, _mini, ...props }: ButtonTemplateProps) => {
           textColor: 'Grayscale/Gray Dark',
         })}
 
-        ${_css && _css}
+        ${$css && $css}
       `}
       {...props}
     >
@@ -96,13 +96,13 @@ export const WhiteFill = ({ _css, _mini, ...props }: ButtonTemplateProps) => {
   )
 }
 export const GrayScaleFill = ({
-  _css,
+  $css,
   _mini,
   ...props
 }: ButtonTemplateProps) => {
   return (
     <ButtonStyle
-      _css={css`
+      $css={css`
         ${buttonAssets({
           _mini,
           disabledType: 'fill',
@@ -111,7 +111,7 @@ export const GrayScaleFill = ({
           textColor: 'White/White off',
         })}
 
-        ${_css && _css}
+        ${$css && $css}
       `}
       {...props}
     >
@@ -120,13 +120,13 @@ export const GrayScaleFill = ({
   )
 }
 export const GrayScaleText = ({
-  _css,
+  $css,
   _mini,
   ...props
 }: ButtonTemplateProps) => {
   return (
     <ButtonStyle
-      _css={css`
+      $css={css`
         ${buttonAssets({
           _mini,
           disabledType: 'text',
@@ -134,7 +134,7 @@ export const GrayScaleText = ({
           textColor: 'Grayscale/Gray Default',
           hoverTextColor: 'Grayscale/Gray Dark',
         })}
-        ${_css && _css}
+        ${$css && $css}
       `}
       {...props}
     >
@@ -144,20 +144,14 @@ export const GrayScaleText = ({
 }
 
 export const GrayScaleOutline = ({
-  _css,
+  $css,
   _mini,
   _icon,
   ...props
 }: ButtonTemplateProps) => {
   return (
     <ButtonStyle
-      _css={css`
-        ${_icon
-          ? css`
-              width: 40px;
-              height: 40px;
-            `
-          : ''}
+      $css={css`
         ${buttonAssets({
           _mini,
           disabledType: _icon ? 'icon' : 'fill',
@@ -167,7 +161,8 @@ export const GrayScaleOutline = ({
           hoverBackgroundColor: 'Grayscale/Background Dark',
           textColor: 'Grayscale/Gray Dark',
         })}
-        ${_css && _css}
+
+        ${$css && $css}
       `}
       {...props}
     >

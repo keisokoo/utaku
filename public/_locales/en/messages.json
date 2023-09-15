@@ -238,5 +238,107 @@
   },
   "view_result": {
     "message": "View Result"
+  },
+  "limit_filters": {
+    "message": "Area Limit Filters"
+  },
+  "limit_area_list": {
+    "message": "Limit Area List"
+  },
+  "edit_limit_area": {
+    "message": "Edit Limit Area"
+  },
+  "enable": {
+    "message": "Enable"
+  },
+  "setting": {
+    "message": "Setting"
+  },
+  "host": {
+    "message": "Host"
+  },
+  "parent_selector": {
+    "message": "Parent Selector"
+  },
+  "image_selector": {
+    "message": "Image Selector"
+  },
+  "video_selector": {
+    "message": "Video Selector"
+  },
+  "current_host": {
+    "message": "Current Host"
+  },
+  "select_area": {
+    "message": "Select Area"
+  },
+  "only_selected_areas_are_collected": {
+    "message": "Pick areas. Only selected areas are collected."
+  },
+  "guide_filter_name_input": {
+    "message": "Enter the filter name."
+  },
+  "limit_area_host_placeholder": {
+    "message": "Enter the host where this filter will be applied. e.g., blog.naver.com"
+  },
+  "limit_area_host_tooltip": {
+    "message": "Enter the host where this filter will be applied. e.g., blog.naver.com\nSpecify the address where this filter will work."
+  },
+  "limit_area_parent_selector_placeholder": {
+    "message": "Enter the parent selector where this filter will be applied. e.g., .post"
+  },
+  "limit_area_parent_selector_tooltip": {
+    "message": "Either click the area selection button or enter manually.\n\nSpecify the area where this filter will work.\n(Some knowledge of querySelector is required.)\nEnter the class, id, or attribute of the Div element.\n\nYou can check the attributes of the element by opening Developer Tools (window: ctrl+shift+i, mac: cmd+option+i) and using the icon at the top left."
+  },
+  "limit_area_image_selector_placeholder": {
+    "message": "If you want additional settings for image selectors, please enter. e.g., .se-image"
+  },
+  "limit_area_image_selector_tooltip": {
+    "message": "Enter the selector for the img tag.\nOnly img tags that match this selector will be collected.\nPlease exclude the tag name img."
+  },
+  "limit_area_video_selector_placeholder": {
+    "message": "If you want additional settings for video selectors, please enter. e.g., .se-video"
+  },
+  "limit_area_video_selector_tooltip": {
+    "message": "Enter the selector for the video tag.\nOnly video tags that match this selector will be collected.\nPlease exclude the tag name video."
+  },
+  "extra_setting": {
+    "message": "Extra Settings"
+  },
+  "alert_same_value": {
+    "message": "Duplicate settings already exist."
+  },
+  "live": {
+    "message": "Live"
+  },
+  "settings_tooltip": {
+    "message": "Enabling Live Mode will apply changes immediately during collection.\n\nRemap: This feature allows you to transform the collected URLs. You can revert to the original image URL by using this.\n\nFilter: This feature limits the area of collection. Filters are only available in Simple Mode."
+  },
+  "import_settings": {
+    "message": "Import Settings"
+  },
+  "export_settings": {
+    "message": "Export Settings"
+  },
+  "import": {
+    "message": "import"
+  },
+  "export": {
+    "message": "export"
+  },
+  "import_settings_tooltip": {
+    "message": "Loading settings.\n\nSettings with the same id will be overwritten.\n\nBefore importing settings, please export them for backup."
+  },
+  "collect_svg_element": {
+    "message": "Collect SVG Element"
+  },
+  "collect_svg_element_tooltip": {
+    "message": "When collecting all images, elements written as SVG Elements will be converted to image data for collection.\n\nThe conversion process may consume a lot of memory, so please activate only when collecting.\n\nThis always functions when selecting a region for collection."
+  },
+  "setting_title": {
+    "message": "URL Transformation and Collection Settings"
+  },
+  "re_collect_by_using_remap_configs": {
+    "message": "Reacquire using remap settings and area limit settings"
   }
 }

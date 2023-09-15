@@ -3,7 +3,7 @@ import { colors } from '../../themes'
 
 export type ColorKey = keyof typeof colors
 export interface ButtonProps {
-  _css: SerializedStyles
+  $css: SerializedStyles
   _mini?: boolean
   _icon?: boolean
 }
@@ -12,7 +12,7 @@ export interface ButtonTemplateProps
     React.ButtonHTMLAttributes<HTMLButtonElement>,
     HTMLButtonElement
   > {
-  _css?: SerializedStyles | string
+  $css?: SerializedStyles | string
   _mini?: boolean
   _icon?: boolean
 }

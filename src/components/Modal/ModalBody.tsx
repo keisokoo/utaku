@@ -1,11 +1,13 @@
 import styled from '@emotion/styled'
 import classNames from 'classnames'
 import React from 'react'
+import { FaTimes } from 'react-icons/fa'
 import { lang } from '../../utils'
 import { GrayScaleOutline } from '../Buttons'
 
 const ModalBodyWrap = styled.div`
   color: #333;
+  max-width: calc(100vw - 128px);
   .modal-header {
     display: flex;
     align-items: center;
@@ -60,12 +62,13 @@ const ModalBody = ({
 }: ModalBodyProps) => {
   return (
     <>
-      <ModalBodyWrap>
-        <div className="modal-header" {...props}>
+      <ModalBodyWrap {...props}>
+        <div className="modal-header">
           <div className="modal-title">{title}</div>
           <div className="modal-btn">
             {btn}
             <GrayScaleOutline _mini className="close" onClick={onClose}>
+              <FaTimes />
               {lang('close')}
             </GrayScaleOutline>
           </div>

@@ -2,7 +2,7 @@ import classNames from 'classnames'
 import { produce } from 'immer'
 import React, { useMemo, useState } from 'react'
 import { FaInfoCircle } from 'react-icons/fa'
-import { useSetRecoilState } from 'recoil'
+import { useRecoilState } from 'recoil'
 import { v4 } from 'uuid'
 import {
   UrlRemapItem,
@@ -28,15 +28,19 @@ interface EditorProps {
   onClose?: () => void
 }
 
-const stepGuide = {
-  reference_url: lang('reference_url_guidance'),
-  name: lang('name_guidance'),
-  host: lang('host_guidance'),
-  sub_domain: lang('sub_domain_guidance'),
-  params: lang('params_guidance'),
-  path_change: lang('path_change_guidance'),
-  replace: lang('replace_guidance'),
-} as { [key in StepNameType]: string }
+const stepGuide = (target: StepNameType) => {
+  const guideList = {
+    reference_url: lang('reference_url_guidance'),
+    name: lang('name_guidance'),
+    host: lang('host_guidance'),
+    sub_domain: lang('sub_domain_guidance'),
+    params: lang('params_guidance'),
+    path_change: lang('path_change_guidance'),
+    replace: lang('replace_guidance'),
+  } as { [key in StepNameType]: string }
+  return guideList[target]
+}
+
 const stepRequired = {
   reference_url: true,
   name: true,
@@ -52,7 +56,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
     remapItem ?? initialUrlRemapItem
   )
   const [viewResult, set_viewResult] = useState<boolean>(false)
-  const set_settingState = useSetRecoilState(settings)
+  const [settingState, set_settingState] = useRecoilState(settings)
   const remap = currentRemap.item
   const remappedUrl = useMemo(() => {
     if (!currentRemap?.item?.reference_url) return null
@@ -149,7 +153,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
           )}
           <S.Guidance className={classNames(mode)}>
             <FaInfoCircle />
-            <div>{stepList[steps] && stepGuide[stepList[steps]]}</div>
+            <div>{stepList[steps] && stepGuide(stepList[steps])}</div>
           </S.Guidance>
         </S.EditorList>
       </div>
@@ -170,18 +174,16 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                   currentRemap.item.host === ''
                 }
                 onClick={() => {
-                  set_settingState(
-                    produce((draft) => {
-                      if (mode === 'edit' && remapItem) {
-                        draft.remapList = draft.remapList.map((curr) => {
-                          if (curr.id === remapItem.id) {
-                            return currentRemap
-                          }
-                          return curr
-                        })
+                  const clone = produce(settingState, (draft) => {
+                    draft.remapList = draft.remapList.map((curr) => {
+                      if (currentRemap && curr.id === currentRemap.id) {
+                        return currentRemap
                       }
+                      return curr
                     })
-                  )
+                  })
+                  set_settingState(clone)
+                  chrome.storage.sync.set({ remapList: clone.remapList })
                   onClose && onClose()
                 }}
               >
@@ -225,6 +227,9 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                         draft.remapList.push({ ...currentRemap, id: v4() })
                       })
                     )
+                    chrome.storage.sync.set({
+                      remapList: [{ ...currentRemap, id: v4() }],
+                    })
                     onClose && onClose()
                   }}
                 >

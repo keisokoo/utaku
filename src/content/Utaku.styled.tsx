@@ -1,4 +1,4 @@
-import { css, keyframes } from '@emotion/react'
+import { css } from '@emotion/react'
 import styled from '@emotion/styled'
 import { colors, typography } from '../themes'
 
@@ -228,27 +228,23 @@ const IconButton = styled.button`
     background: #ffffff70;
   }
 `
-const pulse = keyframes`
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(0, 174, 35, 0.7);
-  }
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 10px rgba(0, 174, 35, 0);
-  }
-`
-const pulseCss = css`
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background-color: #ed2700;
-  display: flex;
-  cursor: pointer;
-  align-items: center;
-  justify-content: center;
-`
 const UtakuStyle = {
+  Status: styled.div`
+    white-space: nowrap;
+    color: #fff;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 0px;
+    border-radius: 16px;
+    border: 1px solid #ffffff7e;
+    & > label {
+      color: #fff;
+      font-size: 14px;
+      padding: 0 8px 0 12px;
+    }
+  `,
   SettingsRow: styled.div`
     display: flex;
     align-items: center;
@@ -299,14 +295,6 @@ const UtakuStyle = {
     &[data-wrapper-size='hide'] {
       height: auto;
     }
-  `,
-  Circle: styled.div`
-    ${pulseCss}
-  `,
-  CircleActive: styled.div`
-    ${pulseCss}
-    animation: ${pulse} 3s infinite;
-    background-color: rgb(0, 174, 35);
   `,
   IconButton,
   SizeController: styled.div`

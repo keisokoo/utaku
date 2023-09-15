@@ -1,5 +1,5 @@
 import styled from '@emotion/styled'
-import { colors } from '../../themes'
+import { colors } from '../themes'
 
 export const PopupInputStyle = {
   UnderlineInput: styled.input`

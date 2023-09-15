@@ -8,34 +8,42 @@ import React, {
   useState,
 } from 'react'
 
+import { css } from '@emotion/react'
 import { produce } from 'immer'
 import {
+  FaCompactDisc,
   FaQuestion,
   FaRedo,
-  FaRegEdit,
   FaRocket,
   FaTimes,
+  FaVectorSquare,
 } from 'react-icons/fa'
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { uniqBy } from 'remeda'
 import {
+  SettingsType,
   UrlRemapItem,
-  defaultMode,
+  defaultSettings,
   modeType,
   settings,
 } from '../atoms/settings'
-import { GrayScaleFill, WhiteFill } from '../components/Buttons'
+import {
+  GrayScaleFill,
+  PrimaryButton,
+  SecondaryButton,
+  WhiteFill,
+} from '../components/Buttons'
 import ItemBox from '../components/ItemBox'
-import EditLimitArea from '../components/LimitArea/EditLimitArea'
+import GetLimitArea from '../components/LimitArea/GetLimitArea'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
-import Remaps from '../components/Remap/Remaps'
 import StepEditor from '../components/Remap/StepEditor'
-import { sampleApply, sampleList } from '../pages/popup/sources'
+import Settings from '../components/Settings/Settings'
+import Tooltip from '../components/Tooltip'
 import {
   lang,
-  migrationRemapList,
-  parseItemWithUrlRemaps,
+  parseItemListWithUrlRemaps,
+  syncSettings,
   urlToRemapItem,
 } from '../utils'
 import ControlComp from './ControlComp'
@@ -59,6 +67,29 @@ const App = () => {
   )
 }
 const Main = (): JSX.Element => {
+  const [hideUi, set_hideUi] = useState<boolean>(false)
+  const tooltipStyle = {
+    transform: 'translateY(calc(-100% - 4px))',
+    borderRadius: '4px',
+    boxShadow: '2px 3px 7px 0px #02020252',
+  }
+  const tooltipParentCss = css`
+    .tooltip {
+      display: none;
+    }
+    svg {
+      transform: rotate(0deg);
+      transition: 1s;
+    }
+    &:hover {
+      svg {
+        transform: rotate(360deg);
+      }
+      .tooltip {
+        display: block;
+      }
+    }
+  `
   const [tooltip, set_tooltip] = useState<string>('')
   const [itemList, set_itemList] = useState<ItemType[]>([])
   const [queueList, set_queueList] = useState<ItemType[]>([])
@@ -74,66 +105,14 @@ const Main = (): JSX.Element => {
     set_active((prev) => !prev)
   }, [])
   useEffect(() => {
-    chrome.storage.local.get(
-      [
-        'folderName',
-        'folderNameList',
-        'sizeLimit',
-        'sizeType',
-        'itemType',
-        'containerSize',
-        'modeType',
-        'remapList',
-        'applyRemapList',
-        'viewMode',
-        'remapFilter',
-      ],
-      (items) => {
-        set_settingState(
-          produce((draft) => {
-            if (!items.remapList && !items.applyRemapList) {
-              chrome.storage.local.set({
-                remapList: sampleList,
-                applyRemapList: sampleApply,
-              })
-            }
-            if (items.folderName) draft.folderName = items.folderName
-            draft.modeType = items.modeType ?? defaultMode
-            if (!items.modeType) {
-              chrome.storage.local.set({ modeType: defaultMode })
-            }
-            if (items.folderNameList)
-              draft.folderNameList = items.folderNameList
-            if (items.sizeLimit) draft.sizeLimit = items.sizeLimit
-            if (items.sizeType) draft.sizeType = items.sizeType
-            if (items.remapFilter) draft.remapFilter = items.remapFilter
-            if (items.viewMode) draft.viewMode = items.viewMode
-            if (items.itemType) draft.itemType = items.itemType
-            if (items.containerSize) draft.containerSize = items.containerSize
-            if (items.remapList) {
-              // migrate
-              draft.remapList = migrationRemapList(items.remapList)
-            }
-            if (items.applyRemapList)
-              draft.applyRemapList = items.applyRemapList
-            if (!items.remapList && !items.applyRemapList) {
-              draft.remapList = sampleList
-              draft.applyRemapList = sampleApply
-            }
-          })
-        )
-        set_fireFirst(true)
-      }
-    )
+    chrome.storage.sync.get(Object.keys(defaultSettings), (items) => {
+      set_settingState((prev) => syncSettings(prev, items as SettingsType))
+      set_fireFirst(true)
+    })
   }, [])
-  const limitBySelector = useMemo(() => {
-    return getLimitBySelector(settingState.remapFilter.limitBySelector)
-  }, [settingState.remapFilter.limitBySelector])
   const appliedRemapList = useMemo(() => {
-    return settingState.remapList.filter((item) =>
-      settingState.applyRemapList.includes(item.id)
-    )
-  }, [settingState.applyRemapList, settingState.remapList])
+    return settingState.remapList.filter((item) => item.active)
+  }, [settingState.remapList])
   const remapHostList = useMemo(() => {
     return appliedRemapList.map((item) => item.item.host)
   }, [appliedRemapList])
@@ -150,28 +129,17 @@ const Main = (): JSX.Element => {
       let widthResult = true
       let heightResult = true
       let notDownloaded = true
-      let includeUrlHost = true
-      let searchName = true
-      if (settingState.remapFilter.searchName) {
-        searchName = item.url
-          .toLowerCase()
-          .includes(settingState.remapFilter.searchName.trim().toLowerCase())
-      }
-      if (settingState.remapFilter.onlyRemapped) {
-        if (!remapHostList.includes(item.url)) includeUrlHost = false
-      }
+      // let searchName = true
+      // if (settingState.searchName) {
+      //   searchName = item.url
+      //     .toLowerCase()
+      //     .includes(settingState.searchName.trim().toLowerCase())
+      // }
       if (itemType && itemType !== 'all') checkItemType = item.type === itemType
       if (downloadedItem.includes(item.url)) notDownloaded = false
       if (sizeLimit.width) widthResult = width >= sizeLimit.width
       if (sizeLimit.height) heightResult = height >= sizeLimit.height
-      return (
-        widthResult &&
-        heightResult &&
-        notDownloaded &&
-        checkItemType &&
-        includeUrlHost &&
-        searchName
-      )
+      return widthResult && heightResult && notDownloaded && checkItemType
     })
     return uniqBy(filtered, (item) => item.url)
   }, [
@@ -180,7 +148,6 @@ const Main = (): JSX.Element => {
     downloadedItem,
     settingState.itemType,
     remapHostList,
-    settingState.remapFilter,
   ])
 
   const timeoutRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
@@ -217,49 +184,58 @@ const Main = (): JSX.Element => {
     }
   }
 
-  const getCurrentPageImages = useCallback(async () => {
-    const results = await chrome.storage.local.get([
-      'remapList',
-      'applyRemapList',
-    ])
+  const getCurrentPageImages = useCallback(
+    async (forceRemap?: boolean, forceLimitArea?: boolean) => {
+      const results = (await chrome.storage.sync.get([
+        'remapList',
+        'limitBySelector',
+        'live',
+        'extraOptions',
+      ])) as SettingsType
+      const limitBySelector =
+        results.live.filter || forceLimitArea
+          ? getLimitBySelector(results?.limitBySelector)
+          : []
+      const remapList =
+        results.live.remap || forceRemap
+          ? (results?.remapList as UrlRemapItem[]) ?? []
+          : []
+      const svgCollect = results.extraOptions.useSvgElement ?? false
+      const currentApplied = remapList.filter((item) => item.active)
+      const localImages = getAllImageUrls(
+        '.utaku-root',
+        limitBySelector,
+        svgCollect
+      ).map((item) => toItemType(item, 'image'))
+      const localVideos = getAllVideoUrls('.utaku-root', limitBySelector).map(
+        (item) => toItemType(item, 'media')
+      )
+      const scrappedImages = uniqBy(
+        parseItemListWithUrlRemaps(currentApplied, localImages) as ItemType[],
+        (item) => item.url
+      )
+      const scrappedVideos = uniqBy(
+        parseItemListWithUrlRemaps(currentApplied, localVideos) as ItemType[],
+        (item) => item.url
+      )
+      return [...scrappedImages, ...scrappedVideos]
+    },
+    []
+  )
 
-    if (!results.remapList || !results.applyRemapList) return []
-    const currentApplied = (results.remapList as UrlRemapItem[]).filter(
-      (item) => (results.applyRemapList as string[]).includes(item.id)
-    )
-
-    const localImages = getAllImageUrls('.utaku-root', limitBySelector).map(
-      (item) => toItemType(item, 'image')
-    )
-    const localVideos = getAllVideoUrls('.utaku-root', limitBySelector).map(
-      (item) => toItemType(item, 'media')
-    )
-
-    const scrappedImages = uniqBy(
-      localImages.map(
-        (curr) => parseItemWithUrlRemaps(currentApplied, curr) as ItemType
-      ),
-      (item) => item.url
-    )
-    const scrappedVideos = uniqBy(
-      localVideos.map(
-        (curr) => parseItemWithUrlRemaps(currentApplied, curr) as ItemType
-      ),
-      (item) => item.url
-    )
-    return [...scrappedImages, ...scrappedVideos]
-  }, [limitBySelector])
-
-  const scrapImages = useCallback(async () => {
-    try {
-      const scrapped = await getCurrentPageImages()
-      set_queueList(() => {
-        return scrapped ?? []
-      })
-    } catch (error) {
-      console.log('error', error)
-    }
-  }, [getCurrentPageImages])
+  const scrapImages = useCallback(
+    async (forceRemap?: boolean, forceLimitArea?: boolean) => {
+      try {
+        const scrapped = await getCurrentPageImages(forceRemap, forceLimitArea)
+        set_queueList(() => {
+          return scrapped ?? []
+        })
+      } catch (error) {
+        console.log('error', error)
+      }
+    },
+    [getCurrentPageImages]
+  )
   useEffect(() => {
     function getData(): Promise<{
       data: ItemType[]
@@ -440,9 +416,7 @@ const Main = (): JSX.Element => {
       handleRemove(value, true)
     }
   }
-  const [modalOpen, set_modalOpen] = useState<'remaps' | UrlRemapItem | null>(
-    null
-  )
+  const [modalOpen, set_modalOpen] = useState<UrlRemapItem | null>(null)
   const handleRemaps = useCallback((value: string) => {
     set_modalOpen(urlToRemapItem(value))
   }, [])
@@ -477,19 +451,6 @@ const Main = (): JSX.Element => {
           set_modalOpen(null)
         }}
       >
-        {modalOpen === 'remaps' && (
-          <Remaps
-            applyRemapList={settingState.applyRemapList}
-            emitRemap={(value) => {
-              set_settingState(
-                produce((draft) => {
-                  draft.applyRemapList = value
-                })
-              )
-              chrome.storage.local.set({ applyRemapList: value })
-            }}
-          />
-        )}
         {typeof modalOpen !== 'string' && modalOpen && (
           <ModalBody title={lang('url_remap_list')} btn={<></>}>
             <StepEditor
@@ -502,7 +463,10 @@ const Main = (): JSX.Element => {
           </ModalBody>
         )}
       </Modal>
-      <UtakuStyle.Wrap data-wrapper-size={settingState.containerSize}>
+      <UtakuStyle.Wrap
+        {...(hideUi && { style: { display: 'none' } })}
+        data-wrapper-size={settingState.containerSize}
+      >
         {settingState.modeType === 'simple' && (
           <UtakuStyle.SettingsRow>
             <UtakuStyle.Row>
@@ -517,28 +481,31 @@ const Main = (): JSX.Element => {
                 <FaTimes />
                 {lang('close')}
               </WhiteFill>
-              <WhiteFill
+              <Settings />
+            </UtakuStyle.Row>
+            <UtakuStyle.Center>
+              <GetLimitArea
+                _icon
                 _mini
-                onClick={() => {
-                  set_modalOpen('remaps')
-                }}
-              >
-                <FaRegEdit />
-                {lang('remaps')}({appliedRemapList?.length ?? 0})
-              </WhiteFill>
-              {/* {appliedRemapList?.length > 0 && (
-                <WhiteFill _mini onClick={() => {}}>
-                  {lang('remaps_only')}
-                </WhiteFill>
-              )} */}
-              <EditLimitArea
                 emitItemList={(value) => {
-                  console.log('value', value)
                   set_itemList([])
-                  set_queueList(value)
+                  set_queueList(uniqBy(value, (item) => item.url))
                 }}
+                emitOnOff={(value) => {
+                  set_hideUi(value)
+                }}
+                $css={tooltipParentCss}
+                btnText={
+                  <>
+                    <Tooltip className="tooltip" style={tooltipStyle}>
+                      {lang('only_selected_areas_are_collected')}
+                    </Tooltip>
+                    <FaVectorSquare />{' '}
+                  </>
+                }
               />
-              <WhiteFill
+              <PrimaryButton
+                _icon
                 _mini
                 onClick={() => {
                   if (reloadRef.current) clearTimeout(reloadRef.current)
@@ -549,12 +516,35 @@ const Main = (): JSX.Element => {
                     set_pending(false)
                   }, 1000)
                 }}
+                $css={tooltipParentCss}
               >
+                <Tooltip className="tooltip" style={tooltipStyle}>
+                  {lang('reload')}
+                </Tooltip>
                 <FaRedo />
-                {lang('reload')}
-              </WhiteFill>
-            </UtakuStyle.Row>
-            <UtakuStyle.Center></UtakuStyle.Center>
+              </PrimaryButton>
+              {!settingState.live.remap && (
+                <SecondaryButton
+                  _icon
+                  _mini
+                  onClick={() => {
+                    if (reloadRef.current) clearTimeout(reloadRef.current)
+                    set_pending(true)
+                    set_itemList([])
+                    reloadRef.current = setTimeout(async () => {
+                      await scrapImages(true, true)
+                      set_pending(false)
+                    }, 1000)
+                  }}
+                  $css={tooltipParentCss}
+                >
+                  <Tooltip className="tooltip" style={tooltipStyle}>
+                    {lang('re_collect_by_using_remap_configs')}
+                  </Tooltip>
+                  <FaCompactDisc />
+                </SecondaryButton>
+              )}
+            </UtakuStyle.Center>
             <UtakuStyle.Right>
               <UtakuStyle.QualityController>
                 <UtakuStyle.IconWrap>
@@ -638,11 +628,11 @@ const Main = (): JSX.Element => {
         >
           <UtakuStyle.DisposeContainer>
             {queueList &&
-              queueList.map((value) => {
+              queueList.map((value, index) => {
                 if (value.type === 'media') {
                   return (
                     <Dispose.Video
-                      key={value.url}
+                      key={'dispose-video' + index + value.url}
                       value={value}
                       disposeVideo={disposeVideo}
                       onError={() => {
@@ -653,7 +643,7 @@ const Main = (): JSX.Element => {
                 }
                 return (
                   <Dispose.Image
-                    key={value.url}
+                    key={'dispose-image' + index + value.url}
                     value={value}
                     disposeImage={disposeImage}
                     onError={() => {

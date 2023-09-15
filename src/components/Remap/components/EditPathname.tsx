@@ -4,7 +4,7 @@ import { sortBy } from 'lodash-es'
 import React, { Fragment, useMemo } from 'react'
 import { UrlRemapItem } from '../../../atoms/settings'
 import { isValidUrl, lang } from '../../../utils'
-import { PopupInputStyle } from '../PopupInput.styled'
+import { PopupInputStyle } from '../../PopupInput.styled'
 import { RemapStyle } from '../Remaps.styled'
 import { getIndexByStepName } from '../Remaps.type'
 

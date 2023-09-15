@@ -9,9 +9,8 @@
     "noImplicitReturns": true,
     "noUnusedLocals": false,
     "strict": true,
-    "target": "es2018"
+    "target": "es2018",
+    "resolveJsonModule": true
   },
-  "include": ["global.d.ts", 
-  "src/**/*.ts",
-  "src/**/*.tsx"]
+  "include": ["global.d.ts", "src/**/*.ts", "src/**/*.tsx"]
 }

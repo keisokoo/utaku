@@ -58,7 +58,7 @@ function handleChangeMode(value: typeof modeType[number]) {
   }
 }
 
-chrome.storage.local.get(['modeType', 'folderName'], (results) => {
+chrome.storage.sync.get(['modeType', 'folderName'], (results) => {
   if (results.modeType) handleChangeMode(results.modeType as typeof modeType[number] || defaultMode)
   if (results.folderName) folderName = results.folderName || 'utaku'
 })
@@ -120,7 +120,7 @@ async function getPopupTab() {
   return currentTabs.length > 0 && currentTabs[0].id ? currentTabs[0] : null
 }
 async function createWindow() {
-  const results = await chrome.storage.local.get(['modeType', 'folderName'])
+  const results = await chrome.storage.sync.get(['modeType', 'folderName'])
   handleChangeMode(results.modeType as typeof modeType[number] || defaultMode)
   folderName = results.folderName || 'utaku'
   if (results.modeType === 'enhanced') {
@@ -188,7 +188,7 @@ function onMessage(
   }
   if (request.message === 'mode-change') {
     handleChangeMode(request.data as typeof modeType[number] || defaultMode)
-    chrome.storage.local.set({ modeType: request.data }, () => {
+    chrome.storage.sync.set({ modeType: request.data }, () => {
       createWindow()
     })
     return false;

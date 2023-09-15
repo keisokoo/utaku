@@ -13,11 +13,13 @@ import { PrimaryButton, WhiteFill } from '../components/Buttons'
 import LoadingImage from '../components/ItemBox/LoadingImage'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
+import { LiveStyles } from '../components/PopupStyles/LiveStyles'
 import Tooltip from '../components/Tooltip'
 import { lang } from '../utils'
 import UtakuStyle, { ModalList } from './Utaku.styled'
 import { itemTypes } from './sources'
 
+const Live = LiveStyles
 interface ControlCompProps {
   tooltip: string
   current: number
@@ -56,7 +58,7 @@ const ControlComp = ({
         draft.viewMode = nextViewMode
       })
     )
-    chrome.storage.local.set({ viewMode: nextViewMode })
+    chrome.storage.sync.set({ viewMode: nextViewMode })
   }
   return (
     <>
@@ -118,7 +120,7 @@ const ControlComp = ({
                             draft.folderNameList = nextFolderNameList
                           })
                         )
-                        chrome.storage.local.set({
+                        chrome.storage.sync.set({
                           folderNameList: nextFolderNameList,
                         })
                       }}
@@ -156,7 +158,7 @@ const ControlComp = ({
                           draft.folderNameList = nextFolderNameList
                         })
                       )
-                      chrome.storage.local.set({
+                      chrome.storage.sync.set({
                         folderNameList: nextFolderNameList,
                       })
                       chrome.runtime.sendMessage(
@@ -195,7 +197,7 @@ const ControlComp = ({
                   })
                 )
                 if (settingState.modeType === 'simple') {
-                  chrome.storage.local.set({
+                  chrome.storage.sync.set({
                     folderName: e.target.value,
                   })
                   chrome.runtime.sendMessage(
@@ -241,7 +243,7 @@ const ControlComp = ({
                     draft.sizeLimit = nextSizeLimit
                   })
                 )
-                chrome.storage.local.set({ sizeLimit: nextSizeLimit })
+                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
               }}
             />
             <span>×</span>
@@ -259,7 +261,7 @@ const ControlComp = ({
                     draft.sizeLimit = nextSizeLimit
                   })
                 )
-                chrome.storage.local.set({ sizeLimit: nextSizeLimit })
+                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
               }}
             />
           </UtakuStyle.InputWrap>
@@ -293,7 +295,7 @@ const ControlComp = ({
                           draft.containerSize = type
                         })
                       )
-                      chrome.storage.local.set({ containerSize: type })
+                      chrome.storage.sync.set({ containerSize: type })
                     }}
                   >
                     {type}
@@ -323,7 +325,7 @@ const ControlComp = ({
                           draft.sizeType = type
                         })
                       )
-                      chrome.storage.local.set({ sizeType: type })
+                      chrome.storage.sync.set({ sizeType: type })
                     }}
                   >
                     {type}
@@ -353,7 +355,7 @@ const ControlComp = ({
                           draft.itemType = type
                         })
                       )
-                      chrome.storage.local.set({ itemType: type })
+                      chrome.storage.sync.set({ itemType: type })
                     }}
                   >
                     {type}
@@ -373,10 +375,12 @@ const ControlComp = ({
               {' )'}
             </div>
           </UtakuStyle.ItemLength>
-          <div onClick={toggleActive}>
-            {active && <UtakuStyle.CircleActive />}
-            {!active && <UtakuStyle.Circle />}
-          </div>
+          {settingState.modeType === 'enhanced' && (
+            <div onClick={toggleActive}>
+              {active && <Live.CircleActive />}
+              {!active && <Live.Circle />}
+            </div>
+          )}
         </UtakuStyle.Right>
         {tooltip && <Tooltip className="utaku-url-tooltip">{tooltip}</Tooltip>}
       </UtakuStyle.Editor>

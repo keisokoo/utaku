@@ -90,7 +90,6 @@ const ItemBox = ({
                 <FaVideo />
               </S.MediaIcon>
               <VideoItem
-                key={item.url}
                 src={item.url}
                 draggable="false"
                 data-item-size={settingState.sizeType}
@@ -112,7 +111,6 @@ const ItemBox = ({
                 <FaImage />
               </S.MediaIcon>
               <ImageItem
-                key={item.url}
                 src={item.url}
                 alt={item.requestId}
                 draggable="false"

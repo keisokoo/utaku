@@ -1,12 +1,7 @@
 import { cloneDeep } from 'lodash-es'
 import React from 'react'
 import { UrlRemapItem } from '../../../atoms/settings'
-import {
-  extractDomain,
-  extractSubDomain,
-  isValidUrl,
-  lang,
-} from '../../../utils'
+import { extractDomain, isValidUrl, lang, urlToRemapItem } from '../../../utils'
 import { RemapStyle } from '../Remaps.styled'
 import { getIndexByStepName } from '../Remaps.type'
 
@@ -36,9 +31,7 @@ const URLReference = ({ remapItem, mode, emitValue }: URLReferenceProps) => {
             const clone = cloneDeep(remapItem)
             clone.item.reference_url = e.target.value
             if (extractDomain(e.target.value) && mode !== 'edit') {
-              clone.item.host = new URL(e.target.value).host
-              clone.item.domain = extractDomain(e.target.value)!
-              clone.item.sub_domain = extractSubDomain(e.target.value) ?? ''
+              clone.item = urlToRemapItem(e.target.value).item
             }
             emitValue(clone)
           }}

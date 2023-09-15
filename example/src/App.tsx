@@ -1,12 +1,18 @@
 import React from 'react'
 import { RecoilRoot } from 'recoil'
-import Modal from '../../src/components/Modal'
+import GetLimitArea from '../../src/components/LimitArea/GetLimitArea'
+import Settings from '../../src/components/Settings/Settings'
 import '../scss/style.scss'
 function App() {
   return (
     <RecoilRoot>
       <div className="wrapper">
-        <Modal target="#utaku-modal" open={true} onClose={() => {}}></Modal>
+        <GetLimitArea
+          emitLimitSelector={(value) => {
+            console.log('value', value)
+          }}
+        />
+        <Settings target="#utaku-modal" />
       </div>
     </RecoilRoot>
   )

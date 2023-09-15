@@ -1,7 +1,10 @@
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css');
 
-[data-highlight] {
-  outline: 2px solid #27beff !important;
+[utaku-highlight] {
+  outline: 3px solid #27beff !important;
+  box-shadow: inset 0px 0px 100vw 100vw #c2fdff91;
+  filter: sepia(1);
+  transition: 0.3s ease-out;
   cursor: copy;
 }
 #utaku-iframe {
