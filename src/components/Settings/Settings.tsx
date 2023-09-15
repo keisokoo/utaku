@@ -237,6 +237,37 @@ const Settings = ({ target }: SettingsProps) => {
                           </div>
                         </L.FlexItem>
                       </L.FlexRow>
+                      <L.FlexRow>
+                        <L.FlexItem>
+                          <label>{lang('use_remap_on_select')}</label>
+                          <L.DotLine />
+                          <div>
+                            <Toggle
+                              active={settingState.extraOptions.remapOnSelect}
+                              onClick={() => {
+                                const clone = produce(settingState, (draft) => {
+                                  draft.extraOptions.remapOnSelect =
+                                    !draft.extraOptions.remapOnSelect
+                                })
+                                set_settingState(clone)
+                                chrome.storage.sync.set({
+                                  extraOptions: clone.extraOptions,
+                                })
+                              }}
+                            />
+                            <FaQuestionCircle
+                              onMouseEnter={() => {
+                                set_tooltipText(
+                                  lang('collect_remap_on_select_tooltip')
+                                )
+                              }}
+                              onMouseLeave={() => {
+                                set_tooltipText(null)
+                              }}
+                            />
+                          </div>
+                        </L.FlexItem>
+                      </L.FlexRow>
                     </L.SettingColumn>
                   </L.Wrap>
                 </S.SettingsWrap>

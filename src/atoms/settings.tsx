@@ -98,7 +98,7 @@ export interface SettingsType {
   containerSize: (typeof containerTypes)[number]
   sizeType: (typeof sizeTypes)[number]
   itemType: (typeof itemTypes)[number]
-  modeType: (typeof modeType)[number]
+  modeType: (typeof modeType)[number] | null
   viewMode: (typeof viewModeTypes)[number][]
   sizeLimit: {
     width: number
@@ -115,12 +115,13 @@ export interface SettingsType {
   extraOptions: {
     useSvgElement: boolean
     remappedOnly: boolean
+    remapOnSelect: boolean
   }
 }
 export const defaultSettings: SettingsType = {
   sizeType: 'small',
   itemType: 'image',
-  modeType: 'simple',
+  modeType: null,
   viewMode: ['container'],
   sizeLimit: {
     width: 100,
@@ -138,6 +139,7 @@ export const defaultSettings: SettingsType = {
   extraOptions: {
     useSvgElement: false,
     remappedOnly: false,
+    remapOnSelect: true,
   },
 }
 export const settings = atom<SettingsType>({

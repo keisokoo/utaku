@@ -26,7 +26,6 @@ import {
 } from '../../components/Buttons'
 import Modal from '../../components/Modal/Modal'
 import ModalBody from '../../components/Modal/ModalBody'
-import Remaps from '../../components/Remap/Remaps'
 import Tooltip from '../../components/Tooltip'
 import { WebResponseItem } from '../../content/types'
 import { lang, syncSettings, urlToRemapItem } from '../../utils'
@@ -38,6 +37,7 @@ import './index.scss'
 import { Virtuoso } from 'react-virtuoso'
 import { LiveStyles } from '../../components/PopupStyles/LiveStyles'
 import StepEditor from '../../components/Remap/StepEditor'
+import Settings from '../../components/Settings/Settings'
 
 const Live = LiveStyles
 
@@ -75,17 +75,17 @@ const Main = (): JSX.Element => {
     },
     settingState.modeType !== 'enhanced'
   )
-  const [modalOpen, set_modalOpen] = useState<'remaps' | UrlRemapItem | null>(
-    null
-  )
+  const [modalOpen, set_modalOpen] = useState<UrlRemapItem | null>(null)
   const [currentListTarget, set_currentListTarget] = useState<{
     tabId: number
     target: (typeof targetType)[number]
   } | null>(null)
 
   const appliedRemapList = useMemo(() => {
-    return settingState.remapList.filter((item) => item.active)
-  }, [settingState.remapList])
+    return settingState.live.remap
+      ? settingState.remapList.filter((item) => item.active)
+      : []
+  }, [settingState.remapList, settingState.live.remap])
   const results = useWebRequests(active, appliedRemapList)
   const {
     removedGroup,
@@ -300,8 +300,7 @@ const Main = (): JSX.Element => {
           set_modalOpen(null)
         }}
       >
-        {modalOpen === 'remaps' && <Remaps />}
-        {typeof modalOpen !== 'string' && modalOpen && (
+        {modalOpen && (
           <ModalBody title={lang('url_remap_list')} btn={<></>}>
             <StepEditor
               mode="add"
@@ -642,23 +641,12 @@ const Main = (): JSX.Element => {
         </PopupStyle.Body>
         <PopupStyle.Bottom>
           <PopupStyle.BottomButtons>
-            <WhiteFill
-              onClick={() => {
-                set_modalOpen('remaps')
-              }}
-            >
-              {lang('remaps')}
-            </WhiteFill>
-            {/* <WhiteFill _mini
-              onClick={() => {
-
-              }}
-            >
-              {lang('remaps_only')}
-            </WhiteFill> */}
-            <PopupStyle.BottomDescription>
-              {lang('applied_remaps', String(appliedRemapList.length))}
-            </PopupStyle.BottomDescription>
+            <Settings target="#popup-modal" />
+            {settingState.live.remap && (
+              <PopupStyle.BottomDescription>
+                {lang('applied_remaps', String(appliedRemapList.length))}
+              </PopupStyle.BottomDescription>
+            )}
           </PopupStyle.BottomButtons>
           <PopupStyle.BottomButtons>
             <GrayScaleFill

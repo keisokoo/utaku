@@ -340,5 +340,11 @@
   },
   "re_collect_by_using_remap_configs": {
     "message": "재구성 설정 및 영역제한 설정을 사용하여 재수집"
+  },
+  "use_remap_on_select": {
+    "message": "선택 영역 재구성 사용"
+  },
+  "collect_remap_on_select_tooltip": {
+    "message": "활성화 시, 선택 영역 수집시 재구성 변환 설정 사용"
   }
 }

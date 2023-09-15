@@ -340,5 +340,11 @@
   },
   "re_collect_by_using_remap_configs": {
     "message": "Reacquire using remap settings and area limit settings"
+  },
+  "use_remap_on_select": {
+    "message": "Use Remap on Selected Area"
+  },
+  "collect_remap_on_select_tooltip": {
+    "message": "When activated, the remapping settings are applied during collection on the selected area."
   }
 }

@@ -211,6 +211,7 @@ export const isLimitBySelectorType = (value: unknown): value is LimitBySelectorT
 export const syncSettings = (prev: SettingsType, settings: SettingsType) => {
   const result = { ...cloneDeep(prev), ...settings }
   if (!settings.modeType) {
+    settings.modeType = defaultMode
     chrome.storage.sync.set({ modeType: defaultMode })
   }
   if (settings.remapList) {

@@ -101,6 +101,7 @@ const Main = (): JSX.Element => {
   const [active, set_active] = useState<boolean>(true)
   const [pending, set_pending] = useState<boolean>(false)
   const [fireFirst, set_fireFirst] = useState<boolean>(false)
+  const fireFirstRef = useRef(false)
   const toggleActive = useCallback(() => {
     set_active((prev) => !prev)
   }, [])
@@ -303,21 +304,24 @@ const Main = (): JSX.Element => {
       }, 1000)
     }
     async function callDataPool() {
-      const getScrapData = await getCurrentPageImages()
-      chrome.runtime.sendMessage(
-        {
-          message: 'bulk-queue-images',
-          data: getScrapData ?? [],
-        },
-        (response) => {
-          if (response?.data?.success) {
-            runDataPool()
+      if (!fireFirstRef.current) {
+        fireFirstRef.current = true
+        const getScrapData = await getCurrentPageImages()
+        chrome.runtime.sendMessage(
+          {
+            message: 'bulk-queue-images',
+            data: getScrapData ?? [],
+          },
+          (response) => {
+            if (response?.data?.success) {
+              runDataPool()
+            }
           }
-        }
-      )
+        )
+      }
     }
-    if (active) {
-      callDataPool()
+    if (active && settingState.modeType !== null) {
+      settingState.modeType === 'enhanced' && callDataPool()
     } else {
       if (timeoutRef.current) clearTimeout(timeoutRef.current)
     }
@@ -489,6 +493,12 @@ const Main = (): JSX.Element => {
                 _mini
                 emitItemList={(value) => {
                   set_itemList([])
+                  if (settingState.extraOptions.remapOnSelect) {
+                    value = parseItemListWithUrlRemaps(
+                      appliedRemapList,
+                      value
+                    ) as ItemType[]
+                  }
                   set_queueList(uniqBy(value, (item) => item.url))
                 }}
                 emitOnOff={(value) => {
