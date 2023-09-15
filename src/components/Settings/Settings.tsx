@@ -228,6 +228,39 @@ const Settings = ({ target }: SettingsProps) => {
                       </L.FlexRow>
                       <L.FlexRow>
                         <L.FlexItem>
+                          <label>{lang('collect_anchor_element')}</label>
+                          <L.DotLine />
+                          <div>
+                            <Toggle
+                              active={
+                                settingState.extraOptions.useAnchorElement
+                              }
+                              onClick={() => {
+                                const clone = produce(settingState, (draft) => {
+                                  draft.extraOptions.useAnchorElement =
+                                    !draft.extraOptions.useAnchorElement
+                                })
+                                set_settingState(clone)
+                                chrome.storage.sync.set({
+                                  extraOptions: clone.extraOptions,
+                                })
+                              }}
+                            />
+                            <FaQuestionCircle
+                              onMouseEnter={() => {
+                                set_tooltipText(
+                                  lang('collect_anchor_element_tooltip')
+                                )
+                              }}
+                              onMouseLeave={() => {
+                                set_tooltipText(null)
+                              }}
+                            />
+                          </div>
+                        </L.FlexItem>
+                      </L.FlexRow>
+                      <L.FlexRow>
+                        <L.FlexItem>
                           <label>{lang('use_remap_on_select')}</label>
                           <L.DotLine />
                           <div>

@@ -36,7 +36,7 @@ function getUrlFromImageElement(el: HTMLImageElement | HTMLSourceElement): strin
   return getLargestSrc(srcset);
 }
 
-function extractImagesFromDocument(doc: Document | Element, exceptSelector?: string, limitBySelector?: LimitBySelectorType, useSvgElement?: boolean): string[] {
+function extractImagesFromDocument(doc: Document | Element, exceptSelector?: string, limitBySelector?: LimitBySelectorType, useSvgElement?: boolean, anchorCollect?: boolean): string[] {
   let selectorQuery = '';
   let parentSelectorQuery = '';
   const exceptQuery = (val: string) => exceptSelector ? `:not(${exceptSelector} ${val})` : '';
@@ -80,15 +80,17 @@ function extractImagesFromDocument(doc: Document | Element, exceptSelector?: str
       return svgElementToBase64(el)
     });
   }
+  let anchorArray: string[] = [];
+  if (anchorCollect) {
+    const anchorQuery = `${parentSelectorQuery} a${selectorQuery}${exceptQuery('a')}`;
 
-  const anchorQuery = `${parentSelectorQuery} a${selectorQuery}${exceptQuery('a')}`;
-
-  const anchorElements = doc.querySelectorAll(
-    anchorQuery
-  ) as NodeListOf<HTMLAnchorElement>
-  const anchorArray = Array.from(anchorElements).map((el) => {
-    return collectImagesFromAnchor(el)
-  }).filter((ii) => ii !== null) as string[];
+    const anchorElements = doc.querySelectorAll(
+      anchorQuery
+    ) as NodeListOf<HTMLAnchorElement>
+    anchorArray = Array.from(anchorElements).map((el) => {
+      return collectImagesFromAnchor(el)
+    }).filter((ii) => ii !== null) as string[];
+  }
 
   return [...imgSrcArray, ...bgImageArray, ...svgArray, ...anchorArray];
 }
@@ -160,18 +162,18 @@ export function getItemsFromCurrentElementTarget(target: Element, exceptSelector
   if (target.closest('svg')) return { image: [svgElementToBase64(target.closest('svg') as SVGElement)].filter((ii) => ii !== null) as string[], media: [] }
 
   const allImageUrls = limitBySelector && limitBySelector.length > 0 ? limitBySelector.map((limit) =>
-    extractImagesFromDocument(target, exceptSelector, limit, true)
-  ).flat() : extractImagesFromDocument(target, exceptSelector, undefined, true);
+    extractImagesFromDocument(target, exceptSelector, limit, true, true)
+  ).flat() : extractImagesFromDocument(target, exceptSelector, undefined, true, true);
   const allVideoUrls = limitBySelector && limitBySelector.length > 0 ? limitBySelector.map((limit) =>
     extractVideosFromDocument(target, exceptSelector, limit)
   ).flat() : extractVideosFromDocument(target, exceptSelector);
   return { image: [...allImageUrls], media: allVideoUrls }
 }
 
-export function getAllImageUrls(exceptSelector?: string, limitBySelector?: LimitBySelectorType[], useSvgElement?: boolean): string[] {
+export function getAllImageUrls(exceptSelector?: string, limitBySelector?: LimitBySelectorType[], useSvgElement?: boolean, anchorCollect?: boolean): string[] {
   let allImageUrls = limitBySelector && limitBySelector.length > 0 ? limitBySelector.map((limit) =>
-    extractImagesFromDocument(document, exceptSelector, limit, useSvgElement)
-  ).flat() : extractImagesFromDocument(document, exceptSelector, undefined, useSvgElement);
+    extractImagesFromDocument(document, exceptSelector, limit, useSvgElement, anchorCollect)
+  ).flat() : extractImagesFromDocument(document, exceptSelector, undefined, useSvgElement, anchorCollect);
   const iframeNodes = Array.from(document.querySelectorAll('iframe')) as HTMLIFrameElement[];
 
   for (const iframe of iframeNodes) {
@@ -179,8 +181,8 @@ export function getAllImageUrls(exceptSelector?: string, limitBySelector?: Limit
       const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
       if (iframeDoc) {
         const iframeImageUrls = limitBySelector && limitBySelector.length > 0 ? limitBySelector.map((limit) =>
-          extractImagesFromDocument(iframeDoc, exceptSelector, limit, useSvgElement)
-        ).flat() : extractImagesFromDocument(iframeDoc, exceptSelector, undefined, useSvgElement);
+          extractImagesFromDocument(iframeDoc, exceptSelector, limit, useSvgElement, anchorCollect)
+        ).flat() : extractImagesFromDocument(iframeDoc, exceptSelector, undefined, useSvgElement, anchorCollect);
         allImageUrls = [...allImageUrls, ...iframeImageUrls];
       }
     } catch (e) {

@@ -140,7 +140,9 @@ function main() {
   const utakuRoot = document.createElement('div')
   const utakuModal = document.createElement('div')
   utakuModal.classList.add('utaku-modal')
+  utakuModal.classList.add('utaku-css')
   utakuRoot.classList.add('utaku-root')
+  utakuRoot.classList.add('utaku-css')
   const reactRoot = document.createElement('div')
   reactRoot.id = 'root-' + rootId
   const button = createFloatingButton()

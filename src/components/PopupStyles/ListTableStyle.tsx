@@ -202,15 +202,20 @@ const FlexRow = styled.div`
   width: 100%;
 `
 const FlexTitle = styled.div`
-  padding: 4px 8px;
-  margin-top: 16px;
-  h1 {
-    font-size: 14px;
-    font-weight: 700;
+  html body .utaku-css & {
+    padding: 4px 8px;
+    margin-top: 16px;
+    h1 {
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      margin: 0px;
+      padding: 0px;
+    }
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
 `
 const DotLine = styled.div`
   width: 100%;

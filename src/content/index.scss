@@ -9,7 +9,7 @@
 }
 #utaku-iframe {
   position: fixed;
-  z-index: 9998;
+  z-index: 214748363;
   bottom: 0;
   left: 0;
   right: 0;
@@ -24,10 +24,10 @@
   border-radius: initial;
   box-shadow: none;
 }
-.utaku-root {
+html body .utaku-root {
   font-size: 14px;
   position: fixed;
-  z-index: 9998;
+  z-index: 214748363;
   bottom: 0;
   left: 0;
   right: 0;
@@ -50,6 +50,11 @@
   }
   .floating-button {
     position: absolute;
+    height: auto;
+    min-height: auto;
+    width: auto;
+    min-width: auto;
+    position: absolute;
     top: 0px;
     left: 50%;
     transform: translate(-50%, -100%);
@@ -61,7 +66,7 @@
     backdrop-filter: blur(6px);
     background-color: rgb(0 0 0 / 50%);
     text-align: center;
-    z-index: 9999;
+    z-index: 214748364;
     border: none;
     outline: none;
     cursor: pointer;

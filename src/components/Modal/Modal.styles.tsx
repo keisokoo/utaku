@@ -8,7 +8,7 @@ const ModalStyle = {
       position: fixed;
       width: 100%;
       height: 100%;
-      z-index: 9999;
+      z-index: 214748364;
       display: flex;
       align-items: center;
       justify-content: center;

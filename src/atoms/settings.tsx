@@ -115,6 +115,7 @@ export interface SettingsType {
   }
   extraOptions: {
     useSvgElement: boolean
+    useAnchorElement: boolean
     remappedOnly: boolean
     remapOnSelect: boolean
   }
@@ -139,6 +140,7 @@ export const defaultSettings: SettingsType = {
   },
   extraOptions: {
     useSvgElement: false,
+    useAnchorElement: false,
     remappedOnly: false,
     remapOnSelect: true,
   },

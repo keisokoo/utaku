@@ -47,6 +47,11 @@ ${color.hoverBorderColor
 
 export const ButtonStyle = styled.button(
   (props: ButtonProps) => css`
+  html body .utaku-css & {
+    min-width: auto;
+    height: auto;
+    min-height: auto;
+    width: auto;
     border: none;
     cursor: pointer;
     user-select: none;
@@ -60,21 +65,6 @@ export const ButtonStyle = styled.button(
       padding: 8px;
       border-radius: 50%;
     `}
+  }
   `
 )
-export const CSVDownloadButton = styled.button`
-  width: 40px;
-  height: 40px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: ${colors['Success/Default']};
-  transition: 0.3s;
-  &:hover {
-    background-color: ${colors['Success/Dark']};
-  }
-  &:disabled {
-    background-color: ${colors['Grayscale/Gray Lighter']};
-  }
-`

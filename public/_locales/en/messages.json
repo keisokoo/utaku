@@ -228,7 +228,7 @@
     "message": "(Optional) If you want to change the Sub Domain, please enter it. For example, in post.example.com, 'post' is the Sub Domain. Change it at the location corresponding to the Sub Domain, use the final 'Replace' if you want to change a specific address value."
   },
   "params_guidance": {
-    "message": "(Optional) If you want to change the query of the URL, please enter it. For example, in post.example.com?q=1234, 'q=1234' is the query and 'q' is the key and '1234' is the value. Add the key you want to change and change it to the desired value. If you only add the key and leave the value empty, the query will be removed."
+    "message": "(Optional) If you want to change the query of the URL, please enter it. For example, in post.example.com?q=1234, 'q=1234' is the query and 'q' is the key and '1234' is the value. Add the key you want to change and change it to the desired value. If you only add the key and leave the value empty, the query will be removed. \n\nIf the query value is the original URL, please insert ${url}. In this case, other transformation operations will be ignored."
   },
   "path_change_guidance": {
     "message": "(Optional) If you want to change the pathname of the URL, please enter it. For example, in post.example.com/post/1234, 'post/1234' is the pathname. You can replace this with the pathname extracted from the reference URL. Click the corresponding location and change it to the desired value."
@@ -334,6 +334,12 @@
   },
   "collect_svg_element_tooltip": {
     "message": "When collecting all images, elements written as SVG Elements will be converted to image data for collection.\n\nThe conversion process may consume a lot of memory, so please activate only when collecting.\n\nThis always functions when selecting a region for collection."
+  },
+  "collect_anchor_element": {
+    "message": "Collect A link href"
+  },
+  "collect_anchor_element_tooltip": {
+    "message": "When collecting all images, this collects the href link addresses of elements written as A Elements.\n\nOn certain sites, access may be temporarily blocked due to excessive requests, so please only activate this when collecting.\n\nThis always works when selecting an area to collect."
   },
   "setting_title": {
     "message": "URL Transformation and Collection Settings"

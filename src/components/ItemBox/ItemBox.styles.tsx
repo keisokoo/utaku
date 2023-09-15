@@ -40,7 +40,9 @@ const iconsCss = css`
   background: #fff;
 `
 const ImageItem = styled.img`
-  ${mediaCss}
+  html body .utaku-css & {
+    ${mediaCss}
+  }
 `
 const VideoItem = styled.video`
   ${mediaCss}

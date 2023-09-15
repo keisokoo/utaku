@@ -29,9 +29,9 @@ import {
 } from '../atoms/settings'
 import {
   GrayScaleFill,
+  GrayScaleText,
   PrimaryButton,
   SecondaryButton,
-  WhiteFill,
 } from '../components/Buttons'
 import ItemBox from '../components/ItemBox'
 import GetLimitArea from '../components/LimitArea/GetLimitArea'
@@ -202,11 +202,13 @@ const Main = (): JSX.Element => {
           ? (results?.remapList as UrlRemapItem[]) ?? []
           : []
       const svgCollect = results.extraOptions.useSvgElement ?? false
+      const anchorCollect = results.extraOptions.useAnchorElement ?? false
       const currentApplied = remapList.filter((item) => item.active)
       const localImages = getAllImageUrls(
         '.utaku-root',
         limitBySelector,
-        svgCollect
+        svgCollect,
+        anchorCollect
       ).map((item) => toItemType(item, 'image'))
       const localVideos = getAllVideoUrls('.utaku-root', limitBySelector).map(
         (item) => toItemType(item, 'media')
@@ -474,17 +476,31 @@ const Main = (): JSX.Element => {
         {settingState.modeType === 'simple' && (
           <UtakuStyle.SettingsRow>
             <UtakuStyle.Row>
-              <WhiteFill
+              <GrayScaleText
                 _mini
                 onClick={() => {
                   chrome.runtime.sendMessage({
                     message: 'utaku-call-unmount',
                   })
                 }}
+                $css={css`
+                  position: absolute;
+                  top: 0;
+                  transform: translate(-50%, -100%);
+                  left: 50%;
+                  background-color: rgb(0 0 0 / 50%);
+                  color: #fff;
+                  border-radius: 4px 4px 0 0;
+                  font-size: 10px;
+                  padding: 2px 8px 2px 6px;
+                  &:hover {
+                    background-color: #00000063;
+                  }
+                `}
               >
                 <FaTimes />
                 {lang('close')}
-              </WhiteFill>
+              </GrayScaleText>
               <Settings />
             </UtakuStyle.Row>
             <UtakuStyle.Center>

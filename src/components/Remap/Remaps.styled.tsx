@@ -124,47 +124,53 @@ export const RemapStyle = {
     border-radius: 4px;
   `,
   QueryStatus: styled.div`
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    transform: translate(0, calc(-50% - 12px));
-    & > div,
-    label {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 4px 8px;
-      gap: 4px;
-      border-radius: 4px;
-      background-color: #ffffff;
-      color: #b7b7b7;
-      font-size: 12px;
-    }
-    & > label {
-      font-size: 14px;
-      color: #333;
+    html body .utaku-css & {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      transform: translate(0, calc(-50% - 12px));
+      & > div,
+      label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 4px 8px;
+        gap: 4px;
+        border-radius: 4px;
+        background-color: #ffffff;
+        color: #b7b7b7;
+        font-size: 12px;
+      }
+      & > label {
+        font-size: 14px;
+        color: #333;
+      }
     }
   `,
   QueryResult,
   InputBox: styled.div`
-    position: relative;
-    flex: 1;
-    input {
-      width: 200px;
-    }
-    & > label {
-      display: block;
-      font-weight: 400;
-      font-size: 14px;
-      color: ${colors['Grayscale/Gray Default']};
-      margin-bottom: 4px;
+    html body .utaku-css & {
+      position: relative;
+      flex: 1;
+      input {
+        width: 200px;
+      }
+      & > label {
+        display: block;
+        font-weight: 400;
+        font-size: 14px;
+        color: ${colors['Grayscale/Gray Default']};
+        margin-bottom: 4px;
+      }
     }
   `,
   CurrentUrl: styled.textarea`
-    ${urlBoxCss}
-    min-height: 90px;
-    border: none;
-    outline: none;
+    html body .utaku-css & {
+      ${urlBoxCss}
+      min-height: 90px;
+      border: none;
+      outline: none;
+    }
   `,
   NextUrl: styled.div`
     ${urlBoxCss}

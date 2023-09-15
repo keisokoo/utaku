@@ -85,11 +85,30 @@ export function extractSubDomain(url: string) {
 export function parseUrlRemap(value: UrlRemap, url: string) {
   try {
     const { params, host, path_change, replace, sub_domain } = value
+    if (url.startsWith('//')) {
+      url = 'https:' + url
+    }
     if (host && !url.includes(host)) {
-      console.log('not include', host);
       return url
     }
-
+    const hasUrlInQueries = Object.values(params).some((value) => value.includes('${url}'))
+    if (hasUrlInQueries) {
+      const urlParams = new URL(url).searchParams
+      const urlParamKeys = Object.entries(params).filter(([, value]) => value.includes('${url}')).map(([key]) => key)[0]
+      const regex = /\$\{url\}\[(\d+)\]/;
+      const matchCount = params[urlParamKeys].match(regex)?.[1]
+      const allValues: string[] = []
+      urlParams.forEach((value, key) => {
+        if (key === urlParamKeys && isValidUrl(value)) allValues.push(value)
+      })
+      if (allValues.length < 1) return url
+      if (matchCount !== undefined && allValues.length > 1 && !isNaN(parseInt(matchCount))) {
+        url = allValues[parseInt(matchCount)] ?? allValues[allValues.length - 1] ?? url
+      } else {
+        url = allValues[allValues.length - 1] ?? url
+      }
+      return url
+    }
     const current_domain = extractDomain(url)
     const current_sub_domain = extractSubDomain(url)
     if (current_domain && current_sub_domain !== sub_domain) {

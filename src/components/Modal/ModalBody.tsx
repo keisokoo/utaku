@@ -67,7 +67,7 @@ const ModalBody = ({
           <div className="modal-title">{title}</div>
           <div className="modal-btn">
             {btn}
-            <GrayScaleOutline _mini className="close" onClick={onClose}>
+            <GrayScaleOutline _mini onClick={onClose}>
               <FaTimes />
               {lang('close')}
             </GrayScaleOutline>
