@@ -19,6 +19,7 @@ export type ReplaceType = {
 }
 export type UrlRemap = {
   reference_url: string
+  initiator?: string
   host: string
   domain: string
   sub_domain: string

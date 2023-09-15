@@ -493,12 +493,14 @@ const Main = (): JSX.Element => {
                 _mini
                 emitItemList={(value) => {
                   set_itemList([])
+                  console.log('before', value)
                   if (settingState.extraOptions.remapOnSelect) {
                     value = parseItemListWithUrlRemaps(
                       appliedRemapList,
                       value
                     ) as ItemType[]
                   }
+                  console.log('after', value)
                   set_queueList(uniqBy(value, (item) => item.url))
                 }}
                 emitOnOff={(value) => {

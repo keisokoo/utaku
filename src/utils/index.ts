@@ -2,7 +2,6 @@ import { cloneDeep, isArray } from "lodash-es"
 import { v4 } from "uuid"
 import { LimitBySelectorType, SettingsType, UrlRemap, UrlRemapItem, defaultMode, initialUrlRemapItem } from "../atoms/settings"
 import { WebResponseItem } from "../content/types"
-import { sampleList } from "../pages/popup/sources"
 
 export function getTransformXY(el: HTMLElement) {
   const transform = window.getComputedStyle(el).transform
@@ -87,6 +86,7 @@ export function parseUrlRemap(value: UrlRemap, url: string) {
   try {
     const { params, host, path_change, replace, sub_domain } = value
     if (host && !url.includes(host)) {
+      console.log('not include', host);
       return url
     }
 
@@ -161,7 +161,9 @@ export function parseItemWithUrlRemapItems(urlRemaps: UrlRemapItem[], item: WebR
 }
 export function parseItemListWithUrlRemaps(urlRemaps: UrlRemapItem[], items: WebResponseItem[]) {
   if (urlRemaps.length < 1) return items
-  return items.map((item) => urlRemaps.map((urlRemap) => parseItemWithUrlRemaps(urlRemap, item))).flat()
+  return items.map((item) => {
+    return parseItemWithUrlRemapItems(urlRemaps, item)
+  })
 }
 
 export function migrationRemapList(remapList: UrlRemapItem[]) {
@@ -218,12 +220,12 @@ export const syncSettings = (prev: SettingsType, settings: SettingsType) => {
     // migrate
     result.remapList = migrationRemapList(settings.remapList)
   }
-  if (!settings.remapList) {
-    result.remapList = sampleList
-    chrome.storage.sync.set({
-      remapList: sampleList
-    })
-  }
+  // if (!settings.remapList) {
+  //   result.remapList = sampleList
+  //   chrome.storage.sync.set({
+  //     remapList: sampleList
+  //   })
+  // }
   return result
 }
 export const exportSettingsByJson = (settings: object) => {
@@ -256,6 +258,7 @@ export const remapListRequireCheckAndParsing = (remapList: UrlRemapItem[]): {
     if (!item.item.host) return `${item.id ?? idx}_host is required`
     if (!item.item.reference_url) return `${item.id ?? idx}_reference_url is required`
     if (typeof item.item.sub_domain !== 'string') return `${item.id ?? idx}_sub_domain must be string`
+    // if (typeof item.item.initiator !== 'string') return `${item.id ?? idx}_initiator must be string`
     if (typeof item.item.params !== 'object') return `${item.id ?? idx}_params must be object - {key: value}`
     if (!isArray(item.item.path_change)) return `${item.id ?? idx}_path_change must be object array - {index: number, to: string}[]`
     if (!isArray(item.item.replace)) return `${item.id ?? idx}_replace must be object array - {from: string, to: string}[]`

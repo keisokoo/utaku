@@ -7,6 +7,7 @@ export const toItemType = (url: string, type: 'image' | 'media') => {
   return {
     url: url,
     type: type,
+    initiator: window.location.origin,
     imageInfo: {
       width: 0,
       height: 0,

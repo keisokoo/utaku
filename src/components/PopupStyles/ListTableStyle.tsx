@@ -139,11 +139,18 @@ const SummaryBox = styled.div`
   justify-content: space-between;
   gap: 4px;
 `
+const CountBox = styled.div`
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+`
 const SummaryContent = styled.div`
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   width: 100%;
+  font-size: 14px;
 `
 const Content = styled.div`
   grid-area: D;
@@ -291,4 +298,5 @@ export const ListTableStyle = {
   FlexTitle,
   DotLine,
   Center,
+  CountBox,
 }

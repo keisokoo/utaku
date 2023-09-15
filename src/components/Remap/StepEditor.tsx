@@ -222,13 +222,16 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                     currentRemap.name === '' || currentRemap.item.host === ''
                   }
                   onClick={() => {
-                    set_settingState(
-                      produce((draft) => {
-                        draft.remapList.push({ ...currentRemap, id: v4() })
+                    const clone = produce(settingState, (draft) => {
+                      draft.remapList.push({
+                        ...currentRemap,
+                        id: v4(),
+                        active: true,
                       })
-                    )
+                    })
+                    set_settingState(clone)
                     chrome.storage.sync.set({
-                      remapList: [{ ...currentRemap, id: v4() }],
+                      remapList: clone.remapList,
                     })
                     onClose && onClose()
                   }}

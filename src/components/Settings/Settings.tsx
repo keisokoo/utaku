@@ -88,17 +88,6 @@ const Settings = ({ target }: SettingsProps) => {
                     {tooltipText}
                   </Tooltip>
                 )}
-                {/* <L.SettingsGrid>
-                  <L.SettingColumn className="a">
-                    <L.Label>{lang('live')}</L.Label>
-                  </L.SettingColumn>
-                  <L.SettingColumn className="b">
-                    <L.Label>{lang('name')} (active / total)</L.Label>
-                  </L.SettingColumn>
-                  <L.SettingColumn className="c">
-                    <L.Label>{lang('setting')}</L.Label>
-                  </L.SettingColumn>
-                </L.SettingsGrid> */}
                 <L.List>
                   <L.SettingsRow>
                     <L.SettingColumn
@@ -135,14 +124,14 @@ const Settings = ({ target }: SettingsProps) => {
                     >
                       <L.SummaryBox>
                         <L.SummaryContent>{lang('remaps')}</L.SummaryContent>
-                        <div>
+                        <L.CountBox>
                           (
                           {
                             settingState.remapList.filter((item) => item.active)
                               .length
                           }
                           /{settingState.remapList.length})
-                        </div>
+                        </L.CountBox>
                       </L.SummaryBox>
                     </L.SettingColumn>
                   </L.SettingsRow>
@@ -183,7 +172,7 @@ const Settings = ({ target }: SettingsProps) => {
                         <L.SummaryContent>
                           {lang('limit_filters')}
                         </L.SummaryContent>
-                        <div>
+                        <L.CountBox>
                           (
                           {
                             settingState.limitBySelector.filter(
@@ -191,7 +180,7 @@ const Settings = ({ target }: SettingsProps) => {
                             ).length
                           }
                           /{settingState.limitBySelector.length})
-                        </div>
+                        </L.CountBox>
                       </L.SummaryBox>
                     </L.SettingColumn>
                   </L.SettingsRow>

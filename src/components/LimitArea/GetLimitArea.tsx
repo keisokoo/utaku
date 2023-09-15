@@ -61,9 +61,18 @@ const GetLimitArea = ({
   const mouseClickToGetQuerySelector = (e: MouseEvent) => {
     e.stopPropagation()
     e.preventDefault()
-    let target = e.target as HTMLElement
-    if (target.tagName === 'IMG' && target.parentElement) {
-      target = target.parentElement as HTMLElement
+    const target = e.target as HTMLElement
+    if (target.tagName.toLowerCase() === 'iframe') {
+      removeEventOnMouseOverForGetQuerySelector()
+      return
+    }
+    let parentQuery = ''
+    const targetNames = ['img', 'video', 'svg', 'a']
+    if (
+      targetNames.includes(target.tagName.toLowerCase()) &&
+      target.parentElement
+    ) {
+      parentQuery = getQuerySelector(target.parentElement as HTMLElement)
     }
     if (!isElement(target)) return
     const querySelector = getQuerySelector(target)
@@ -73,12 +82,11 @@ const GetLimitArea = ({
     }
     let imageQuery = ''
     let videoQuery = ''
-    let parentQuery = ''
     if (target.tagName === 'IMG') {
       imageQuery = querySelector
     } else if (target.tagName === 'VIDEO') {
       videoQuery = querySelector
-    } else {
+    } else if (!parentQuery) {
       parentQuery = querySelector
     }
     const limitSelector = {
@@ -110,9 +118,15 @@ const GetLimitArea = ({
   const mouseOverToGetQuerySelector = (e: MouseEvent) => {
     const target = e.target as HTMLElement
     const utakuRoot = document.querySelector('.utaku-root')
+    if (target.tagName.toLowerCase() === 'iframe') return
     if (utakuRoot?.contains(target)) return
     if (isElement(target)) {
-      const targetElement = document.elementFromPoint(
+      const currentIframe = (e.currentTarget as Document).defaultView
+        ?.frameElement as HTMLIFrameElement | null
+      const doc = currentIframe?.contentDocument
+        ? currentIframe.contentDocument
+        : document
+      const targetElement = doc.elementFromPoint(
         e.clientX,
         e.clientY
       ) as HTMLElement
@@ -123,6 +137,43 @@ const GetLimitArea = ({
       highlightedElement.current = targetElement
     }
   }
+  const injectStylesIfNeeded = (iframe: HTMLIFrameElement) => {
+    const utakuStyle = `[utaku-highlight] {
+      outline: 3px solid #27beff !important;
+      box-shadow: inset 0px 0px 100vw 100vw #c2fdff91;
+      filter: sepia(1);
+      transition: 0.3s ease-out;
+      cursor: copy;
+    }`
+    const iframeDoc = iframe.contentDocument
+
+    if (iframeDoc) {
+      let styleElement = iframeDoc.querySelector(
+        'style[data-custom-style]'
+      ) as HTMLStyleElement
+
+      if (!styleElement) {
+        styleElement = iframeDoc.createElement('style') as HTMLStyleElement
+        styleElement.setAttribute('data-custom-style', '')
+        iframeDoc.head?.appendChild(styleElement)
+      }
+
+      styleElement.innerHTML = utakuStyle
+    }
+  }
+  const removeInjected = (iframe: HTMLIFrameElement) => {
+    const iframeDoc = iframe.contentDocument
+
+    if (iframeDoc) {
+      const styleElement = iframeDoc.querySelector(
+        'style[data-custom-style]'
+      ) as HTMLStyleElement
+
+      if (styleElement) {
+        styleElement.remove()
+      }
+    }
+  }
   const setEventOnMouseOverForGetQuerySelector = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -130,6 +181,20 @@ const GetLimitArea = ({
     e.preventDefault()
     set_onOff(true)
     emitOnOff && emitOnOff(true)
+    document.querySelectorAll('iframe').forEach((el) => {
+      if (el.contentDocument) {
+        injectStylesIfNeeded(el)
+        el.contentDocument.addEventListener(
+          'mouseover',
+          mouseOverToGetQuerySelector
+        )
+        el.contentDocument.addEventListener(
+          'click',
+          mouseClickToGetQuerySelector,
+          true
+        )
+      }
+    })
     document.addEventListener('mouseover', mouseOverToGetQuerySelector)
     document.addEventListener('click', mouseClickToGetQuerySelector, true)
   }
@@ -138,6 +203,25 @@ const GetLimitArea = ({
     emitOnOff && emitOnOff(false)
     document.querySelectorAll('[utaku-highlight]').forEach((el) => {
       el.removeAttribute('utaku-highlight')
+    })
+    document.querySelectorAll('iframe').forEach((el) => {
+      if (el.contentDocument) {
+        removeInjected(el)
+        el.contentDocument
+          .querySelectorAll('[utaku-highlight]')
+          .forEach((curr) => {
+            curr.removeAttribute('utaku-highlight')
+          })
+        el.contentDocument.removeEventListener(
+          'mouseover',
+          mouseOverToGetQuerySelector
+        )
+        el.contentDocument.removeEventListener(
+          'click',
+          mouseClickToGetQuerySelector,
+          true
+        )
+      }
     })
     document.removeEventListener('mouseover', mouseOverToGetQuerySelector)
     document.removeEventListener('click', mouseClickToGetQuerySelector, true)
