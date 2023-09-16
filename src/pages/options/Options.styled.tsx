@@ -22,6 +22,14 @@ export const OptionStyle = {
       text-align: center;
     }
   `,
+  Links: styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    a {
+      text-decoration: underline !important;
+    }
+  `,
   VideoBox: styled.div`
     background-color: #494949;
     padding: 32px;
