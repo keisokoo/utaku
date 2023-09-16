@@ -86,32 +86,39 @@ export function extractSubDomain(url: string) {
 export function parseUrlRemap(value: UrlRemap, url: string) {
   try {
     const { params, host, path_change, replace, sub_domain } = value
-    if (url.startsWith('//')) {
-      url = 'https:' + url
-    }
+
     if (host && !url.includes(host)) {
       return url
     }
+    const current_domain = extractDomain(url)
+    const current_sub_domain = extractSubDomain(url)
+
     const hasUrlInQueries = Object.values(params).some((value) => value.includes('#{url}'))
+
     if (hasUrlInQueries) {
-      const urlParams = new URL(url).searchParams
+      let queryUrl = url
+      const urlParams = new URL(queryUrl).searchParams
       const urlParamKeys = Object.entries(params).filter(([, value]) => value.includes('#{url}')).map(([key]) => key)[0]
       const regex = /#\{url\}\[(\d+)\]/;
       const matchCount = params[urlParamKeys].match(regex)?.[1]
+
       const allValues: string[] = []
+
       urlParams.forEach((value, key) => {
         if (key === urlParamKeys && isValidUrl(value)) allValues.push(value)
       })
       if (allValues.length < 1) return url
       if (matchCount !== undefined && allValues.length > 1 && !isNaN(parseInt(matchCount))) {
-        url = allValues[parseInt(matchCount)] ?? allValues[allValues.length - 1] ?? url
+        queryUrl = allValues[parseInt(matchCount)] ?? allValues[allValues.length - 1] ?? url
       } else {
-        url = allValues[allValues.length - 1] ?? url
+        queryUrl = allValues[allValues.length - 1] ?? url
       }
-      return url
+      if (queryUrl && extractDomain(queryUrl) === current_domain) {
+        return queryUrl
+      } else {
+        return url
+      }
     }
-    const current_domain = extractDomain(url)
-    const current_sub_domain = extractSubDomain(url)
     if (current_domain && current_sub_domain !== sub_domain) {
       if (current_sub_domain) url = url.replace(current_sub_domain, sub_domain)
       if (!current_sub_domain) {
@@ -121,9 +128,9 @@ export function parseUrlRemap(value: UrlRemap, url: string) {
       }
     }
     if (Object.keys(params).length) {
-      URL
       const urlObj = new URL(url)
       Object.keys(params).forEach((key) => {
+        if (params[key].includes(`#{url}`)) return
         if (params[key]) {
           urlObj.searchParams.set(key, params[key])
         } else {
