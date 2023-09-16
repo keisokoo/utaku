@@ -95,7 +95,8 @@ export const isRemapSettingsType = (
   }
   return true
 }
-export interface SettingsType {
+export type SettingsType = {
+  [key: string]: unknown
   containerSize: (typeof containerTypes)[number]
   sizeType: (typeof sizeTypes)[number]
   itemType: (typeof itemTypes)[number]

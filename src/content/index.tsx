@@ -52,7 +52,7 @@ chrome.runtime.onMessage.addListener(onMessage)
 const getAvailable = (el?: HTMLElement) => {
   try {
     if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
-    chrome.storage.sync.get(['modeType'], (results) => {
+    chrome.storage.local.get(['modeType'], (results) => {
       const currentMode = results.modeType || defaultMode
       if (currentMode === 'simple') {
         if (root) {

@@ -58,7 +58,7 @@ const ControlComp = ({
         draft.viewMode = nextViewMode
       })
     )
-    chrome.storage.sync.set({ viewMode: nextViewMode })
+    chrome.storage.local.set({ viewMode: nextViewMode })
   }
   return (
     <>
@@ -120,7 +120,7 @@ const ControlComp = ({
                             draft.folderNameList = nextFolderNameList
                           })
                         )
-                        chrome.storage.sync.set({
+                        chrome.storage.local.set({
                           folderNameList: nextFolderNameList,
                         })
                       }}
@@ -158,7 +158,7 @@ const ControlComp = ({
                           draft.folderNameList = nextFolderNameList
                         })
                       )
-                      chrome.storage.sync.set({
+                      chrome.storage.local.set({
                         folderNameList: nextFolderNameList,
                       })
                       chrome.runtime.sendMessage(
@@ -197,7 +197,7 @@ const ControlComp = ({
                   })
                 )
                 if (settingState.modeType === 'simple') {
-                  chrome.storage.sync.set({
+                  chrome.storage.local.set({
                     folderName: e.target.value,
                   })
                   chrome.runtime.sendMessage(
@@ -243,7 +243,7 @@ const ControlComp = ({
                     draft.sizeLimit = nextSizeLimit
                   })
                 )
-                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
+                chrome.storage.local.set({ sizeLimit: nextSizeLimit })
               }}
             />
             <span>×</span>
@@ -261,7 +261,7 @@ const ControlComp = ({
                     draft.sizeLimit = nextSizeLimit
                   })
                 )
-                chrome.storage.sync.set({ sizeLimit: nextSizeLimit })
+                chrome.storage.local.set({ sizeLimit: nextSizeLimit })
               }}
             />
           </UtakuStyle.InputWrap>
@@ -295,7 +295,7 @@ const ControlComp = ({
                           draft.containerSize = type
                         })
                       )
-                      chrome.storage.sync.set({ containerSize: type })
+                      chrome.storage.local.set({ containerSize: type })
                     }}
                   >
                     {type}
@@ -325,7 +325,7 @@ const ControlComp = ({
                           draft.sizeType = type
                         })
                       )
-                      chrome.storage.sync.set({ sizeType: type })
+                      chrome.storage.local.set({ sizeType: type })
                     }}
                   >
                     {type}
@@ -355,7 +355,7 @@ const ControlComp = ({
                           draft.itemType = type
                         })
                       )
-                      chrome.storage.sync.set({ itemType: type })
+                      chrome.storage.local.set({ itemType: type })
                     }}
                   >
                     {type}

@@ -165,7 +165,7 @@ const Settings = ({ target }: SettingsProps) => {
                             draft.live.remap = !draft.live.remap
                           })
                           set_settingState(clone)
-                          chrome.storage.sync.set({
+                          chrome.storage.local.set({
                             live: clone.live,
                           })
                         }}
@@ -212,7 +212,7 @@ const Settings = ({ target }: SettingsProps) => {
                             draft.live.filter = !draft.live.filter
                           })
                           set_settingState(clone)
-                          chrome.storage.sync.set({
+                          chrome.storage.local.set({
                             live: clone.live,
                           })
                         }}
@@ -274,7 +274,7 @@ const Settings = ({ target }: SettingsProps) => {
                                     !draft.extraOptions.useSvgElement
                                 })
                                 set_settingState(clone)
-                                chrome.storage.sync.set({
+                                chrome.storage.local.set({
                                   extraOptions: clone.extraOptions,
                                 })
                               }}
@@ -298,7 +298,7 @@ const Settings = ({ target }: SettingsProps) => {
                                     !draft.extraOptions.useAnchorElement
                                 })
                                 set_settingState(clone)
-                                chrome.storage.sync.set({
+                                chrome.storage.local.set({
                                   extraOptions: clone.extraOptions,
                                 })
                               }}
@@ -320,7 +320,7 @@ const Settings = ({ target }: SettingsProps) => {
                                     !draft.extraOptions.remapOnSelect
                                 })
                                 set_settingState(clone)
-                                chrome.storage.sync.set({
+                                chrome.storage.local.set({
                                   extraOptions: clone.extraOptions,
                                 })
                               }}
@@ -359,7 +359,7 @@ const Settings = ({ target }: SettingsProps) => {
                                       }
                                     )
                                     set_settingState(clone)
-                                    chrome.storage.sync.set({
+                                    chrome.storage.local.set({
                                       remapList: clone.remapList,
                                       limitBySelector: clone.limitBySelector,
                                     })
@@ -451,7 +451,7 @@ const Settings = ({ target }: SettingsProps) => {
                             )
                           })
                           set_settingState(clone)
-                          chrome.storage.sync.set({
+                          chrome.storage.local.set({
                             remapList: clone.remapList,
                             limitBySelector: clone.limitBySelector,
                           })

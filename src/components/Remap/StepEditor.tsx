@@ -183,7 +183,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                     })
                   })
                   set_settingState(clone)
-                  chrome.storage.sync.set({ remapList: clone.remapList })
+                  chrome.storage.local.set({ remapList: clone.remapList })
                   onClose && onClose()
                 }}
               >
@@ -230,7 +230,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
                       })
                     })
                     set_settingState(clone)
-                    chrome.storage.sync.set({
+                    chrome.storage.local.set({
                       remapList: clone.remapList,
                     })
                     onClose && onClose()

@@ -11,7 +11,7 @@ const useFileDownload = (
   const [folderName, set_folderName] = useState<string>('utaku')
   const handleFolderName = useCallback((name: string) => {
     set_folderName(name)
-    chrome.storage.sync.set({ folderName: name })
+    chrome.storage.local.set({ folderName: name })
     chrome.runtime.sendMessage(
       { message: 'set-folderName', data: name },
       () => {

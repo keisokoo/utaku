@@ -234,18 +234,8 @@ export const syncSettings = (prev: SettingsType, settings: SettingsType) => {
   const result = { ...cloneDeep(prev), ...settings }
   if (!settings.modeType) {
     settings.modeType = defaultMode
-    chrome.storage.sync.set({ modeType: defaultMode })
+    chrome.storage.local.set({ modeType: defaultMode })
   }
-  if (settings.remapList) {
-    // migrate
-    result.remapList = migrationRemapList(settings.remapList)
-  }
-  // if (!settings.remapList) {
-  //   result.remapList = sampleList
-  //   chrome.storage.sync.set({
-  //     remapList: sampleList
-  //   })
-  // }
   return result
 }
 export const exportSettingsByJson = (settings: object) => {

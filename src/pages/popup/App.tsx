@@ -100,7 +100,7 @@ const Main = (): JSX.Element => {
     handleSourceList,
   } = results
   useEffect(() => {
-    chrome.storage.sync.get(Object.keys(defaultSettings), (items) => {
+    chrome.storage.local.get(Object.keys(defaultSettings), (items) => {
       set_settingState((prev) => syncSettings(prev, items as SettingsType))
     })
   }, [])
@@ -214,7 +214,7 @@ const Main = (): JSX.Element => {
       if (request.message === 'setFolderName') {
         const folderName = request.data as string
         handleFolderName(folderName)
-        chrome.storage.sync.set({ folderName })
+        chrome.storage.local.set({ folderName })
       }
     }
     if (!chrome.runtime.onMessage.hasListener(onMessage)) {

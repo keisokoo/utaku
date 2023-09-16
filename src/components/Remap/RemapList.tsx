@@ -59,7 +59,7 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
                           })
                         })
                         set_settingState(clone)
-                        chrome.storage.sync.set({
+                        chrome.storage.local.set({
                           remapList: clone.remapList,
                         })
                       }}
@@ -91,7 +91,7 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
                           ),
                         })
                         if (chrome?.storage)
-                          chrome.storage.sync.set({
+                          chrome.storage.local.set({
                             remapList: settingState.remapList.filter(
                               (curr) => curr.id !== item.id
                             ),
@@ -119,7 +119,7 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
                 })
               })
               set_settingState(clone)
-              chrome.storage.sync.set({
+              chrome.storage.local.set({
                 remapList: clone.remapList,
               })
             }}
@@ -136,7 +136,7 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
                 })
               })
               set_settingState(clone)
-              chrome.storage.sync.set({
+              chrome.storage.local.set({
                 remapList: clone.remapList,
               })
             }}
@@ -155,7 +155,7 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
                       draft.remapList = []
                     })
                     set_settingState(clone)
-                    chrome.storage.sync.set({
+                    chrome.storage.local.set({
                       remapList: clone.remapList,
                     })
                   },
@@ -173,7 +173,7 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
                 draft.live.remap = !draft.live.remap
               })
               set_settingState(clone)
-              chrome.storage.sync.set({
+              chrome.storage.local.set({
                 live: clone.live,
               })
             }}

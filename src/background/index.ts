@@ -1,6 +1,7 @@
 
 import browser from 'webextension-polyfill';
-import { defaultMode, modeType } from '../atoms/settings';
+import { SettingsType, defaultMode, defaultSettings, modeType } from '../atoms/settings';
+import { masterSettings } from '../utils/sources';
 let isSimpleMode = false
 let folderName = 'utaku'
 
@@ -58,7 +59,7 @@ function handleChangeMode(value: typeof modeType[number]) {
   }
 }
 
-chrome.storage.sync.get(['modeType', 'folderName'], (results) => {
+chrome.storage.local.get(['modeType', 'folderName'], (results) => {
   if (results.modeType) handleChangeMode(results.modeType as typeof modeType[number] || defaultMode)
   if (results.folderName) folderName = results.folderName || 'utaku'
 })
@@ -120,7 +121,7 @@ async function getPopupTab() {
   return currentTabs.length > 0 && currentTabs[0].id ? currentTabs[0] : null
 }
 async function createWindow() {
-  const results = await chrome.storage.sync.get(['modeType', 'folderName'])
+  const results = await chrome.storage.local.get(['modeType', 'folderName'])
   handleChangeMode(results.modeType as typeof modeType[number] || defaultMode)
   folderName = results.folderName || 'utaku'
   if (results.modeType === 'enhanced') {
@@ -188,7 +189,7 @@ function onMessage(
   }
   if (request.message === 'mode-change') {
     handleChangeMode(request.data as typeof modeType[number] || defaultMode)
-    chrome.storage.sync.set({ modeType: request.data }, () => {
+    chrome.storage.local.set({ modeType: request.data }, () => {
       createWindow()
     })
     return false;
@@ -273,3 +274,39 @@ function downloadFilenameSuggestOnBackground(
     console.log('error', error)
   }
 }
+const modeTypes = ['simple', 'enhanced'] as const
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    chrome.storage.local.set({
+      ...defaultSettings,
+      remapList: masterSettings.remapList,
+      limitBySelector: masterSettings.limitBySelector,
+      modeType: 'simple'
+    })
+  } else if (details.reason === 'update') {
+    chrome.storage.local.get(null, (results) => {
+      const updatedSettings: SettingsType = { ...defaultSettings };
+      if (results) {
+        if (results?.remapList[0] && !Array.isArray((results as SettingsType)?.remapList?.[0]?.item?.replace)) results.remapList = masterSettings.remapList
+        if (!results.remapList) results.remapList = masterSettings.remapList
+        if (!results.limitBySelector) results.limitBySelector = masterSettings.limitBySelector
+      }
+      for (const [key] of Object.entries(updatedSettings)) {
+        if (Object.prototype.hasOwnProperty.call(results, key)) {
+          updatedSettings[key] = results[key];
+        }
+      }
+      if (!results.modeType || !modeTypes.includes(results.modeType as typeof modeTypes[number])) {
+        chrome.storage.local.set({
+          ...defaultSettings,
+          remapList: masterSettings.remapList,
+          limitBySelector: masterSettings.limitBySelector,
+          modeType: 'simple'
+        })
+      } else {
+        chrome.storage.local.set({ ...updatedSettings })
+      }
+    }
+    )
+  }
+});

@@ -117,7 +117,7 @@ const LimitArea = ({ emitOnOff, onClose, setNotice }: LimitAreaProps) => {
                                   })
                               })
                               set_settingState(clone)
-                              chrome.storage.sync.set({
+                              chrome.storage.local.set({
                                 limitBySelector: clone.limitBySelector,
                               })
                             }}
@@ -185,7 +185,7 @@ const LimitArea = ({ emitOnOff, onClose, setNotice }: LimitAreaProps) => {
                                   )
                               })
                               set_settingState(clone)
-                              chrome.storage.sync.set({
+                              chrome.storage.local.set({
                                 limitBySelector: clone.limitBySelector,
                               })
                             }}
@@ -256,7 +256,7 @@ const LimitArea = ({ emitOnOff, onClose, setNotice }: LimitAreaProps) => {
                       )
                     })
                     set_settingState(clone)
-                    chrome.storage.sync.set({
+                    chrome.storage.local.set({
                       limitBySelector: clone.limitBySelector,
                     })
                   }}
@@ -275,7 +275,7 @@ const LimitArea = ({ emitOnOff, onClose, setNotice }: LimitAreaProps) => {
                       )
                     })
                     set_settingState(clone)
-                    chrome.storage.sync.set({
+                    chrome.storage.local.set({
                       limitBySelector: clone.limitBySelector,
                     })
                   }}
@@ -294,7 +294,7 @@ const LimitArea = ({ emitOnOff, onClose, setNotice }: LimitAreaProps) => {
                             draft.limitBySelector = []
                           })
                           set_settingState(clone)
-                          chrome.storage.sync.set({
+                          chrome.storage.local.set({
                             limitBySelector: clone.limitBySelector,
                           })
                         },
@@ -312,7 +312,7 @@ const LimitArea = ({ emitOnOff, onClose, setNotice }: LimitAreaProps) => {
                       draft.live.filter = !draft.live.filter
                     })
                     set_settingState(clone)
-                    chrome.storage.sync.set({ live: clone.live })
+                    chrome.storage.local.set({ live: clone.live })
                   }}
                 >
                   Live mode{' '}

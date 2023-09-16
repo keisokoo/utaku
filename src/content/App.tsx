@@ -106,13 +106,13 @@ const Main = (): JSX.Element => {
     set_active((prev) => !prev)
   }, [])
   useEffect(() => {
-    chrome.storage.sync.get(Object.keys(defaultSettings), (items) => {
+    chrome.storage.local.get(Object.keys(defaultSettings), (items) => {
       set_settingState((prev) => syncSettings(prev, items as SettingsType))
       set_fireFirst(true)
     })
   }, [])
   const appliedRemapList = useMemo(() => {
-    return settingState.remapList.filter((item) => item.active)
+    return settingState.remapList?.filter((item) => item.active) ?? []
   }, [settingState.remapList])
   const remapHostList = useMemo(() => {
     return appliedRemapList.map((item) => item.item.host)
@@ -187,18 +187,13 @@ const Main = (): JSX.Element => {
 
   const getCurrentPageImages = useCallback(
     async (forceRemap?: boolean, forceLimitArea?: boolean) => {
-      const results = (await chrome.storage.sync.get([
-        'remapList',
-        'limitBySelector',
-        'live',
-        'extraOptions',
-      ])) as SettingsType
+      const results = (await chrome.storage.local.get(null)) as SettingsType
       const limitBySelector =
-        results.live.filter || forceLimitArea
+        results.live?.filter || forceLimitArea
           ? getLimitBySelector(results?.limitBySelector)
           : []
       const remapList =
-        results.live.remap || forceRemap
+        results.live?.remap || forceRemap
           ? (results?.remapList as UrlRemapItem[]) ?? []
           : []
       const svgCollect = results.extraOptions.useSvgElement ?? false

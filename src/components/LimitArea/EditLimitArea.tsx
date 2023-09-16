@@ -259,7 +259,7 @@ const EditLimitArea = ({
                   }
                 })
                 set_settingState(clone)
-                chrome.storage.sync.set({
+                chrome.storage.local.set({
                   limitBySelector: clone.limitBySelector,
                 })
                 onClose && onClose()
