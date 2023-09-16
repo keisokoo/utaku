@@ -61,7 +61,7 @@ const Remaps = ({ onClose, setNotice, ...props }: RemapsProps) => {
       {/* 추가, 편집 */}
       {mode !== null && (
         <ModalBody
-          title={lang('url_remap_list')}
+          title={currentRemap ? lang('url_remap_edit') : lang('url_remap_add')}
           fixed={!!currentRemap}
           onClose={() => {
             set_mode(null)

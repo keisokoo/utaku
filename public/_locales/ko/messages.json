@@ -14,6 +14,12 @@
   "url_remap_list": {
     "message": "URL 재구성 목록"
   },
+  "url_remap_add": {
+    "message": "재구성 설정 추가"
+  },
+  "url_remap_edit": {
+    "message": "재구성 설정 편집"
+  },
   "edit_url_match": {
     "message": "URL 검색 패턴"
   },

@@ -39,6 +39,10 @@ const Editor = styled(Controller)`
   background-color: rgb(7 121 255 / 50%);
 `
 const inputCss = css`
+  height: auto;
+  width: auto;
+  min-height: auto;
+  min-width: auto;
   min-width: 80px;
   flex: 1;
   width: 100%;
@@ -55,19 +59,23 @@ const inputCss = css`
   ${typography['Body/Small/Bold']}
 `
 const InputWrap = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-right: 16px;
-  color: #fff;
-  input[type='text'],
-  input[type='number'],
-  input[type='password'] {
-    ${inputCss}
+  html body .utaku-css & {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-right: 16px;
+    color: #fff;
+    input[type='text'],
+    input[type='number'],
+    input[type='password'] {
+      ${inputCss}
+    }
   }
 `
 const Input = styled.input`
-  ${inputCss}
+  html body .utaku-css & {
+    ${inputCss}
+  }
 `
 const DisposeContainer = styled.div`
   position: absolute;

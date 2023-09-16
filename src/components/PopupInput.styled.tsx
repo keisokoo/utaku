@@ -4,6 +4,10 @@ import { colors } from '../themes'
 export const PopupInputStyle = {
   UnderlineInput: styled.input`
     html body .utaku-css & {
+      height: auto;
+      width: auto;
+      min-height: auto;
+      min-width: auto;
       appearance: none;
       color: ${colors['Grayscale/Gray Dark']};
       border: none;
@@ -29,6 +33,10 @@ export const PopupInputStyle = {
   `,
   FilledInput: styled.input`
     html body .utaku-css & {
+      height: auto;
+      width: auto;
+      min-height: auto;
+      min-width: auto;
       appearance: none;
       color: ${colors['Grayscale/Gray Dark']};
       border: none;

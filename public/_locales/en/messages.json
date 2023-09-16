@@ -26,6 +26,12 @@
   "url_remap_list": {
     "message": "URL Remap List"
   },
+  "url_remap_add": {
+    "message": "Add Remap"
+  },
+  "url_remap_edit": {
+    "message": "Edit Remap"
+  },
   "remaps": {
     "message": "Remaps"
   },
