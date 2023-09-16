@@ -149,13 +149,3 @@ export const settings = atom<SettingsType>({
   key: 'settings',
   default: { ...defaultSettings },
 })
-
-// const sampleSelector =
-// {
-//   host: 'blog.naver.com',
-//   selector: {
-//     image: '.se_mediaImage',
-//     video: '',
-//     parent: '.se_viewArea',
-//   },
-// }

@@ -47,6 +47,7 @@ html body .utaku-root {
     sans-serif;
   * {
     box-sizing: border-box;
+    min-width: auto;
   }
   .floating-button {
     position: absolute;

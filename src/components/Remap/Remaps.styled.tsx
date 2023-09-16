@@ -286,6 +286,11 @@ export const RemapStyle = {
     display: flex;
     justify-content: space-between;
     gap: 8px;
+    & > div {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
   `,
   List: styled.div`
     display: flex;

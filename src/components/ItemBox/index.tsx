@@ -13,6 +13,7 @@ import {
 import { useRecoilState } from 'recoil'
 import { settings } from '../../atoms/settings'
 import { ItemType } from '../../content/types'
+import { copyToClipboard } from '../../utils'
 import S from './ItemBox.styles'
 
 interface ItemBoxProps
@@ -32,12 +33,6 @@ const ItemBox = ({
 }: ItemBoxProps) => {
   const [settingState] = useRecoilState(settings)
   const { ImageItem, VideoItem } = S
-  const copyToClipboard = (text: string) => {
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(text).then()
-      return
-    }
-  }
   const handleDown = (url: string) => {
     if (settingState.modeType === 'simple') {
       chrome.runtime.sendMessage({
@@ -131,9 +126,13 @@ const ItemBox = ({
         <S.Icons className="image-icons" data-item-size={settingState.sizeType}>
           <S.IconWrap
             {...tooltipEventAttributes('Copy')}
-            onClick={(e) => {
+            onClick={async (e) => {
               e.stopPropagation()
-              copyToClipboard(item.url)
+              await copyToClipboard(item.url)
+              setTooltip && setTooltip('Copied')
+              setTimeout(() => {
+                setTooltip && setTooltip('')
+              }, 2000)
             }}
           >
             <FaClipboard />
@@ -150,6 +149,7 @@ const ItemBox = ({
           <S.IconWrap
             {...tooltipEventAttributes('Remap: ' + item.url)}
             onClick={(e) => {
+              console.log('item', item)
               e.stopPropagation()
               if (settingState.modeType === 'simple') {
                 handleRemaps && handleRemaps(item.url)

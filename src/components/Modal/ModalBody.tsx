@@ -1,3 +1,4 @@
+import { SerializedStyles } from '@emotion/react'
 import styled from '@emotion/styled'
 import classNames from 'classnames'
 import React from 'react'
@@ -40,6 +41,7 @@ const ModalBodyWrap = styled.div`
   border-radius: 8px;
   min-width: 320px;
   box-shadow: 0 0 8px 0 rgb(0 0 0 / 10%);
+  ${(props: ModalBodyProps) => props.$css}
 `
 
 interface ModalBodyProps
@@ -47,30 +49,36 @@ interface ModalBodyProps
     React.HTMLAttributes<HTMLDivElement>,
     HTMLDivElement
   > {
+  $css?: SerializedStyles | string
   fixed?: boolean
   title?: string
   btn?: React.ReactNode
+  removeClose?: boolean
   onClose?: () => void
 }
 const ModalBody = ({
   fixed,
   btn,
+  removeClose,
   onClose,
   children,
   title,
+  $css,
   ...props
 }: ModalBodyProps) => {
   return (
     <>
-      <ModalBodyWrap {...props}>
+      <ModalBodyWrap $css={$css} {...props}>
         <div className="modal-header">
           <div className="modal-title">{title}</div>
           <div className="modal-btn">
             {btn}
-            <GrayScaleOutline _mini onClick={onClose}>
-              <FaTimes />
-              {lang('close')}
-            </GrayScaleOutline>
+            {!removeClose && (
+              <GrayScaleOutline _mini onClick={onClose}>
+                <FaTimes />
+                {lang('close')}
+              </GrayScaleOutline>
+            )}
           </div>
         </div>
         <div className={classNames({ fixed }, 'modal-body')}>{children}</div>

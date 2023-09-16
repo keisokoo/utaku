@@ -10,3 +10,8 @@ export interface ModalProps
   _css?: SerializedStyles | string
   target?: string
 }
+export type NoticeType = {
+  title: string
+  content: string | JSX.Element
+  onClick: () => void
+}

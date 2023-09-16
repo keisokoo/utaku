@@ -5,7 +5,13 @@ import { FaCaretDown, FaEdit, FaPlus, FaTrash } from 'react-icons/fa'
 import { useRecoilState } from 'recoil'
 import { LimitBySelectorType, settings } from '../../atoms/settings'
 import { lang } from '../../utils'
-import { GrayScaleFill, GrayScaleOutline, SecondaryButton } from '../Buttons'
+import {
+  GrayScaleFill,
+  GrayScaleOutline,
+  PrimaryButton,
+  SecondaryButton,
+} from '../Buttons'
+import { NoticeType } from '../Modal/Modal.types'
 import ModalBody from '../Modal/ModalBody'
 import { ListTableStyle } from '../PopupStyles/ListTableStyle'
 import { LiveStyles } from '../PopupStyles/LiveStyles'
@@ -19,8 +25,9 @@ const Live = LiveStyles
 interface LimitAreaProps {
   emitOnOff: (bool: boolean) => void
   onClose?: () => void
+  setNotice?: (notice: NoticeType) => void
 }
-const LimitArea = ({ emitOnOff, onClose }: LimitAreaProps) => {
+const LimitArea = ({ emitOnOff, onClose, setNotice }: LimitAreaProps) => {
   const [settingState, set_settingState] = useRecoilState(settings)
   const { limitBySelector } = settingState
   const [selector, set_selector] = useState<LimitBySelectorType | null>(null)
@@ -73,8 +80,8 @@ const LimitArea = ({ emitOnOff, onClose }: LimitAreaProps) => {
             </>
           }
         >
-          <S.LimitAreaWrap>
-            <L.Wrap>
+          <L.BodyWrap>
+            <div>
               <L.Grid>
                 <L.Column className="a">
                   <L.Label>{lang('enable')}</L.Label>
@@ -234,9 +241,69 @@ const LimitArea = ({ emitOnOff, onClose }: LimitAreaProps) => {
                   )
                 })}
               </L.List>
-            </L.Wrap>
-            <L.Buttons>
-              <div></div>
+            </div>
+            <L.Bottom>
+              <div>
+                <PrimaryButton
+                  _mini
+                  onClick={() => {
+                    const clone = produce(settingState, (draft) => {
+                      draft.limitBySelector = draft.limitBySelector.map(
+                        (curr) => {
+                          curr.active = true
+                          return curr
+                        }
+                      )
+                    })
+                    set_settingState(clone)
+                    chrome.storage.sync.set({
+                      limitBySelector: clone.limitBySelector,
+                    })
+                  }}
+                >
+                  {lang('all_enable')}
+                </PrimaryButton>
+                <SecondaryButton
+                  _mini
+                  onClick={() => {
+                    const clone = produce(settingState, (draft) => {
+                      draft.limitBySelector = draft.limitBySelector.map(
+                        (curr) => {
+                          curr.active = false
+                          return curr
+                        }
+                      )
+                    })
+                    set_settingState(clone)
+                    chrome.storage.sync.set({
+                      limitBySelector: clone.limitBySelector,
+                    })
+                  }}
+                >
+                  {lang('all_disable')}
+                </SecondaryButton>
+                <GrayScaleFill
+                  _mini
+                  onClick={() => {
+                    setNotice &&
+                      setNotice({
+                        title: lang('alert'),
+                        content: lang('all_delete_confirm'),
+                        onClick: () => {
+                          const clone = produce(settingState, (draft) => {
+                            draft.limitBySelector = []
+                          })
+                          set_settingState(clone)
+                          chrome.storage.sync.set({
+                            limitBySelector: clone.limitBySelector,
+                          })
+                        },
+                      })
+                  }}
+                >
+                  {lang('all_delete')}
+                </GrayScaleFill>
+              </div>
               <div>
                 <Live.Status
                   data-active={settingState.live.filter}
@@ -262,8 +329,8 @@ const LimitArea = ({ emitOnOff, onClose }: LimitAreaProps) => {
                   )}
                 </Live.Status>
               </div>
-            </L.Buttons>
-          </S.LimitAreaWrap>
+            </L.Bottom>
+          </L.BodyWrap>
         </ModalBody>
       )}
     </>

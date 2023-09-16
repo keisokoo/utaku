@@ -48,6 +48,7 @@ export function isValidUrl(url?: string | null) {
 }
 export function urlToRemapItem(url: string): UrlRemapItem {
   try {
+    if (url.startsWith('//')) url = 'https:' + url
     const currentUrl = new URL(url)
     return {
       ...initialUrlRemapItem,
@@ -91,11 +92,11 @@ export function parseUrlRemap(value: UrlRemap, url: string) {
     if (host && !url.includes(host)) {
       return url
     }
-    const hasUrlInQueries = Object.values(params).some((value) => value.includes('${url}'))
+    const hasUrlInQueries = Object.values(params).some((value) => value.includes('#{url}'))
     if (hasUrlInQueries) {
       const urlParams = new URL(url).searchParams
-      const urlParamKeys = Object.entries(params).filter(([, value]) => value.includes('${url}')).map(([key]) => key)[0]
-      const regex = /\$\{url\}\[(\d+)\]/;
+      const urlParamKeys = Object.entries(params).filter(([, value]) => value.includes('#{url}')).map(([key]) => key)[0]
+      const regex = /#\{url\}\[(\d+)\]/;
       const matchCount = params[urlParamKeys].match(regex)?.[1]
       const allValues: string[] = []
       urlParams.forEach((value, key) => {
@@ -345,4 +346,31 @@ export function mergeByIds<T extends { id: string },>(arr1: T[], arr2: T[]): T[]
     }
   }
   return Object.values(idToItemMap);
+}
+
+export async function copyToClipboard(text: string): Promise<string> {
+  if (window !== undefined && window.navigator?.clipboard && window.isSecureContext) {
+    return new Promise((res, rej) => {
+      navigator.clipboard
+        .writeText(text)
+        .then(() => {
+          res(text)
+        })
+        .catch(() => {
+          rej('error')
+        })
+    })
+  } else {
+    const El = document.createElement('textarea')
+    El.style.position = 'absolute'
+    El.style.opacity = '0'
+    document.body.appendChild(El)
+    El.value = text
+    El.focus()
+    El.select()
+    return new Promise((res, rej) => {
+      document.execCommand('copy') ? res(text) : rej('error')
+      El.remove()
+    })
+  }
 }

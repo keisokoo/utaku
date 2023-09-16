@@ -4,6 +4,7 @@ import { useRecoilState } from 'recoil'
 import { settings } from '../../atoms/settings'
 import { lang } from '../../utils'
 import { SecondaryButton } from '../Buttons'
+import { NoticeType } from '../Modal/Modal.types'
 import ModalBody from '../Modal/ModalBody'
 import RemapList from './RemapList'
 import { RemapBodyMode } from './Remaps.type'
@@ -15,8 +16,9 @@ interface RemapsProps
     HTMLDivElement
   > {
   onClose?: () => void
+  setNotice?: (notice: NoticeType) => void
 }
-const Remaps = ({ onClose, ...props }: RemapsProps) => {
+const Remaps = ({ onClose, setNotice, ...props }: RemapsProps) => {
   const [mode, set_mode] = useState<RemapBodyMode>(null)
   const [settingState] = useRecoilState(settings)
   const currentRemap = useMemo(() => {
@@ -50,7 +52,10 @@ const Remaps = ({ onClose, ...props }: RemapsProps) => {
           }
           {...props}
         >
-          <RemapList setRemapMode={(val) => set_mode(val)} />
+          <RemapList
+            setNotice={setNotice}
+            setRemapMode={(val) => set_mode(val)}
+          />
         </ModalBody>
       )}
       {/* 추가, 편집 */}

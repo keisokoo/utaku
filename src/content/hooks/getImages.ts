@@ -35,7 +35,22 @@ function getUrlFromImageElement(el: HTMLImageElement | HTMLSourceElement): strin
 
   return getLargestSrc(srcset);
 }
-
+function getComputedStyle(el: Element) {
+  try {
+    return [window.getComputedStyle(el), window.getComputedStyle(el, '::before'), window.getComputedStyle(el, '::after')];
+  } catch (error) {
+    return []
+  }
+}
+function getBackgroundImageCode(style: CSSStyleDeclaration) {
+  try {
+    const backgroundImage = style.getPropertyValue('background-image') || style.getPropertyValue('background');
+    const match = /url\("?(.+?)"?\)/.exec(backgroundImage);
+    return match ? match[1] : null;
+  } catch (error) {
+    return null
+  }
+}
 function extractImagesFromDocument(doc: Document | Element, exceptSelector?: string, limitBySelector?: LimitBySelectorType, useSvgElement?: boolean, anchorCollect?: boolean): string[] {
   let selectorQuery = '';
   let parentSelectorQuery = '';
@@ -61,15 +76,13 @@ function extractImagesFromDocument(doc: Document | Element, exceptSelector?: str
   );
 
   const bgImageArray = Array.from(elements).flatMap(el => {
-    const styles = [window.getComputedStyle(el), window.getComputedStyle(el, '::before'), window.getComputedStyle(el, '::after')];
-
+    const styles = getComputedStyle(el)
     return styles.map(style => {
-      const backgroundImage = style.getPropertyValue('background-image') || style.getPropertyValue('background');
-
-      const match = /url\("?(.+?)"?\)/.exec(backgroundImage);
-      return match ? match[1] : null;
+      return getBackgroundImageCode(style)
     });
-  }).filter((url): url is string => url !== null && !url.startsWith('data:'));
+  }).filter((url): url is string => url !== null && !url.startsWith('data:') &&
+    !url.endsWith('.woff') &&
+    !url.endsWith('.woff2') && !url.endsWith('.ttf') && !url.endsWith('.eot') && !url.endsWith('.svg'));
   let svgArray: string[] = [];
   if (useSvgElement) {
     const svgQuery = `${parentSelectorQuery} svg${selectorQuery}${exceptQuery('svg')}`;

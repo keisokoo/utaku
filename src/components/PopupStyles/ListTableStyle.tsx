@@ -281,6 +281,11 @@ const Bottom = styled.div`
     gap: 8px;
   }
 `
+const BodyWrap = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+`
 export const ListTableStyle = {
   SettingsGrid,
   SettingsRow,
@@ -304,4 +309,5 @@ export const ListTableStyle = {
   DotLine,
   Center,
   CountBox,
+  BodyWrap,
 }

@@ -98,7 +98,35 @@ const SelectorItem = styled.div`
   color: #939393;
   padding: 4px 8px;
 `
+const NoticeContents = styled.div`
+  padding: 32px;
+  white-space: pre-line;
+  font-size: 14px;
+  line-height: 1;
+  color: #434343;
+  text-align: center;
+  background-color: #fff;
+`
+const NoticeBottom = styled.div`
+  html body .utaku-css & {
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 8px;
+    & > button {
+      &:first-of-type {
+        width: 100px;
+      }
+      &:last-of-type {
+        width: 160px;
+      }
+    }
+  }
+`
 export const PopupStyles = {
+  NoticeBottom,
+  NoticeContents,
   BottomWrap,
   SettingsWrap,
   ListItem,
