@@ -1,3 +1,4 @@
+import { isElement } from "lodash-es";
 import { LimitBySelectorType } from "../../atoms/settings";
 import { isValidUrl } from "../../utils";
 
@@ -62,7 +63,7 @@ function extractImagesFromDocument(doc: Document | Element, exceptSelector?: str
     }
   }
   const imageQuery = `${parentSelectorQuery} img${selectorQuery}${exceptQuery('img')}, ${parentSelectorQuery} source${selectorQuery}${exceptQuery('source')}`;
-  const backgroundQuery = `${parentSelectorQuery}${selectorQuery}${exceptQuery('*')}`;
+  const backgroundQuery = `${parentSelectorQuery} *${selectorQuery}${exceptQuery('*')}`;
   const imageElements = doc.querySelectorAll(
     imageQuery
   ) as NodeListOf<HTMLImageElement | HTMLSourceElement>;
@@ -71,11 +72,13 @@ function extractImagesFromDocument(doc: Document | Element, exceptSelector?: str
     return getUrlFromImageElement(el);
   });
 
-  const elements = doc.querySelectorAll(
+  let bgElements = Array.from(doc.querySelectorAll(
     backgroundQuery
-  );
-
-  const bgImageArray = Array.from(elements).flatMap(el => {
+  ))
+  if (isElement(doc)) {
+    bgElements = [doc as Element, ...bgElements];
+  }
+  const bgImageArray = bgElements.flatMap(el => {
     const styles = getComputedStyle(el)
     return styles.map(style => {
       return getBackgroundImageCode(style)
@@ -83,6 +86,7 @@ function extractImagesFromDocument(doc: Document | Element, exceptSelector?: str
   }).filter((url): url is string => url !== null && !url.startsWith('data:') &&
     !url.endsWith('.woff') &&
     !url.endsWith('.woff2') && !url.endsWith('.ttf') && !url.endsWith('.eot') && !url.endsWith('.svg'));
+
   let svgArray: string[] = [];
   if (useSvgElement) {
     const svgQuery = `${parentSelectorQuery} svg${selectorQuery}${exceptQuery('svg')}`;

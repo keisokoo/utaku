@@ -149,7 +149,6 @@ const ItemBox = ({
           <S.IconWrap
             {...tooltipEventAttributes('Remap: ' + item.url)}
             onClick={(e) => {
-              console.log('item', item)
               e.stopPropagation()
               if (settingState.modeType === 'simple') {
                 handleRemaps && handleRemaps(item.url)
