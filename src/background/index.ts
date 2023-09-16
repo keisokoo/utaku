@@ -226,6 +226,11 @@ if (!chrome.runtime.onMessage.hasListener(onMessage)) {
   chrome.runtime.onMessage.addListener(onMessage)
 }
 chrome.action.onClicked.addListener(createWindow)
+chrome.commands.onCommand.addListener((command: string) => {
+  if (command === '_execute_browser_action') {
+    createWindow()
+  }
+});
 
 function handleDownloadChangeOnBackground(
   downloadDelta: chrome.downloads.DownloadDelta
