@@ -86,7 +86,7 @@ function quitUtaku() {
       if (tab.id && tab.id > 0)
         chrome.tabs.sendMessage(tab.id, { message: 'utaku-quit' }, () => {
           if (chrome.runtime.lastError) {
-            console.log('Error:', chrome.runtime.lastError);
+            console.log(chrome.runtime.lastError);
           }
         });
     });
@@ -99,7 +99,7 @@ chrome.runtime.onConnect.addListener(function (port) {
         if (tab.id && tab.id > 0)
           chrome.tabs.sendMessage(tab.id, { message: 'utaku-active' }, () => {
             if (chrome.runtime.lastError) {
-              console.log('Error:', chrome.runtime.lastError);
+              console.log(chrome.runtime.lastError);
             }
           });
       });
@@ -205,7 +205,7 @@ function onMessage(
     chrome.action.setIcon({ path: '/icon34.png' })
     chrome.tabs.sendMessage(senderId, { message: 'utaku-quit' }, () => {
       if (chrome.runtime.lastError) {
-        console.log('Error:', chrome.runtime.lastError);
+        console.log(chrome.runtime.lastError);
       }
     });
     return false;
@@ -276,7 +276,7 @@ function downloadFilenameSuggestOnBackground(
       })
     }
   } catch (error) {
-    console.log('error', error)
+    console.log(error)
   }
 }
 const modeTypes = ['simple', 'enhanced'] as const
@@ -292,8 +292,8 @@ chrome.runtime.onInstalled.addListener((details) => {
     chrome.storage.local.get(null, (results) => {
       const updatedSettings: SettingsType = { ...defaultSettings };
       if (results) {
-        if (results?.remapList[0] && !Array.isArray((results as SettingsType)?.remapList?.[0]?.item?.replace)) results.remapList = masterSettings.remapList
         if (!results.remapList) results.remapList = masterSettings.remapList
+        if (results?.remapList?.[0] && !Array.isArray((results as SettingsType)?.remapList?.[0]?.item?.replace)) results.remapList = masterSettings.remapList
         if (!results.limitBySelector) results.limitBySelector = masterSettings.limitBySelector
       }
       for (const [key] of Object.entries(updatedSettings)) {

@@ -595,7 +595,7 @@ const Main = (): JSX.Element => {
                                               },
                                             })
                                           } catch (error) {
-                                            console.log('err')
+                                            console.log(error)
                                           }
                                         }}
                                       >

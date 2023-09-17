@@ -81,7 +81,7 @@ const useFileDownload = (
           })
         }
       } catch (error) {
-        console.log('error', error)
+        console.log(error)
       }
     }
     if (

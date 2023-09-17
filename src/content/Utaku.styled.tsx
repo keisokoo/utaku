@@ -316,6 +316,10 @@ const UtakuStyle = {
     align-items: center;
     justify-content: center;
     min-width: 100px;
+    flex-shrink: 0;
+    & > div {
+      flex-shrink: 0;
+    }
   `,
   Empty: styled.div`
     display: flex;

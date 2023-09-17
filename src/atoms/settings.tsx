@@ -111,14 +111,14 @@ export type SettingsType = {
   remapList: UrlRemapItem[]
   limitBySelector: LimitBySelectorType[]
   live: {
-    remap: boolean
-    filter: boolean
+    remap?: boolean
+    filter?: boolean
   }
   extraOptions: {
-    useSvgElement: boolean
-    useAnchorElement: boolean
-    remappedOnly: boolean
-    remapOnSelect: boolean
+    useSvgElement?: boolean
+    useAnchorElement?: boolean
+    remappedOnly?: boolean
+    remapOnSelect?: boolean
   }
 }
 export const defaultSettings: SettingsType = {

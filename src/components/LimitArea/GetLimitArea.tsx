@@ -103,8 +103,7 @@ const GetLimitArea = ({
     if (emitItemList) {
       const currentItems = getItemsFromCurrentElementTarget(
         target,
-        '.utaku-root',
-        [limitSelector]
+        '.utaku-root'
       )
       const images = currentItems.image.map((item) => toItemType(item, 'image'))
       const videos = currentItems.media.map((item) => toItemType(item, 'media'))

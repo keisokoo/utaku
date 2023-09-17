@@ -64,6 +64,7 @@ function extractImagesFromDocument(doc: Document | Element, exceptSelector?: str
   }
   const imageQuery = `${parentSelectorQuery} img${selectorQuery}${exceptQuery('img')}, ${parentSelectorQuery} source${selectorQuery}${exceptQuery('source')}`;
   const backgroundQuery = `${parentSelectorQuery} *${selectorQuery}${exceptQuery('*')}`;
+
   const imageElements = doc.querySelectorAll(
     imageQuery
   ) as NodeListOf<HTMLImageElement | HTMLSourceElement>;
@@ -117,11 +118,13 @@ function base64EncodeUnicode(str: string): string {
   }));
 }
 export function svgElementToBase64(el: SVGElement): string {
+  if (!el.hasAttribute('xmlns')) el.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
   const svg = el.outerHTML;
   const base64Svg = base64EncodeUnicode(svg);
   const dataUrl = `data:image/svg+xml;base64,${base64Svg}`;
   return dataUrl;
 }
+
 
 function collectImagesFromAnchor(el: HTMLAnchorElement): string | null {
   const href = el.getAttribute('href');
@@ -172,8 +175,6 @@ export function extractSVGFromDocument(doc: Document | Element, exceptSelector?:
 }
 
 export function getItemsFromCurrentElementTarget(target: Element, exceptSelector?: string, limitBySelector?: LimitBySelectorType[]) {
-  console.log('target', target);
-
   if (target.tagName.toLowerCase() === 'a') return { image: [collectImagesFromAnchor(target as HTMLAnchorElement)].filter((ii) => ii !== null) as string[], media: [] }
   if (target.tagName.toLowerCase() === 'img') return { image: [getUrlFromImageElement(target as HTMLImageElement)].filter((ii) => ii !== null) as string[], media: [] }
   if (target.tagName.toLowerCase() === 'video') return { image: [], media: [getUrlFromVideoElement(target as HTMLVideoElement)].filter((ii) => ii !== null) as string[] }
@@ -186,7 +187,12 @@ export function getItemsFromCurrentElementTarget(target: Element, exceptSelector
   const allVideoUrls = limitBySelector && limitBySelector.length > 0 ? limitBySelector.map((limit) =>
     extractVideosFromDocument(target, exceptSelector, limit)
   ).flat() : extractVideosFromDocument(target, exceptSelector);
-  return { image: [...allImageUrls], media: allVideoUrls }
+  let result = { image: [...allImageUrls], media: allVideoUrls }
+  if ([...result.image, ...result.media].length === 0 && target.parentElement) {
+    const nextResult = getItemsFromCurrentElementTarget(target.parentElement, exceptSelector, limitBySelector)
+    result = { image: [...nextResult.image], media: [...nextResult.media] }
+  }
+  return result
 }
 
 export function getAllImageUrls(exceptSelector?: string, limitBySelector?: LimitBySelectorType[], useSvgElement?: boolean, anchorCollect?: boolean): string[] {

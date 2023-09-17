@@ -41,7 +41,7 @@ export function isValidUrl(url?: string | null) {
   try {
     if (!url) return false
     const currentUrl = new URL(url)
-    return currentUrl?.hostname ? true : false
+    return !!currentUrl?.hostname
   } catch (error) {
     return false
   }
@@ -99,7 +99,7 @@ export function parseUrlRemap(value: UrlRemap, url: string) {
       let queryUrl = url
       const urlParams = new URL(queryUrl).searchParams
       const urlParamKeys = Object.entries(params).filter(([, value]) => value.includes('#{url}')).map(([key]) => key)[0]
-      const regex = /#\{url\}\[(\d+)\]/;
+      const regex = /#\{url}\[(\d+)]/;
       const matchCount = params[urlParamKeys].match(regex)?.[1]
 
       const allValues: string[] = []
