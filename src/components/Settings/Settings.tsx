@@ -1,5 +1,4 @@
 import { css } from '@emotion/react'
-import classNames from 'classnames'
 import { produce } from 'immer'
 import { uniqBy } from 'lodash-es'
 import React, { useState } from 'react'
@@ -58,13 +57,13 @@ const Settings = ({ target }: SettingsProps) => {
         <ModalBody
           $css={css`
             min-width: 400px;
-            .modal-header {
+            [data-utaku-modal-header] {
               padding-top: 32px;
-              .modal-title {
+              [data-utaku-modal-title] {
                 font-size: 20px;
               }
             }
-            .modal-body {
+            [data-utaku-modal-body] {
               padding-bottom: 16px;
               & > div:first-of-type {
                 text-align: center;
@@ -104,7 +103,7 @@ const Settings = ({ target }: SettingsProps) => {
       {settingModal && (
         <Modal
           {...(target && { target })}
-          className={classNames({ hide: onOff })}
+          data-utaku-hide={onOff}
           open={true}
           onClose={() => set_settingModal(null)}
         >
@@ -158,7 +157,7 @@ const Settings = ({ target }: SettingsProps) => {
                   <L.List>
                     <L.SettingsRow>
                       <L.SettingColumn
-                        className="a"
+                        data-utaku-grid-item="a"
                         data-active={settingState.live.remap}
                         onClick={() => {
                           const clone = produce(settingState, (draft) => {
@@ -184,7 +183,7 @@ const Settings = ({ target }: SettingsProps) => {
                         )}
                       </L.SettingColumn>
                       <L.SettingColumn
-                        className="b"
+                        data-utaku-grid-item="b"
                         onClick={() => {
                           set_settingModal('remaps')
                         }}
@@ -205,7 +204,7 @@ const Settings = ({ target }: SettingsProps) => {
                     </L.SettingsRow>
                     <L.SettingsRow>
                       <L.SettingColumn
-                        className="a"
+                        data-utaku-grid-item="a"
                         data-active={settingState.live.filter}
                         onClick={() => {
                           const clone = produce(settingState, (draft) => {
@@ -231,7 +230,7 @@ const Settings = ({ target }: SettingsProps) => {
                         )}
                       </L.SettingColumn>
                       <L.SettingColumn
-                        className="b"
+                        data-utaku-grid-item="b"
                         onClick={() => {
                           set_settingModal('limit-selector')
                         }}

@@ -172,6 +172,8 @@ export function extractSVGFromDocument(doc: Document | Element, exceptSelector?:
 }
 
 export function getItemsFromCurrentElementTarget(target: Element, exceptSelector?: string, limitBySelector?: LimitBySelectorType[]) {
+  console.log('target', target);
+
   if (target.tagName.toLowerCase() === 'a') return { image: [collectImagesFromAnchor(target as HTMLAnchorElement)].filter((ii) => ii !== null) as string[], media: [] }
   if (target.tagName.toLowerCase() === 'img') return { image: [getUrlFromImageElement(target as HTMLImageElement)].filter((ii) => ii !== null) as string[], media: [] }
   if (target.tagName.toLowerCase() === 'video') return { image: [], media: [getUrlFromVideoElement(target as HTMLVideoElement)].filter((ii) => ii !== null) as string[] }

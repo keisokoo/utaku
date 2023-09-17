@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import { produce } from 'immer'
 import React, { useMemo, useState } from 'react'
 import { FaInfoCircle } from 'react-icons/fa'
@@ -151,7 +150,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
               }}
             />
           )}
-          <S.Guidance className={classNames(mode)}>
+          <S.Guidance data-utaku-mode={mode}>
             <FaInfoCircle />
             <div>{stepList[steps] && stepGuide(stepList[steps])}</div>
           </S.Guidance>
@@ -159,7 +158,7 @@ const Editor = ({ mode, onClose, remapItem }: EditorProps) => {
       </div>
       <S.BottomList>
         {viewResult && remappedUrl && isValidUrl(remap.reference_url) && (
-          <S.NextUrl className={classNames(mode)}>
+          <S.NextUrl>
             <div>{remappedUrl?.toString()}</div>
           </S.NextUrl>
         )}

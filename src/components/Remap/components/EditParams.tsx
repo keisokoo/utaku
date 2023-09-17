@@ -33,7 +33,7 @@ const EditParams = ({ remapItem, emitValue }: EditParamsProps) => {
           {`${getIndexByStepName('params') + 1}. `}
           {lang('edit_query')}
         </S.PartLabel>
-        <S.QueryBox className="utaku-flex-center">
+        <S.QueryBox>
           <S.InputBox>
             <label>{lang('add_query')}</label>
             <S.SpaceBetween>
@@ -62,8 +62,8 @@ const EditParams = ({ remapItem, emitValue }: EditParamsProps) => {
           <S.Divider />
           <S.Column style={{ gap: '16px' }}>
             {Object.keys(remap.params).map((key) => (
-              <S.InputWrap key={key} className="utaku-flex-center">
-                <S.InputBox className="utaku-flex-center">
+              <S.InputWrap key={key} data-utaku-class="utaku-flex-center">
+                <S.InputBox>
                   <S.QueryStatus>
                     <div>
                       {referrerParams?.[key] !== undefined ? (
@@ -102,7 +102,7 @@ const EditParams = ({ remapItem, emitValue }: EditParamsProps) => {
                       {lang('delete')}
                     </S.Chip>
                   </S.SpaceBetween>
-                  <S.QueryResult className="query-result">
+                  <S.QueryResult data-utaku-query-result={''}>
                     {referrer &&
                     remapItem.item.params[key] !== referrerParams?.[key] ? (
                       <>
@@ -116,7 +116,7 @@ const EditParams = ({ remapItem, emitValue }: EditParamsProps) => {
                                 </>
                               </div>
                             </div>
-                            <div className="after">
+                            <div data-utaku-query-result="after">
                               <label>After</label>
                               <div>
                                 {remapItem.item.params[key] ? (
@@ -131,7 +131,7 @@ const EditParams = ({ remapItem, emitValue }: EditParamsProps) => {
                           </>
                         ) : (
                           <>
-                            <div className="after">
+                            <div data-utaku-query-result="after">
                               <label>Append</label>
                               {remapItem.item.params[key] && (
                                 <div>

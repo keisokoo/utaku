@@ -14,7 +14,7 @@ const ModalStyle = {
       justify-content: center;
       top: 0;
       left: 0;
-      &.hide {
+      &[data-utaku-hide='true'] {
         display: none;
       }
       ${typeof _css === 'string' ? css(_css) : _css ? _css : css``}

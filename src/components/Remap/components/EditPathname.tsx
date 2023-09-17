@@ -105,9 +105,9 @@ const EditPathname = ({ remapItem, emitValue }: EditPathnameProps) => {
             return (
               <S.InputWrap
                 key={'changer' + item.index}
-                className="utaku-flex-center"
+                data-utaku-class="utaku-flex-center"
               >
-                <S.InputBox className="utaku-flex-center">
+                <S.InputBox>
                   <S.QueryStatus>
                     <div>{lang('path_index')}: </div>
                     <label>{item.index}</label>

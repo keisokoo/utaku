@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import React from 'react'
 import {
   FaCheck,
@@ -65,7 +64,8 @@ const ItemBox = ({
   return (
     <>
       <S.Wrap
-        className={classNames({ active: item.imageInfo.active }, item.type)}
+        data-utaku-active={item.imageInfo.active}
+        data-utaku-item-type={item.type}
         {...props}
       >
         <S.ImageBox>
@@ -115,15 +115,12 @@ const ItemBox = ({
             </>
           )}
         </S.ImageBox>
-        <S.ImageSize
-          className="image-size"
-          data-item-size={settingState.sizeType}
-        >
+        <S.ImageSize data-item-size={settingState.sizeType}>
           <span>{item.imageInfo.width}px</span>
           <span>×</span>
           <span>{item.imageInfo.height}px</span>
         </S.ImageSize>
-        <S.Icons className="image-icons" data-item-size={settingState.sizeType}>
+        <S.Icons data-item-size={settingState.sizeType}>
           <S.IconWrap
             {...tooltipEventAttributes('Copy')}
             onClick={async (e) => {

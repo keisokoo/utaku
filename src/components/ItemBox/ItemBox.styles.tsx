@@ -159,7 +159,7 @@ const ItemBoxStyles = {
       break-inside: avoid;
       margin-bottom: 16px;
     }
-    &.image {
+    &[data-utaku-item-type='image'] {
       ${CheckIcon} {
         color: ${colors['Accent/Default']};
       }
@@ -167,7 +167,7 @@ const ItemBoxStyles = {
         background-color: #c7faff40;
       }
     }
-    &.media {
+    &[data-utaku-item-type='media'] {
       ${MediaIcon} {
         color: ${colors['Secondary/Default']};
       }
@@ -175,16 +175,16 @@ const ItemBoxStyles = {
         background-color: #ff528640;
       }
     }
-    &.active {
+    &[data-utaku-active='true'] {
       opacity: 1;
       border-radius: 8px;
       ${ImageSize} {
         color: ${colors['Accent/Dark']};
       }
-      &.image {
+      &[data-utaku-item-type='image'] {
         background-color: ${colors['Accent/Light']};
       }
-      &.media {
+      &[data-utaku-item-type='media'] {
         background-color: ${colors['Secondary/Light']};
       }
     }

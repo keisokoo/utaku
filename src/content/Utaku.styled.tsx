@@ -25,7 +25,7 @@ const Controller = styled.div`
     cursor: default;
   }
   ${typography['Body/Small/Bold']}
-  .utaku-url-tooltip {
+  [data-utaku-url-tooltip='true'] {
     position: absolute;
     left: 50%;
     transform: translateX(-50%);
@@ -171,7 +171,7 @@ const switchCss = css`
     padding: 4px 12px;
     text-transform: capitalize;
     cursor: pointer;
-    &.active {
+    &[data-utaku-active='true'] {
       color: ${colors['Primary/Default']};
       background-color: ${colors['White/White 70%']};
     }

@@ -18,7 +18,7 @@ export const OptionStyle = {
   `,
   Box: styled.div`
     padding: 16px;
-    &.center {
+    &[data-utaku-center] {
       text-align: center;
     }
   `,

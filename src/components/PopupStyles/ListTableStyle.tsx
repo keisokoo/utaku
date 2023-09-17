@@ -75,7 +75,7 @@ const SettingColumn = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0px;
-  &.a {
+  &[data-utaku-grid-item='a'] {
     grid-area: A;
     padding: 8px 0 4px;
     display: flex;
@@ -96,7 +96,7 @@ const SettingColumn = styled.div`
       border-color: #616161;
     }
   }
-  &.b {
+  &[data-utaku-grid-item='b'] {
     user-select: none;
     grid-area: B;
     width: 100%;
@@ -118,17 +118,17 @@ const Column = styled.div`
   display: flex;
   flex-direction: column;
   gap: 4px;
-  &.a {
+  &[data-utaku-grid-item='a'] {
     grid-area: A;
   }
-  &.b {
+  &[data-utaku-grid-item='b'] {
     grid-area: B;
     width: 100%;
     min-width: 200px;
     overflow: hidden;
     justify-content: center;
   }
-  &.c {
+  &[data-utaku-grid-item='c'] {
     grid-area: C;
   }
 `

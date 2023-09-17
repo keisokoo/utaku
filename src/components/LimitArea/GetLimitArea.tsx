@@ -174,6 +174,10 @@ const GetLimitArea = ({
       }
     }
   }
+  function prevent(e: Event) {
+    e.stopPropagation()
+    e.preventDefault()
+  }
   const setEventOnMouseOverForGetQuerySelector = (
     e: React.MouseEvent<HTMLButtonElement, MouseEvent>
   ) => {
@@ -195,6 +199,7 @@ const GetLimitArea = ({
         )
       }
     })
+    document.addEventListener('mouseenter', prevent)
     document.addEventListener('mouseover', mouseOverToGetQuerySelector)
     document.addEventListener('click', mouseClickToGetQuerySelector, true)
   }
@@ -223,6 +228,7 @@ const GetLimitArea = ({
         )
       }
     })
+    document.removeEventListener('mouseenter', prevent)
     document.removeEventListener('mouseover', mouseOverToGetQuerySelector)
     document.removeEventListener('click', mouseClickToGetQuerySelector, true)
   }

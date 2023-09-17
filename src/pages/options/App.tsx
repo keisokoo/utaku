@@ -238,7 +238,7 @@ const Main = (): JSX.Element => {
               </O.VideoDescription>
             </O.VideoBox>
           </O.Box>
-          <O.Box className="center">
+          <O.Box data-utaku-center={''}>
             <O.CenterLogo>
               <LogoBoxW />
             </O.CenterLogo>

@@ -74,7 +74,7 @@ const Main = (): JSX.Element => {
     boxShadow: '2px 3px 7px 0px #02020252',
   }
   const tooltipParentCss = css`
-    .tooltip {
+    [data-utaku-class='tooltip'] {
       display: none;
     }
     svg {
@@ -85,7 +85,7 @@ const Main = (): JSX.Element => {
       svg {
         transform: rotate(360deg);
       }
-      .tooltip {
+      [data-utaku-class='tooltip'] {
         display: block;
       }
     }
@@ -518,7 +518,7 @@ const Main = (): JSX.Element => {
                 $css={tooltipParentCss}
                 btnText={
                   <>
-                    <Tooltip className="tooltip" style={tooltipStyle}>
+                    <Tooltip data-utaku-class="tooltip" style={tooltipStyle}>
                       {lang('only_selected_areas_are_collected')}
                     </Tooltip>
                     <FaVectorSquare />{' '}
@@ -539,7 +539,7 @@ const Main = (): JSX.Element => {
                 }}
                 $css={tooltipParentCss}
               >
-                <Tooltip className="tooltip" style={tooltipStyle}>
+                <Tooltip data-utaku-class="tooltip" style={tooltipStyle}>
                   {lang('reload')}
                 </Tooltip>
                 <FaRedo />
@@ -559,7 +559,7 @@ const Main = (): JSX.Element => {
                   }}
                   $css={tooltipParentCss}
                 >
-                  <Tooltip className="tooltip" style={tooltipStyle}>
+                  <Tooltip data-utaku-class="tooltip" style={tooltipStyle}>
                     {lang('re_collect_by_using_remap_configs')}
                   </Tooltip>
                   <FaCompactDisc />
@@ -576,7 +576,7 @@ const Main = (): JSX.Element => {
                   .map((type) => (
                     <div
                       key={type}
-                      className={type === settingState.modeType ? 'active' : ''}
+                      data-utaku-active={type === settingState.modeType}
                       onClick={() => {
                         if (type === 'simple') return
                         set_settingState(

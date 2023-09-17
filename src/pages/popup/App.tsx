@@ -329,7 +329,7 @@ const Main = (): JSX.Element => {
                   .map((type) => (
                     <div
                       key={type}
-                      className={type === settingState.modeType ? 'active' : ''}
+                      data-utaku-active={type === settingState.modeType}
                       onClick={() => {
                         if (type === 'enhanced') return
                         set_settingState(
@@ -386,9 +386,7 @@ const Main = (): JSX.Element => {
                   tabId && removedGroup ? removedGroup[tabId] ?? [] : []
                 return (
                   <Fragment key={tabItem.id + String(index)}>
-                    <PopupStyle.ColumnWrap
-                      className={classNames({ active: tabItem.active })}
-                    >
+                    <PopupStyle.ColumnWrap data-utaku-active={tabItem.active}>
                       <PopupStyle.Item>
                         {tabItem.tooltip && (
                           <Tooltip>{tabItem.tooltip}</Tooltip>
@@ -441,9 +439,7 @@ const Main = (): JSX.Element => {
                           <span className="length">
                             <PopupStyle.ListButton
                               _mini
-                              className={classNames({
-                                active: isActive('disposed'),
-                              })}
+                              data-utaku-active={isActive('disposed')}
                               disabled={disposedList.length < 1}
                               onClick={() => {
                                 if (!tabItem.id) return

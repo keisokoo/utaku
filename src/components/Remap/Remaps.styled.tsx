@@ -48,7 +48,7 @@ const QueryResult = styled.div`
       border-radius: 4px;
       flex: 1;
     }
-    &.after {
+    &[data-utaku-query-result='after'] {
       & > div {
         background-color: #d6f8d6;
         color: #006b05;
@@ -75,7 +75,7 @@ export const RemapStyle = {
     }
   `,
   Guidance: styled.div`
-    &.edit {
+    &[data-utaku-mode='edit'] {
       display: none;
     }
     display: flex;
@@ -104,11 +104,11 @@ export const RemapStyle = {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 8px;
-    &.utaku-flex-center {
+    &[data-utaku-class='utaku-flex-center'] {
       align-items: center;
     }
     &:hover {
-      .query-result {
+      [data-utaku-query-result] {
         display: flex;
       }
     }

@@ -1,3 +1,4 @@
+import "react";
 
 declare namespace chrome.webRequest {
   interface WebResponseHeadersDetails {

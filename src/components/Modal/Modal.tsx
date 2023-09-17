@@ -70,23 +70,22 @@ const Modal = ({
     const targetElement = document.body.querySelector(target)
     if (!targetElement) return
     if (open) {
-      targetElement.classList.add('active')
+      targetElement.setAttribute('data-utaku-active', '')
     } else {
-      targetElement.classList.remove('active')
+      targetElement.removeAttribute('data-utaku-active')
     }
     return () => {
-      targetElement.classList.remove('active')
+      targetElement.removeAttribute('data-utaku-active')
     }
   }, [target, open])
   return ReactDOM.createPortal(
     <>
       {open && (
         <S.Container {...props}>
-          <S.Wrap tabIndex={0} ref={wrapRef} className="modal-wrap">
+          <S.Wrap tabIndex={0} ref={wrapRef}>
             {childrenWithProps}
           </S.Wrap>
           <S.Background
-            className="modal-background"
             onClick={(e) => {
               e.stopPropagation()
               onClose()

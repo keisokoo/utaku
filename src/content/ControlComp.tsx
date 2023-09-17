@@ -1,4 +1,3 @@
-import classNames from 'classnames'
 import { produce } from 'immer'
 import React, { useState } from 'react'
 import { FaList, FaPhotoVideo, FaSlidersH, FaTh } from 'react-icons/fa'
@@ -81,7 +80,7 @@ const ControlComp = ({
               {folderNameList.map((name) => (
                 <ModalList.Row
                   key={name}
-                  className={classNames({ active: name === folderName })}
+                  data-utaku-active={name === folderName}
                 >
                   <ModalList.Name>{name}</ModalList.Name>
                   <ModalList.Buttons>
@@ -288,7 +287,7 @@ const ControlComp = ({
                 {containerTypes.map((type) => (
                   <div
                     key={type}
-                    className={type === containerSize ? 'active' : ''}
+                    data-utaku-active={type === containerSize}
                     onClick={() => {
                       set_settingState(
                         produce((draft) => {
@@ -318,7 +317,7 @@ const ControlComp = ({
                 {sizeTypes.map((type) => (
                   <div
                     key={type}
-                    className={type === sizeType ? 'active' : ''}
+                    data-utaku-active={type === sizeType}
                     onClick={() => {
                       set_settingState(
                         produce((draft) => {
@@ -348,7 +347,7 @@ const ControlComp = ({
                 {itemTypes.map((type) => (
                   <div
                     key={type}
-                    className={type === itemType ? 'active' : ''}
+                    data-utaku-active={type === itemType}
                     onClick={() => {
                       set_settingState(
                         produce((draft) => {
@@ -382,7 +381,7 @@ const ControlComp = ({
             </div>
           )}
         </UtakuStyle.Right>
-        {tooltip && <Tooltip className="utaku-url-tooltip">{tooltip}</Tooltip>}
+        {tooltip && <Tooltip data-utaku-url-tooltip={true}>{tooltip}</Tooltip>}
       </UtakuStyle.Editor>
     </>
   )

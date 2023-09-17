@@ -28,13 +28,13 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
     <L.BodyWrap>
       <div>
         <L.Grid>
-          <L.Column className="a">
+          <L.Column data-utaku-grid-item="a">
             <L.Label>{lang('enable')}</L.Label>
           </L.Column>
-          <L.Column className="b">
+          <L.Column data-utaku-grid-item="b">
             <L.Label>{lang('name')}</L.Label>
           </L.Column>
-          <L.Column className="c">
+          <L.Column data-utaku-grid-item="c">
             <L.Label>{lang('setting')}</L.Label>
           </L.Column>
         </L.Grid>
@@ -45,7 +45,7 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
           {settingState.remapList.map((item) => {
             return (
               <L.Row key={item.id} data-disabled={!item.active}>
-                <L.Column className="a">
+                <L.Column data-utaku-grid-item="a">
                   <L.StatusBox>
                     <Toggle
                       active={item.active}
@@ -66,12 +66,12 @@ const RemapList = ({ setRemapMode, setNotice }: RemapListProps) => {
                     />
                   </L.StatusBox>
                 </L.Column>
-                <L.Column className="b">
+                <L.Column data-utaku-grid-item="b">
                   <L.SummaryBox>
                     <L.SummaryContent>{item.name}</L.SummaryContent>
                   </L.SummaryBox>
                 </L.Column>
-                <L.Column className="c">
+                <L.Column data-utaku-grid-item="c">
                   <L.Buttons>
                     <GrayScaleFill
                       _mini

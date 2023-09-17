@@ -39,7 +39,10 @@ const EditReplace = ({ affix, remapItem, emitValue }: EditReplaceProps) => {
           </GrayScaleOutline>
           {remap.replace.map((item, idx) => {
             return (
-              <S.InputWrap key={'replace' + idx} className="utaku-flex-center">
+              <S.InputWrap
+                key={'replace' + idx}
+                data-utaku-class="utaku-flex-center"
+              >
                 <S.InputBox>
                   <label>
                     {idx + 1}. {lang('replace_url')}

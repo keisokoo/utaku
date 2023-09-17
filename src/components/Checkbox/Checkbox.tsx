@@ -1,5 +1,4 @@
 import styled from '@emotion/styled'
-import classNames from 'classnames'
 import React from 'react'
 import { BsFillCheckCircleFill, BsFillCircleFill } from 'react-icons/bs'
 import { colors } from '../../themes'
@@ -15,7 +14,7 @@ const CheckboxIcon = styled.div`
   cursor: pointer;
   display: flex;
   align-items: center;
-  &.active {
+  &[data-utaku-active='true'] {
     color: ${colors['Primary/Default']};
   }
 `
@@ -27,15 +26,11 @@ interface CheckboxProps extends React.HTMLAttributes<HTMLDivElement> {
 const Checkbox = ({ ...props }: CheckboxProps) => {
   return (
     <>
-      <CheckboxWrap className={classNames({ active: props.active })} {...props}>
-        <CheckboxIcon
-          className={classNames({ active: props.active }, 'checkbox-icon')}
-        >
+      <CheckboxWrap data-utaku-active={props.active} {...props}>
+        <CheckboxIcon data-utaku-active={props.active}>
           {props.active ? <BsFillCheckCircleFill /> : <BsFillCircleFill />}
         </CheckboxIcon>
-        {props.children && (
-          <div className="checkbox-label">{props.children}</div>
-        )}
+        {props.children && <div data-utaku-label={''}>{props.children}</div>}
       </CheckboxWrap>
     </>
   )

@@ -42,10 +42,4 @@ html body .utaku-root {
   .utaku-wrapper {
     width: 100%;
   }
-  .utaku-modal {
-    display: none;
-    &.active {
-      display: flex;
-    }
-  }
 }

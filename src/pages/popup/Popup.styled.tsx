@@ -21,7 +21,7 @@ const switchCss = css`
     padding: 4px 12px;
     text-transform: capitalize;
     cursor: pointer;
-    &.active {
+    &[data-utaku-active='true'] {
       color: ${colors['Primary/Default']};
       background-color: ${colors['White/White 70%']};
     }
@@ -116,7 +116,7 @@ const PopupStyle = {
     flex-direction: column;
     gap: 0px;
     background-color: rgb(78 78 78 / 30%);
-    &.active {
+    &[data-utaku-active='true'] {
       background-color: rgb(78 78 78 / 70%);
     }
   `,
@@ -133,7 +133,7 @@ const PopupStyle = {
     }
   `,
   ListButton: styled(WhiteFill)`
-    &.active {
+    &[data-utaku-active='true'] {
       color: ${colors['Primary/Default']};
     }
   `,
