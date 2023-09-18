@@ -4,10 +4,10 @@ import React, { useRef } from 'react'
 import { FaVectorSquare } from 'react-icons/fa'
 import { v4 } from 'uuid'
 import { LimitBySelectorType } from '../../atoms/settings'
-import { getItemsFromCurrentElementTarget } from '../../content/hooks/getImages'
-import { toItemType } from '../../content/hooks/useGetImages'
 import { ItemType } from '../../content/types'
 import { lang } from '../../utils'
+import { getItemsFromCurrentElementTarget } from '../../utils/getImages'
+import { toItemType } from '../../utils/parse'
 import { WhiteFill } from '../Buttons'
 
 interface GetLimitAreaProps {

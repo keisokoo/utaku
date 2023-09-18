@@ -4,3 +4,4 @@ build
 releases
 .DS_Store
 .ide
+.vscode

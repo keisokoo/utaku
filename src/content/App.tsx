@@ -8,54 +8,36 @@ import React, {
   useState,
 } from 'react'
 
-import { css } from '@emotion/react'
 import { produce } from 'immer'
-import {
-  FaCompactDisc,
-  FaQuestion,
-  FaRedo,
-  FaRocket,
-  FaTimes,
-  FaVectorSquare,
-} from 'react-icons/fa'
 import { RecoilRoot, useRecoilState } from 'recoil'
 import { uniqBy } from 'remeda'
 import {
   SettingsType,
   UrlRemapItem,
   defaultSettings,
-  modeType,
   settings,
 } from '../atoms/settings'
-import {
-  GrayScaleFill,
-  GrayScaleText,
-  PrimaryButton,
-  SecondaryButton,
-} from '../components/Buttons'
 import ItemBox from '../components/ItemBox'
-import GetLimitArea from '../components/LimitArea/GetLimitArea'
 import Modal from '../components/Modal'
 import ModalBody from '../components/Modal/ModalBody'
 import StepEditor from '../components/Remap/StepEditor'
-import Settings from '../components/Settings/Settings'
-import Tooltip from '../components/Tooltip'
 import {
   lang,
   parseItemListWithUrlRemaps,
   syncSettings,
   urlToRemapItem,
 } from '../utils'
-import ControlComp from './ControlComp'
-import Dispose from './DisposeComp'
-import DownloadComp from './DownloadComp'
-import UtakuStyle from './Utaku.styled'
 import {
   getAllImageUrls,
   getAllVideoUrls,
   getLimitBySelector,
-} from './hooks/getImages'
-import { toItemType } from './hooks/useGetImages'
+} from '../utils/getImages'
+import { toItemType } from '../utils/parse'
+import ControlComp from './ControlComp'
+import Dispose from './DisposeComp'
+import DownloadComp from './DownloadComp'
+import SimpleModeHeader from './SimpleModeHeader'
+import UtakuStyle from './Utaku.styled'
 import './index.scss'
 import { ImageInfo, ItemType, WebResponseItem } from './types'
 
@@ -68,28 +50,6 @@ const App = () => {
 }
 const Main = (): JSX.Element => {
   const [hideUi, set_hideUi] = useState<boolean>(false)
-  const tooltipStyle = {
-    transform: 'translateY(calc(-100% - 4px))',
-    borderRadius: '4px',
-    boxShadow: '2px 3px 7px 0px #02020252',
-  }
-  const tooltipParentCss = css`
-    [data-utaku-class='tooltip'] {
-      display: none;
-    }
-    svg {
-      transform: rotate(0deg);
-      transition: 1s;
-    }
-    &:hover {
-      svg {
-        transform: rotate(360deg);
-      }
-      [data-utaku-class='tooltip'] {
-        display: block;
-      }
-    }
-  `
   const [tooltip, set_tooltip] = useState<string>('')
   const [itemList, set_itemList] = useState<ItemType[]>([])
   const [queueList, set_queueList] = useState<ItemType[]>([])
@@ -130,12 +90,6 @@ const Main = (): JSX.Element => {
       let widthResult = true
       let heightResult = true
       let notDownloaded = true
-      // let searchName = true
-      // if (settingState.searchName) {
-      //   searchName = item.url
-      //     .toLowerCase()
-      //     .includes(settingState.searchName.trim().toLowerCase())
-      // }
       if (itemType && itemType !== 'all') checkItemType = item.type === itemType
       if (downloadedItem.includes(item.url)) notDownloaded = false
       if (sizeLimit.width) widthResult = width >= sizeLimit.width
@@ -469,145 +423,30 @@ const Main = (): JSX.Element => {
         data-wrapper-size={settingState.containerSize}
       >
         {settingState.modeType === 'simple' && (
-          <UtakuStyle.SettingsRow>
-            <UtakuStyle.Row>
-              <GrayScaleText
-                _mini
-                onClick={() => {
-                  chrome.runtime.sendMessage({
-                    message: 'utaku-call-unmount',
-                  })
-                }}
-                $css={css`
-                  position: absolute;
-                  top: 0;
-                  transform: translate(-50%, -100%);
-                  left: 50%;
-                  background-color: rgb(0 0 0 / 50%);
-                  color: #fff;
-                  border-radius: 4px 4px 0 0;
-                  font-size: 10px;
-                  padding: 2px 8px 2px 6px;
-                  &:hover {
-                    background-color: #00000063;
-                  }
-                `}
-              >
-                <FaTimes />
-                {lang('close')}
-              </GrayScaleText>
-              <Settings />
-            </UtakuStyle.Row>
-            <UtakuStyle.Center>
-              <GetLimitArea
-                _icon
-                _mini
-                emitItemList={(value) => {
-                  set_itemList([])
-                  if (settingState.extraOptions.remapOnSelect) {
-                    value = parseItemListWithUrlRemaps(
-                      appliedRemapList,
-                      value
-                    ) as ItemType[]
-                  }
-                  set_queueList(uniqBy(value, (item) => item.url))
-                }}
-                emitOnOff={(value) => {
-                  set_hideUi(value)
-                }}
-                $css={tooltipParentCss}
-                btnText={
-                  <>
-                    <Tooltip data-utaku-class="tooltip" style={tooltipStyle}>
-                      {lang('only_selected_areas_are_collected')}
-                    </Tooltip>
-                    <FaVectorSquare />{' '}
-                  </>
-                }
-              />
-              <PrimaryButton
-                _icon
-                _mini
-                onClick={() => {
-                  if (reloadRef.current) clearTimeout(reloadRef.current)
-                  set_pending(true)
-                  set_itemList([])
-                  reloadRef.current = setTimeout(async () => {
-                    await scrapImages()
-                    set_pending(false)
-                  }, 1000)
-                }}
-                $css={tooltipParentCss}
-              >
-                <Tooltip data-utaku-class="tooltip" style={tooltipStyle}>
-                  {lang('reload')}
-                </Tooltip>
-                <FaRedo />
-              </PrimaryButton>
-              {!settingState.live.remap && (
-                <SecondaryButton
-                  _icon
-                  _mini
-                  onClick={() => {
-                    if (reloadRef.current) clearTimeout(reloadRef.current)
-                    set_pending(true)
-                    set_itemList([])
-                    reloadRef.current = setTimeout(async () => {
-                      await scrapImages(true, true)
-                      set_pending(false)
-                    }, 1000)
-                  }}
-                  $css={tooltipParentCss}
-                >
-                  <Tooltip data-utaku-class="tooltip" style={tooltipStyle}>
-                    {lang('re_collect_by_using_remap_configs')}
-                  </Tooltip>
-                  <FaCompactDisc />
-                </SecondaryButton>
-              )}
-            </UtakuStyle.Center>
-            <UtakuStyle.Right>
-              <UtakuStyle.QualityController>
-                <UtakuStyle.IconWrap>
-                  <FaRocket />
-                </UtakuStyle.IconWrap>
-                {modeType
-                  .filter((ii) => !!ii)
-                  .map((type) => (
-                    <div
-                      key={type}
-                      data-utaku-active={type === settingState.modeType}
-                      onClick={() => {
-                        if (type === 'simple') return
-                        set_settingState(
-                          produce((draft) => {
-                            draft.modeType = type
-                          })
-                        )
-                        chrome.runtime.sendMessage({
-                          message: 'mode-change',
-                          data: type,
-                        })
-                        window.location.reload()
-                      }}
-                    >
-                      {type}
-                    </div>
-                  ))}
-              </UtakuStyle.QualityController>
-              <GrayScaleFill
-                _icon
-                _mini
-                onClick={() => {
-                  chrome.runtime.sendMessage({
-                    message: 'open-options',
-                  })
-                }}
-              >
-                <FaQuestion />
-              </GrayScaleFill>
-            </UtakuStyle.Right>
-          </UtakuStyle.SettingsRow>
+          <SimpleModeHeader
+            handleItemList={(value) => {
+              set_itemList([])
+              if (settingState.extraOptions.remapOnSelect) {
+                value = parseItemListWithUrlRemaps(
+                  appliedRemapList,
+                  value
+                ) as ItemType[]
+              }
+              set_queueList(uniqBy(value, (item) => item.url))
+            }}
+            handleReload={(bool) => {
+              if (reloadRef.current) clearTimeout(reloadRef.current)
+              set_pending(true)
+              set_itemList([])
+              reloadRef.current = setTimeout(async () => {
+                await scrapImages(bool, bool)
+                set_pending(false)
+              }, 1000)
+            }}
+            handleUi={(value) => {
+              set_hideUi(value)
+            }}
+          />
         )}
         <DownloadComp
           itemList={itemList}
