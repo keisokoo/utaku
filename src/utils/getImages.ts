@@ -169,8 +169,7 @@ function extractBackgroundImagesFromDocument(doc: Document | Element, exceptSele
 }
 
 function getUrlFromVideoElement(el: HTMLVideoElement) {
-  let src = el.getAttribute('src');
-  if (src && !src.startsWith('blob:')) src = null;
+  const src = el.getAttribute('src');
   const sourceElement = el.querySelector('source');
   const sourceSrc = sourceElement ? sourceElement.getAttribute('src') : null;
   const result = src ?? sourceSrc ?? null
@@ -198,6 +197,7 @@ function extractVideosFromDocument(doc: Document | Element, exceptSelector?: str
   const videoSrcArray = Array.from(videoElements).map(el => {
     return getUrlFromVideoElement(el as HTMLVideoElement)
   }).filter((src): src is string => src !== null && !src.startsWith('blob:'));
+
   return [...videoSrcArray];
 }
 

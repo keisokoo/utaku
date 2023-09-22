@@ -309,7 +309,10 @@ chrome.runtime.onInstalled.addListener((details) => {
           modeType: 'simple'
         })
       } else {
-        chrome.storage.local.set({ ...updatedSettings })
+        chrome.storage.local.set({
+          ...updatedSettings,
+          modeType: 'simple'
+        })
       }
     }
     )
