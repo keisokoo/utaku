@@ -162,6 +162,8 @@ async function createWindow() {
     });
   }
 }
+
+
 function onMessage(
   request: {
     message: string
@@ -227,7 +229,7 @@ if (!chrome.runtime.onMessage.hasListener(onMessage)) {
 }
 chrome.action.onClicked.addListener(createWindow)
 chrome.commands.onCommand.addListener((command: string) => {
-  if (command === '_execute_browser_action') {
+  if (command === '_execute_action') {
     createWindow()
   }
 });
