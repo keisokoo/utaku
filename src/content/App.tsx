@@ -39,7 +39,7 @@ import DownloadComp from './DownloadComp'
 import SimpleModeHeader from './SimpleModeHeader'
 import UtakuStyle from './Utaku.styled'
 import './index.scss'
-import { ImageInfo, ItemType, WebResponseItem } from './types'
+import { ImageInfo, ItemType } from './types'
 
 const App = () => {
   return (
@@ -53,9 +53,7 @@ const Main = (): JSX.Element => {
   const [tooltip, set_tooltip] = useState<string>('')
   const [itemList, set_itemList] = useState<ItemType[]>([])
   const [queueList, set_queueList] = useState<ItemType[]>([])
-  const [changedUrl, set_changedUrl] = useState<
-    chrome.webRequest.WebResponseHeadersDetails[]
-  >([])
+  const [changedUrl, set_changedUrl] = useState<ItemType[]>([])
   const [downloadedItem, set_downloadedItem] = useState<string[]>([])
   const [settingState, set_settingState] = useRecoilState(settings)
   const [active, set_active] = useState<boolean>(true)
@@ -77,33 +75,42 @@ const Main = (): JSX.Element => {
   const remapHostList = useMemo(() => {
     return appliedRemapList.map((item) => item.item.host)
   }, [appliedRemapList])
+  const filterLogic = useCallback(
+    (itemList: ItemType[]) => {
+      if (!itemList) return []
+      if (!itemList.length) return []
+      const filtered = itemList.filter((item) => {
+        if (!item.imageInfo) return false
+        if (item.imageInfo.hide) return false
+        const { width, height } = item.imageInfo
+        const sizeLimit = settingState.sizeLimit
+        const itemType = settingState.itemType
+        let checkItemType = true
+        let widthResult = true
+        let heightResult = true
+        let notDownloaded = true
+        if (itemType && itemType !== 'all')
+          checkItemType = item.type === itemType
+        if (downloadedItem.includes(item.url)) notDownloaded = false
+        if (sizeLimit.width) widthResult = width >= sizeLimit.width
+        if (sizeLimit.height) heightResult = height >= sizeLimit.height
+        return widthResult && heightResult && notDownloaded && checkItemType
+      })
+      const result = uniqBy(filtered, (item) => item.url).sort(
+        (a, b) => a.order - b.order
+      )
+      return result
+    },
+    [
+      settingState.sizeLimit,
+      downloadedItem,
+      settingState.itemType,
+      remapHostList,
+    ]
+  )
   const filteredImages = useMemo(() => {
-    if (!itemList) return []
-    if (!itemList.length) return []
-    const filtered = itemList.filter((item) => {
-      if (!item.imageInfo) return false
-      if (item.imageInfo.hide) return false
-      const { width, height } = item.imageInfo
-      const sizeLimit = settingState.sizeLimit
-      const itemType = settingState.itemType
-      let checkItemType = true
-      let widthResult = true
-      let heightResult = true
-      let notDownloaded = true
-      if (itemType && itemType !== 'all') checkItemType = item.type === itemType
-      if (downloadedItem.includes(item.url)) notDownloaded = false
-      if (sizeLimit.width) widthResult = width >= sizeLimit.width
-      if (sizeLimit.height) heightResult = height >= sizeLimit.height
-      return widthResult && heightResult && notDownloaded && checkItemType
-    })
-    return uniqBy(filtered, (item) => item.url)
-  }, [
-    itemList,
-    settingState.sizeLimit,
-    downloadedItem,
-    settingState.itemType,
-    remapHostList,
-  ])
+    return filterLogic(itemList)
+  }, [filterLogic, itemList])
 
   const timeoutRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
   const reloadRef = useRef(null) as MutableRefObject<NodeJS.Timeout | null>
@@ -180,7 +187,9 @@ const Main = (): JSX.Element => {
       try {
         const scrapped = await getCurrentPageImages(forceRemap, forceLimitArea)
         set_queueList(() => {
-          return scrapped ?? []
+          return scrapped
+            ? scrapped.map((item, index) => ({ ...item, order: index + 1 }))
+            : []
         })
       } catch (error) {
         console.log(error)
@@ -241,7 +250,9 @@ const Main = (): JSX.Element => {
           set_queueList((prev) => {
             if (!data) return []
             if (isEqual(prev, data)) return prev
-            return data ?? []
+            return data
+              ? data.map((item, index) => ({ ...item, order: index + 1 }))
+              : []
           })
           set_downloadedItem((prev) => {
             if (!downloaded.length) return prev
@@ -317,7 +328,7 @@ const Main = (): JSX.Element => {
   }
   const disposeVideo = (
     e: React.SyntheticEvent<HTMLVideoElement, Event>,
-    value: chrome.webRequest.WebResponseHeadersDetails
+    value: ItemType
   ) => {
     try {
       const videoTarget = e.currentTarget
@@ -327,9 +338,7 @@ const Main = (): JSX.Element => {
         height: videoHeight,
       }
       set_itemList((prev) => {
-        const clone: WebResponseItem & {
-          imageInfo: ImageInfo
-        } = {
+        const clone: ItemType = {
           ...value,
           imageInfo: imageInfoData,
         }
@@ -345,7 +354,7 @@ const Main = (): JSX.Element => {
   }
   const disposeImage = (
     e: React.SyntheticEvent<HTMLImageElement, Event>,
-    value: chrome.webRequest.WebResponseHeadersDetails
+    value: ItemType
   ) => {
     try {
       const imageTarget = e.currentTarget
@@ -355,9 +364,7 @@ const Main = (): JSX.Element => {
         height: naturalHeight,
       }
       set_itemList((prev) => {
-        const clone: WebResponseItem & {
-          imageInfo: ImageInfo
-        } = {
+        const clone: ItemType = {
           ...value,
           imageInfo: imageInfoData,
         }
@@ -396,6 +403,39 @@ const Main = (): JSX.Element => {
       chrome.runtime.onMessage.removeListener(onMessage)
     }
   }, [])
+  const handleOrder = (item: ItemType, direction: 'left' | 'right') => {
+    set_itemList((draft) => {
+      const filtered = filterLogic([...draft])
+      const currentIndex = filtered.findIndex((i) => i.url === item.url)
+      if (currentIndex < 0 || currentIndex >= filtered.length - 1) return draft
+      const currentItem = filtered[currentIndex]
+      const currentOrder = currentItem.order
+      if (direction === 'left') {
+        if (currentIndex === 0) return draft
+        const temp = filtered[currentIndex - 1]
+        const tempOrder = temp.order
+        temp.order = currentOrder
+        currentItem.order = tempOrder
+        return draft.map((i) => {
+          if (i.url === currentItem.url) return currentItem
+          if (i.url === temp.url) return temp
+          return i
+        })
+      } else {
+        if (currentIndex === filtered.length - 1) return draft
+        const temp = filtered[currentIndex + 1]
+        const tempOrder = temp.order
+        temp.order = currentOrder
+        currentItem.order = tempOrder
+        return draft.map((i) => {
+          if (i.url === currentItem.url) return currentItem
+          if (i.url === temp.url) return temp
+          return i
+        })
+      }
+    })
+  }
+
   if (!itemList) return <></>
   if (!fireFirst) return <></>
   return (
@@ -570,9 +610,11 @@ const Main = (): JSX.Element => {
               </UtakuStyle.Empty>
             )}
             {filteredImages &&
-              filteredImages.map((value) => {
+              filteredImages.map((value, index) => {
                 return (
                   <ItemBox
+                    itemIndex={index}
+                    handleOrder={handleOrder}
                     handleRemaps={handleRemaps}
                     data-wrapper-size={settingState.containerSize}
                     item={value}

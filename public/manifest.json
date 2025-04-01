@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "UTAKU image downloader - 이미지 다운로더",
   "default_locale": "en",
-  "version": "0.1.07",
+  "version": "0.1.08",
   "description": "Utaku image or video downloader, 이미지 다운로더",
   "background": {
     "service_worker": "background/index.js",

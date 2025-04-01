@@ -38,6 +38,7 @@ import { Virtuoso } from 'react-virtuoso'
 import { LiveStyles } from '../../components/PopupStyles/LiveStyles'
 import StepEditor from '../../components/Remap/StepEditor'
 import Settings from '../../components/Settings/Settings'
+import { appendNumberInFrontOfFileName } from '../../utils/appendNumberInFrontOfFileName'
 
 const Live = LiveStyles
 
@@ -195,7 +196,15 @@ const Main = (): JSX.Element => {
         const downloadList = request.data as string[]
         for (let i = 0; i < downloadList.length; i++) {
           set_onProgress((prev) => [...prev, downloadList[i]])
-          chrome.downloads.download({ url: downloadList[i] })
+          chrome.downloads.download({
+            url: downloadList[i],
+            filename: appendNumberInFrontOfFileName(
+              folderName,
+              downloadList[i],
+              i,
+              downloadList.length.toString().length + 1
+            ),
+          })
         }
       }
       if (request.message === 'create-remap') {

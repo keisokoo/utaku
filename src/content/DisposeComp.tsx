@@ -1,17 +1,18 @@
 import React from 'react'
+import { ItemType } from './types'
 interface DisposeVideoProps {
-  value: chrome.webRequest.WebResponseHeadersDetails
+  value: ItemType
   disposeVideo: (
     e: React.SyntheticEvent<HTMLVideoElement, Event>,
-    value: chrome.webRequest.WebResponseHeadersDetails
+    value: ItemType
   ) => void
   onError?: (e: React.SyntheticEvent<HTMLVideoElement, Event>) => void
 }
 interface DisposeImageProps {
-  value: chrome.webRequest.WebResponseHeadersDetails
+  value: ItemType
   disposeImage: (
     e: React.SyntheticEvent<HTMLImageElement, Event>,
-    value: chrome.webRequest.WebResponseHeadersDetails
+    value: ItemType
   ) => void
   onError?: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void
 }

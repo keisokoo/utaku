@@ -8,12 +8,15 @@ import { rootId } from './sources'
 if (chrome.runtime.lastError) console.log(chrome.runtime.lastError)
 let root: ReactDOM.Root | null = null
 
-function onMessage(
+async function onMessage(
   request: { message: string; data: object },
   sender?: unknown,
   sendResponse?: (response: string) => void
 ) {
   if (request?.message === 'utaku-mount') {
+    if (!document.querySelector('.utaku-root')) {
+      window.location.reload()
+    }
     const container = document.getElementById('root-' + rootId) as HTMLElement
     if (!root) {
       root = ReactDOM.createRoot(container)

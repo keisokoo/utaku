@@ -1,5 +1,7 @@
 import React from 'react'
 import {
+  FaArrowLeft,
+  FaArrowRight,
   FaCheck,
   FaClipboard,
   FaDownload,
@@ -21,13 +23,16 @@ interface ItemBoxProps
     HTMLDivElement
   > {
   item: ItemType
+  itemIndex: number
   setTooltip?: (tooltip: string) => void
   handleRemaps?: (url: string) => void
+  handleOrder?: (item: ItemType, direction: 'left' | 'right') => void
 }
 const ItemBox = ({
   item,
   setTooltip,
   handleRemaps,
+  handleOrder,
   ...props
 }: ItemBoxProps) => {
   const [settingState] = useRecoilState(settings)
@@ -122,6 +127,15 @@ const ItemBox = ({
         </S.ImageSize>
         <S.Icons data-item-size={settingState.sizeType}>
           <S.IconWrap
+            {...tooltipEventAttributes('Order Left')}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleOrder && handleOrder(item, 'left')
+            }}
+          >
+            <FaArrowLeft />
+          </S.IconWrap>
+          <S.IconWrap
             {...tooltipEventAttributes('Copy')}
             onClick={async (e) => {
               e.stopPropagation()
@@ -170,6 +184,15 @@ const ItemBox = ({
             }}
           >
             <FaShare />
+          </S.IconWrap>
+          <S.IconWrap
+            {...tooltipEventAttributes('Order Right')}
+            onClick={(e) => {
+              e.stopPropagation()
+              handleOrder && handleOrder(item, 'right')
+            }}
+          >
+            <FaArrowRight />
           </S.IconWrap>
         </S.Icons>
       </S.Wrap>

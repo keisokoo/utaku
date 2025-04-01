@@ -1,4 +1,3 @@
-
 export type WebResponseItem = chrome.webRequest.WebResponseHeadersDetails & {
   imageInfo?: ImageInfo
 }
@@ -12,4 +11,5 @@ export type ImageInfo = {
 }
 export type ItemType = WebResponseItem & {
   imageInfo: ImageInfo
+  order: number
 }

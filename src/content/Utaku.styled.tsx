@@ -124,8 +124,8 @@ const Grid = styled.div`
     transition: 0.15s;
   }
   &:not([data-wrapper-size='tile']) {
-    flex-direction: row-reverse;
-    justify-content: flex-end;
+    flex-direction: row;
+    justify-content: flex-start;
     column-count: initial;
     display: flex;
     gap: 8px;
